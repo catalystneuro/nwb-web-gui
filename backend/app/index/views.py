@@ -1,29 +1,15 @@
 from flask import jsonify
+from .utils import get_schema_from_hdmf_class
+from pynwb import NWBHDF5IO
 
 
 def index():
 
-    # Example of json schema generated from nwb file
-    json = {
-        "data":{
-            "additionalProperties": False,
-            "properties": {
-                "def_key_name": {
-                "default": "name",
-                "description": "the default key name",
-                "type": "string"
-                },
-                "label": {
-                "description": "the label on this dictionary",
-                "type": "string"
-                }
-            },
-            "required": [
-                "label"
-            ],
-            "type": "object"
-            }
-        }
+    # Read one nwb file and get schema from hdmf class
+    io = NWBHDF5IO('/home/vinicius/Área de Trabalho/Trabalhos/neuro_react/data/102086.nwb', mode='r')
+    nwb = io.read()
+    schema = get_schema_from_hdmf_class(nwb.subject)
 
+    schema2 = get_schema_from_hdmf_class(nwb.acquisition)
 
-    return jsonify(json)
+    return jsonify({'data': [schema, schema2]})
