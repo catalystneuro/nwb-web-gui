@@ -21,30 +21,28 @@ const Index = () => {
             });
     }, []);
 
+    // Map forms on data change and return html element with form data
     const nwbForm = useMemo(() => {
         return (
             nwbSchema.map((nwb, index) => {
                 return (
-                    /*
+
                     < Card >
                         <Card.Header>
-                            <Accordion.Toggle as={Button} variant="link" eventKey={index}>
+                            <Accordion.Toggle as={Button} variant="link" eventKey={index + 1}>
                                 Form {index}
                             </Accordion.Toggle>
                         </Card.Header>
-                        <Accordion.Collapse eventKey={index}>
+                        <Accordion.Collapse eventKey={index + 1}>
                             <Card.Body>
                                 <Form key={nwb} schema={nwb} />
                             </Card.Body>
                         </Accordion.Collapse>
                     </Card >
-                    */
-                    <Form schema={nwb} />
                 )
             })
         )
     }, [nwbSchema])
-
 
 
     return (

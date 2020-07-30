@@ -12,4 +12,6 @@ def index():
 
     schema2 = get_schema_from_hdmf_class(nwb.acquisition)
 
-    return jsonify({'data': [schema, schema2]})
+    schema3 = get_schema_from_hdmf_class(nwb.electrodes)
+
+    return jsonify({'data': [schema, schema2, schema3]})
