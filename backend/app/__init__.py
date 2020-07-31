@@ -12,9 +12,11 @@ def create_app():
 
     with app.app_context():
         from .index import index
+        from .explorer import explorer
 
         app.register_blueprint(index.index_bp)
-
+        app.register_blueprint(explorer.explorer_bp)
+        
         return app
 
 

@@ -3,6 +3,7 @@ import { Row, Col, Container, Accordion, Card, Button } from 'react-bootstrap'
 import { Styles } from '../styles/index'
 import Form from "@rjsf/core";
 import { siteContent } from '../api/index'
+import NavigationBar from "../components/Navbar"
 
 
 const Index = () => {
@@ -44,9 +45,20 @@ const Index = () => {
         )
     }, [nwbSchema])
 
+    const schema_test = {
+        title: "Todo",
+        type: "object",
+        required: ["title"],
+        properties: {
+            title: { type: "string", title: "Title", default: "A new task" },
+            done: { type: "boolean", title: "Done?", default: false }
+        }
+    };
+
 
     return (
         <Styles>
+            <NavigationBar />
             <Container fluid>
                 <Row>
                     <Col md={{ span: 10, offset: 1 }}>
