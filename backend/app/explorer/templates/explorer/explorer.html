@@ -2,14 +2,22 @@
 {% block styles %}
 <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
     integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous" />
-
+<link rel="stylesheet" href="{{ url_for('explorer_bp.static', filename='explorer.css') }}" />
 {% endblock %}
 
 {% block content %}
 {% include "navbar.html" %}
-<div>
-    <h1>Return voila notebook with Ipywidgets Voila render</h1>
+<div class="row rowFile" style="justify-content: center;">
+    <div class="col-md-6 colForm">
+        <form method='POST'>
+            <label>NWB File path</label>
+            <input style='margin-bottom: 10px;' class='form-control' id="myfile" name="myfile">
+            <button class='btn btn-dark' type='submit'>Submit</button>
+        </form>
+    </div>
 </div>
+{% if render_iframe %}
+<iframe class='voila' style="min-width: 100vw; min-height: 100vh;" src={{voila_address}}>
+    {% endif %}
 
-
-{% endblock %}
+    {% endblock %}

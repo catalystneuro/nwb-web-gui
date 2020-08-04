@@ -1,14 +1,16 @@
 <nav class="navbar navbar-expand-md navbar-dark bg-dark">
-    <a class="navbar-brand" href="http://localhost:3000/index">NWB Web GUI</a>
+    <form method="POST">
+        <button type='submit' class='btn navbar-brand' name='exitApp' value='exit'>NWB Web GUI</button>
+    </form>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
         aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav ml-auto mt-2 mt-lg-0">
-            <li class="nav-item active">
-                <a class="nav-link" href="http://localhost:3000/index">Metadata/Conversion</a>
-            </li>
+            <form method="POST">
+                <button type='submit' class='nav-link btn' name='exitApp' value='exit'>Metada/Conversion</button>
+            </form>
             <li class="nav-item">
                 <a class="nav-link" href="#">NWB Explorer</a>
             </li>
