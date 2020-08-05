@@ -70,6 +70,6 @@ def yaml_to_json(yaml):
                                     'default': val
                                 }
 
-        forms_list.append(schema_base)
+        forms_list.append({e:schema_base})
 
     return forms_list

@@ -15,4 +15,4 @@ def index():
 
     schema = yaml_to_json(metadata)
 
-    return jsonify({'data': schema})
+    return jsonify({'data':schema})
