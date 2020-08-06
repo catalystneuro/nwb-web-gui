@@ -4,6 +4,8 @@ import { Styles } from '../styles/index'
 import Form from "@rjsf/core";
 import { siteContent } from '../api/index'
 import NavigationBar from "../components/Navbar"
+import { toast, ToastContainer } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
 
 
 const Index = () => {
@@ -23,6 +25,24 @@ const Index = () => {
             });
     }, []);
 
+    const onSubmit = async (e) => {
+        const formTitle = e.schema.title
+        const formData = e.formData
+
+        const payload = {
+            formTitle,
+            formData
+        };
+        const res = await siteContent.sendForm(payload)
+
+        if (res.ok) {
+            toast.success('Data Sent!');
+        } else {
+            toast.error("Something went wrong.");
+        }
+
+    }
+
     // Map forms on data change and return html element with form data
     const nwbForm = useMemo(() => {
         return (
@@ -36,7 +56,7 @@ const Index = () => {
                         </Card.Header>
                         <Accordion.Collapse eventKey={index + 1}>
                             <Card.Body>
-                                <Form key={nwb} schema={Object.values(nwb)[0]} />
+                                <Form key={nwb} schema={Object.values(nwb)[0]} onSubmit={onSubmit} />
                             </Card.Body>
                         </Accordion.Collapse>
                     </Card >
@@ -45,22 +65,13 @@ const Index = () => {
         )
     }, [nwbSchema])
 
-    const schema_test = {
-        title: "Todo",
-        type: "object",
-        required: ["title"],
-        properties: {
-            title: { type: "string", title: "Title", default: "A new task" },
-            done: { type: "boolean", title: "Done?", default: false }
-        }
-    };
-
 
     return (
         <Styles>
             <NavigationBar />
             <Container fluid>
                 <Row>
+                    <ToastContainer />
                     <Col md={{ span: 10, offset: 1 }}>
                         <Accordion>
                             {nwbForm}

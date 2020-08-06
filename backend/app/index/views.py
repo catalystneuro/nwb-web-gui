@@ -1,4 +1,4 @@
-from flask import jsonify
+from flask import jsonify, request
 from .utils import yaml_to_json
 from pynwb import NWBHDF5IO
 import datetime
@@ -14,5 +14,9 @@ def index():
         metadata = yaml.safe_load(f)
 
     schema = yaml_to_json(metadata)
+
+    if request.method == 'POST':
+        print(request.json)
+        return jsonify({'response': 'ok'}), 200
 
     return jsonify({'data':schema})

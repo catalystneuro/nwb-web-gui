@@ -5,5 +5,5 @@ const api = create({
 });
 
 export const siteContent = {
-    getIndex: () => api.get('/index')
+    sendForm: (p) => api.post("/index", p)
 }

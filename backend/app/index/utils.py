@@ -36,9 +36,11 @@ def yaml_to_json(yaml):
             type='object',
             additionalProperties=False)
 
-        for k, v in yaml[e].items():
+        for k,v in yaml[e].items():
             if k[0].islower():
-                schema_base['required'].append(k)
+                if k not in schema_base['required']:
+                    schema_base['required'].append(k)
+                schema_base['title'] = e
                 if 'time' not in k:
                     schema_base['properties'][k] = {
                         'type': 'string',
@@ -52,19 +54,22 @@ def yaml_to_json(yaml):
             else:
                 if isinstance(yaml[e][k], list):
                     for element in yaml[e][k]:
+                        schema_base['title'] = e
                         for key, val in element.items():
                             if isinstance(element[key], list):
                                 for item in element[key]:
                                     for i, value in item.items():
                                         form_name = '{} {} {} {}'.format(e, k, key, i)
-                                        schema_base['required'].append(form_name)
+                                        if form_name not in schema_base['required']:
+                                            schema_base['required'].append(form_name)
                                         schema_base['properties'][form_name] = {
                                             'type':'string',
                                             'default': value
                                         }
                             else:
                                 form_name = '{} {} {}'.format(e,k,key)
-                                schema_base['required'].append(form_name)
+                                if form_name not in schema_base['required']:
+                                    schema_base['required'].append(form_name)
                                 schema_base['properties'][form_name] = {
                                     'type': 'string',
                                     'default': val
