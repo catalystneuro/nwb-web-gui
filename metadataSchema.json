@@ -112,7 +112,12 @@
                 "Ophys ImagingPlane optical_channel emission_lambda",
                 "Ophys ImagingPlane optical_channel name",
                 "Ophys TwoPhotonSeries name",
-                "Ophys TwoPhotonSeries imaging_plane"
+                "Ophys TwoPhotonSeries imaging_plane",
+                "Ophys ImageSegmentation name",
+                "Ophys ImageSegmentation plane_segmentations name",
+                "Ophys ImageSegmentation plane_segmentations description",
+                "Ophys ImageSegmentation plane_segmentations imaging_plane",
+                "Ophys ImageSegmentation plane_segmentations reference_images"
             ],
             "properties": {
                 "Ophys Device name": {
@@ -128,7 +133,7 @@
                     "default": "Bruker 2-p microscope"
                 },
                 "Ophys ImagingPlane excitation_lambda": {
-                    "type": "string",
+                    "type": "number",
                     "default": 920.0
                 },
                 "Ophys ImagingPlane imaging_rate": {
@@ -152,7 +157,7 @@
                     "default": "2P Optical Channel"
                 },
                 "Ophys ImagingPlane optical_channel emission_lambda": {
-                    "type": "string",
+                    "type": "number",
                     "default": 510.0
                 },
                 "Ophys ImagingPlane optical_channel name": {
@@ -166,6 +171,26 @@
                 "Ophys TwoPhotonSeries imaging_plane": {
                     "type": "string",
                     "default": "imaging_plane"
+                },
+                "Ophys ImageSegmentation name": {
+                	"type": "string",
+                	"default": "image_segmentation"
+                },
+                "Ophys ImageSegmentation plane_segmentations name": {
+                	"type": "string",
+                	"default": "plane_segmentation"
+                },
+                "Ophys ImageSegmentation plane_segmentations description": {
+                	"type": "string",
+                	"default": "ADDME"
+                },
+                "Ophys ImageSegmentation plane_segmentations imaging_plane": {
+                	"type": "string",
+                	"default": "imaging_plane"
+                },
+                "Ophys ImageSegmentation plane_segmentations reference_images": {
+                	"type": "string",
+                	"default": "raw_ophys"
                 }
             },
             "type": "object",

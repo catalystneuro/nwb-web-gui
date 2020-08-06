@@ -42,17 +42,33 @@ def call_voila(run_cmd):
 def kill_processes():
     global processes_list
 
-    for p in processes_list:
-        p.terminate()
-        p.join()
-        p.close()
-        print('Terminated: ', p)
-    processes_list = []
+    if len(processes_list) > 0:
+        for p in processes_list:
+            p.terminate()
+            p.join()
+            p.close()
+            print('Terminated: ', p)
+        processes_list = []
+
+
+def check_exit():
+    global nwb_file
+
+    if request.method == 'POST' and 'exitApp' in request.form:
+        kill_processes()
+
+        nwb_file = None
+        if request.form['exitApp'] == 'dashboard':
+            return 'http://localhost:3000/custom_dashboard'
+        else:
+            return 'http://localhost:3000/index'
+    else:
+        return 'continue'
 
 
 def explorer():
     '''Explorer route main function '''
-    
+
     global processes_list
     global nwb_file
 
@@ -63,13 +79,15 @@ def explorer():
 
     if nwb_file is None:
         render_iframe = False
+        leave_app = check_exit()
+        if leave_app != 'continue':
+            return redirect(leave_app)
     else:
         render_iframe = True
         # First, check if it an exit call
-        if request.method == 'POST' and 'exitApp' in request.form:
-            kill_processes()
-            nwb_file = None
-            return redirect('http://localhost:3000/index')
+        leave_app = check_exit()
+        if leave_app != 'continue':
+            return redirect(leave_app)
 
         # path_notebook = Path(app.root_path) / 'explorer/explorer.ipynb'
         aux_notebook = create_notebook(nwb_file)
@@ -91,7 +109,7 @@ def explorer():
         proc_voila.start()
         processes_list.append(proc_voila)
         voila_address = 'http://localhost:8866'
-    
+
     voila_address = 'http://localhost:8866'
 
     return render_template('explorer/explorer.html', voila_address=voila_address, render_iframe=render_iframe)

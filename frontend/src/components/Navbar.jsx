@@ -8,7 +8,6 @@ const NavigationBar = () => {
 
     return (
         <Styles>
-
             <Navbar expand="md" bg="dark" variant="dark">
                 <Link to="/index">
                     <Navbar.Brand>
@@ -22,7 +21,10 @@ const NavigationBar = () => {
                             <Link className='link' to="/index">Metadata/Conversion </Link>
                         </Nav.Link>
                         <Nav.Link href='http://localhost:5000/explorer'>
-                            NWB Explorer
+                            <a className='link'>NWB Explorer</a>
+                        </Nav.Link>
+                        <Nav.Link>
+                            <Link className='link' to="/custom_dashboards" >Custom Dashboards </Link>
                         </Nav.Link>
                     </Nav>
                 </Navbar.Collapse>

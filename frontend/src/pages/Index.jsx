@@ -3,7 +3,6 @@ import { Row, Col, Container, Accordion, Card, Button } from 'react-bootstrap'
 import { Styles } from '../styles/index'
 import Form from "@rjsf/core";
 import { siteContent } from '../api/index'
-import NavigationBar from "../components/Navbar"
 import { toast, ToastContainer } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -68,7 +67,6 @@ const Index = () => {
 
     return (
         <Styles>
-            <NavigationBar />
             <Container fluid>
                 <Row>
                     <ToastContainer />

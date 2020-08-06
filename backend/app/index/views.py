@@ -15,13 +15,11 @@ def get_index(forms, title):
 
 def index():
 
-    # Read one nwb file and get schema from hdmf class
-    yaml_path = '/home/vinicius/Área de Trabalho/Trabalhos/neuro/data/metadata.yaml'
+    # Read one json file to create form schema
+    json_file = '/home/vinicius/Área de Trabalho/Trabalhos/nwb-web-gui/metadataSchema.json'
 
-    with open(yaml_path) as f:
-        metadata = yaml.safe_load(f)
-
-    schema = yaml_to_json(metadata)
+    with open(json_file, 'r') as inp:
+        schema = json.load(inp)
 
     if request.method == 'POST':
         title = request.json['formTitle']
