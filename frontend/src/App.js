@@ -9,7 +9,6 @@ function App() {
     <Router>
       <NavigationBar />
       <Switch>
-
         <Route exact path="/index">
           <Index />
         </Route>

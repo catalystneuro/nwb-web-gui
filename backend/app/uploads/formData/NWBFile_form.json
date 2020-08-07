@@ -1,0 +1,37 @@
+{
+    "NWBFile": {
+        "required": [
+            "experimenter",
+            "identifier",
+            "institution",
+            "session_description",
+            "session_start_time"
+        ],
+        "properties": {
+            "experimenter": {
+                "type": "string",
+                "default": "Lawrence Huang"
+            },
+            "identifier": {
+                "type": "string",
+                "default": "Identifier"
+            },
+            "institution": {
+                "type": "string",
+                "default": "Allen"
+            },
+            "session_description": {
+                "type": "string",
+                "default": "Description One"
+            },
+            "session_start_time": {
+                "type": "string",
+                "format": "date-time",
+                "default": "2020-08-05T02:04:00.000Z"
+            }
+        },
+        "type": "object",
+        "additionalProperties": false,
+        "title": "NWBFile"
+    }
+}

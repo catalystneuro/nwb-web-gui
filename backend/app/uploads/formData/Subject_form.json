@@ -1,0 +1,26 @@
+{
+    "Subject": {
+        "required": [
+            "subject_id",
+            "genotype",
+            "age"
+        ],
+        "properties": {
+            "subject_id": {
+                "type": "string",
+                "default": "ADDME"
+            },
+            "genotype": {
+                "type": "string",
+                "default": "ADDME"
+            },
+            "age": {
+                "type": "string",
+                "default": "ADDME"
+            }
+        },
+        "type": "object",
+        "additionalProperties": false,
+        "title": "Subject"
+    }
+}

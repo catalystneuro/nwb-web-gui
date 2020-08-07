@@ -11,4 +11,10 @@ export const Styles = styled.div`{
     background-color: #000000
 }
 
+.btn{
+    margin-bottom: 10px;
+    margin-top: 5px;
+    margin-right: 5px
+}
+
 }`;
