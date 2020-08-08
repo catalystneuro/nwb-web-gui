@@ -1,4 +1,18 @@
 from copy import deepcopy
+from flask import request
+
+
+def ovewrite_schemas(schema_aux):
+    for k, v in request.json['formData'].items():
+        schema_aux['properties'][k]['default'] = v
+    return schema_aux
+
+
+def get_index(forms, title):
+    for i, e in enumerate(forms):
+        if title in e.keys():
+            return i
+    return -1
 
 
 def get_schema(docval):

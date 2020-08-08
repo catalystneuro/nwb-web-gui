@@ -1,5 +1,4 @@
 from flask import jsonify, request
-from .utils import yaml_to_json
 from pynwb import NWBHDF5IO
 import datetime
 import yaml
@@ -7,81 +6,104 @@ import json
 from werkzeug.utils import secure_filename
 from flask import current_app as app
 from pathlib import Path
+from .utils import yaml_to_json, get_index, ovewrite_schemas
 
 schema = [1]
+inputSchema = None
 nwb_save_path = None
+new_schema = []
 
-def get_index(forms, title):
-    for i, e in enumerate(forms):
-        if title in e.keys():
-            return i
-    return -1
+
+def upload_file():
+    global schema
+    global new_schema
+
+    # if sending metatada json file (load metadata)
+    myFile = request.files['myFile'] 
+    filename = secure_filename(myFile.filename)
+
+    destination = Path(app.root_path) / "uploads/metadata/metadata.json"
+    myFile.save(destination)
+
+    with open(destination, 'r') as inp:
+        schema = json.load(inp)
+
+    new_schema = schema
+
+    return jsonify({'schemaTwo': schema}), 200
+
+
+def save_all_schemas():
+    global new_schema
+    destination = Path(app.root_path) / "uploads/metadata/all_uploaded_metadata.json"
+    with open(destination, 'w+') as out:
+        json.dump(new_schema, out, indent=4)
+
+    return jsonify({'data':'ok'})
+
+
+def save_metadata():
+    global schema
+    global inputSchema
+    global new_schema
+
+    if request.json is None:
+        return jsonify({'error': 'error'}), 400
+
+    title = request.json['formTitle']
+
+    if 'input' not in title.lower() and 'clear' not in title.lower():
+        form_index = get_index(schema, title)
+        form_schema = schema[form_index]
+        schema_aux = form_schema[title]
+        schema_aux = ovewrite_schemas(schema_aux)
+        new_schema_index = get_index(new_schema, title)
+        schema_json = {
+            title: schema_aux
+        }
+        if new_schema_index == -1:
+            new_schema.append(schema_json)
+        else:
+            new_schema[new_schema_index] = schema_json
+        save_all_schemas()
+    elif 'clear' in title.lower():
+        schema = [1]
+        return jsonify({'schemaTwo': schema}), 200
+    else:
+        form_index = get_index(inputSchema, title)
+        form_schema = inputSchema[form_index]
+        schema_aux = form_schema[title]
+        schema_aux = ovewrite_schemas(schema_aux)
+        schema_json = {
+            title: schema_aux
+        }
+
+    dest = Path(app.root_path) / 'uploads/formData/{}_form.json'.format(title)
+
+    with open(dest, 'w+') as out:
+        json.dump(schema_json, out, indent=4)
+
+    return jsonify({'response': 'ok'}), 200
 
 
 def index():
     global schema
+    global inputSchema
+    global new_schema
 
-    # Read one json file to create form schema
-    nwb_json_path = '/home/vinicius/Área de Trabalho/Trabalhos/nwb-web-gui/metadataSchema.json'
+    # Read inputs json schema
     input_json_path = '/home/vinicius/Área de Trabalho/Trabalhos/nwb-web-gui/inputsSchema.json'
 
     with open(input_json_path, 'r') as inp:
-        schemaOne = json.load(inp)
+        inputSchema = json.load(inp)
 
-    with open(nwb_json_path, 'r') as inp:
-        schemaTwo = json.load(inp)
-
-
-    # If sending filled form data
-    if request.method == 'POST' and not request.files:
-        if request.json is None:
-            return jsonify({'error': 'error'}), 400
-
-        title = request.json['formTitle']
-
-        if 'input' not in title.lower() and 'clear' not in title.lower():
-            form_index = get_index(schema, title)
-            form_schema = schema[form_index]
-        elif 'clear' in title.lower():
-            schema = [1]
-            return jsonify({'schemaTwo': schema}), 200
-        else:
-            form_index = get_index(schemaOne, title)
-            form_schema = schemaOne[form_index]
-
-        schema_aux = form_schema[title]
-
-        for k, v in request.json['formData'].items():
-            schema_aux['properties'][k]['default'] = v
-
-        schema_json = {
-            title: schema_aux
-        }
-        dest = Path(app.root_path) / 'uploads/formData/{}_form.json'.format(title)
-
-        with open(dest, 'w+') as out:
-            json.dump(schema_json, out, indent=4)
-
-            return jsonify({'response': 'ok'}), 200
-    elif request.files:
-        # if sending metatada json file (load metadata)
-        myFile = request.files['myFile'] 
-        filename = secure_filename(myFile.filename)
-
-        destination = Path(app.root_path) / "uploads/metadata/metadata.json"
-        myFile.save(destination)
-
-        with open(destination, 'r') as inp:
-            schema = json.load(inp)
-
-        return jsonify({'schemaTwo': schema}), 200
-
-    return jsonify({'schemaOne': schemaOne, 'schemaTwo':schema})
+    return jsonify({'schemaOne': inputSchema, 'schemaTwo':schema})
 
 
-def save_nwb():
+def convert_nwb():
     global nwb_save_path
     # Check if path exists
+    #TODO
     path = Path(request.json['nwbPath'])
     if path.is_dir():
         nwb_save_path = path

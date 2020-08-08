@@ -16,7 +16,7 @@
             },
             "age": {
                 "type": "string",
-                "default": "ADDME"
+                "default": "Teste"
             }
         },
         "type": "object",

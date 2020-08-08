@@ -108,7 +108,7 @@ const Index = () => {
             selectedFile,
         );
 
-        const res = await siteContent.sendForm(payload)
+        const res = await siteContent.sendFile(payload)
 
         if (res.ok) {
             toast.success('Metadata Uploaded');
@@ -136,7 +136,7 @@ const Index = () => {
         }
     }
 
-    const submitPath = async (e) => {
+    const convertNwb = async (e) => {
         e.preventDefault()
         if (nwbPath !== null) {
             const payload = {
@@ -189,7 +189,7 @@ const Index = () => {
                 </Row>
                 <Row>
                     <Col md={{ span: 10, offset: 1 }}>
-                        <FormReact ref={pathForm} onSubmit={submitPath}>
+                        <FormReact ref={pathForm} onSubmit={convertNwb}>
                             <FormReact.Group>
                                 <FormReact.Label>Save Path</FormReact.Label>
                                 <FormReact.Control placeholder='Path/to/file.nwb' onChange={(e) => setNwbpath(e.target.value)} />

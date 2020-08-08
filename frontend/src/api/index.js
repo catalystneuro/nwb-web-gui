@@ -5,6 +5,7 @@ const api = create({
 });
 
 export const siteContent = {
-    sendForm: (p) => api.post("/index", p),
-    sendPath: (p) => api.post("/index/savenwb", p)
+    sendForm: (p) => api.post("/index/savemetadata", p),
+    sendPath: (p) => api.post("/index/convertnwb", p),
+    sendFile: (p) => api.post("index/uploadfile", p),
 }
