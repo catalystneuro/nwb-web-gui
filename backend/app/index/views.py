@@ -9,7 +9,7 @@ from flask import current_app as app
 from pathlib import Path
 
 schema = [1]
-
+nwb_save_path = None
 
 def get_index(forms, title):
     for i, e in enumerate(forms):
@@ -38,8 +38,6 @@ def index():
             return jsonify({'error': 'error'}), 400
 
         title = request.json['formTitle']
-
-        print(title)
 
         if 'input' not in title.lower() and 'clear' not in title.lower():
             form_index = get_index(schema, title)
@@ -79,3 +77,14 @@ def index():
         return jsonify({'schemaTwo': schema}), 200
 
     return jsonify({'schemaOne': schemaOne, 'schemaTwo':schema})
+
+
+def save_nwb():
+    global nwb_save_path
+    # Check if path exists
+    path = Path(request.json['nwbPath'])
+    if path.is_dir():
+        nwb_save_path = path
+        return jsonify({'data': 'ok'}), 200
+    else:
+        return jsonify({'data':'error'}), 400

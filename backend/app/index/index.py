@@ -1,6 +1,6 @@
 from flask import Blueprint
 from flask import current_app as current_app
-from app.index.views import index
+from app.index.views import index, save_nwb
 
 
 index_bp = Blueprint(
@@ -10,3 +10,4 @@ index_bp = Blueprint(
 )
 
 index_bp.add_url_rule('/index', view_func=index, methods=['GET', 'POST'])
+index_bp.add_url_rule('/index/savenwb', view_func=save_nwb, methods=['POST'])

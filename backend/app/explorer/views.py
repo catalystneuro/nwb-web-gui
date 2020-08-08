@@ -61,7 +61,7 @@ def check_exit():
         if request.form['exitApp'] == 'dashboard':
             return 'http://localhost:3000/custom_dashboard'
         else:
-            return 'http://localhost:3000/index'
+            return 'http://localhost:3000/'
     else:
         return 'continue'
 

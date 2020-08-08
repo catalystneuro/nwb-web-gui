@@ -9,7 +9,7 @@ const NavigationBar = () => {
     return (
         <Styles>
             <Navbar expand="md" bg="dark" variant="dark">
-                <Link to="/index">
+                <Link to="/">
                     <Navbar.Brand>
                         NWB-Web-GUI
                         </Navbar.Brand>
@@ -18,7 +18,7 @@ const NavigationBar = () => {
                 <Navbar.Collapse id="basic-navbar-nav ml-auto">
                     <Nav className="ml-auto">
                         <Nav.Link>
-                            <Link className='link' to="/index">Metadata/Conversion </Link>
+                            <Link className='link' to="/">Metadata/Conversion </Link>
                         </Nav.Link>
                         <Nav.Link href='http://localhost:5000/explorer'>
                             <a className='link'>NWB Explorer</a>

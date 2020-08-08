@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useRef } from 'react';
 import { Row, Col, Container, Accordion, Card, Button } from 'react-bootstrap'
 import { Form as FormReact } from 'react-bootstrap'
 import { Styles } from '../styles/index'
@@ -14,6 +14,8 @@ const Index = () => {
     const [schemaOne, setSchemaOne] = useState(defaultSchema)
     const [nwbSchema, setSchema] = useState(defaultSchema);
     const [selectedFile, setSelectedfile] = useState(null);
+    const [nwbPath, setNwbpath] = useState(null);
+    const pathForm = useRef(null)
 
     useEffect(() => {
         fetch("/index")
@@ -134,6 +136,26 @@ const Index = () => {
         }
     }
 
+    const submitPath = async (e) => {
+        e.preventDefault()
+        if (nwbPath !== null) {
+            const payload = {
+                nwbPath
+            }
+            const res = await siteContent.sendPath(payload)
+
+            if (res.ok) {
+                toast.success('Converted');
+                setNwbpath(null)
+                pathForm.current.reset();
+            } else {
+                toast.error('Something went wrong')
+            }
+        } else {
+            toast.error("Path field must not be empty.");
+        }
+    }
+
 
     return (
         <Styles>
@@ -167,11 +189,11 @@ const Index = () => {
                 </Row>
                 <Row>
                     <Col md={{ span: 10, offset: 1 }}>
-                        <FormReact>
+                        <FormReact ref={pathForm} onSubmit={submitPath}>
                             <FormReact.Group>
                                 <FormReact.Label>Save Path</FormReact.Label>
-                                <FormReact.Control placeholder="Path/to/data.nwb" />
-                                <Button className='btn btn-info'>Convert</Button>
+                                <FormReact.Control placeholder='Path/to/file.nwb' onChange={(e) => setNwbpath(e.target.value)} />
+                                <Button type='submit' className='btn btn-info'>Convert</Button>
                             </FormReact.Group>
                         </FormReact>
                     </Col>
