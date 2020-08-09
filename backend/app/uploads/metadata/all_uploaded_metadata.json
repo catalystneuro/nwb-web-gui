@@ -27,7 +27,8 @@
                 },
                 "session_start_time": {
                     "type": "string",
-                    "format": "date-time"
+                    "format": "date-time",
+                    "default": "2020-08-04T16:38:00.000Z"
                 }
             },
             "type": "object",
@@ -53,7 +54,7 @@
                 },
                 "age": {
                     "type": "string",
-                    "default": "Teste"
+                    "default": "ADDME"
                 }
             },
             "type": "object",
@@ -73,7 +74,7 @@
             "properties": {
                 "Ecephys Device name": {
                     "type": "string",
-                    "default": "Device Ecephys"
+                    "default": "MultiClamp 700B"
                 },
                 "Ecephys ElectrodeGroup description": {
                     "type": "string",

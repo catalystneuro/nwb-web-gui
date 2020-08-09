@@ -79,6 +79,9 @@ const Index = () => {
     const inputsForm = useMemo(() => {
         return (
             schemaOne.map((schema, index) => {
+                if (schema === 1) {
+                    return ''
+                }
                 return (
                     <Row>
                         <Col md={12}>
@@ -98,13 +101,12 @@ const Index = () => {
         setSelectedfile(e.target.files[0])
     };
 
-    const submitFile = async (e) => {
+    const submitFile = choice => async (e) => {
         e.preventDefault()
 
         const payload = new FormData();
-        console.log(payload)
         payload.append(
-            "myFile",
+            choice,
             selectedFile,
         );
 
@@ -113,23 +115,33 @@ const Index = () => {
         if (res.ok) {
             toast.success('Metadata Uploaded');
             setSelectedfile(null)
-            setSchema(res.data.schemaTwo)
+            if (choice === 'nwb') {
+                setSchema(res.data.schemaTwo)
+            } else {
+                setSchemaOne(res.data.schemaOne)
+            }
+
         } else {
             toast.error("Something went wrong.");
         }
     }
 
-    const clearSchema = async e => {
+    const clearSchema = choice => async e => {
         e.preventDefault()
 
         const payload = {
-            "formTitle": 'clear'
+            "formTitle": 'clear',
+            "formChoice": choice
         }
         const res = await siteContent.sendForm(payload)
 
         if (res.ok) {
             toast.success('Schema Cleaned');
-            setSchema(defaultSchema)
+            if (choice === 'nwb') {
+                setSchema(defaultSchema)
+            } else {
+                setSchemaOne(defaultSchema)
+            }
         }
         else {
             toast.error("Something went wrong.");
@@ -161,6 +173,21 @@ const Index = () => {
         <Styles>
             <Container fluid>
                 <Row>
+                    <Col md={{ span: 10, offset: 1 }}>
+                        <Card>
+                            <Card.Body>
+                                <FormReact onSubmit={submitFile('input')}>
+                                    <FormReact.Group>
+                                        <FormReact.File label="Load Input Metadata" onChange={handleLoad} />
+                                        <Button type='submit' className='btn btn-info'>Submit</Button>
+                                        <Button onClick={clearSchema('input')} className='btn btn-info'>Clear Schema</Button>
+                                    </FormReact.Group>
+                                </FormReact>
+                            </Card.Body>
+                        </Card>
+                    </Col>
+                </Row>
+                <Row>
                     <ToastContainer />
                     <Col md={{ span: 10, offset: 1 }}>
                         {inputsForm}
@@ -169,15 +196,18 @@ const Index = () => {
             </Container>
             <Container fluid>
                 <Row>
-                    <Col md={{ span: 8, offset: 1 }}>
-                        <FormReact onSubmit={submitFile}>
-                            <FormReact.Group>
-                                <FormReact.File label="Load Metadata" onChange={handleLoad} />
-                                <Button type='submit' className='btn btn-info'>Submit</Button>
-                                <Button onClick={clearSchema} className='btn btn-info'>Clear Schema</Button>
-                            </FormReact.Group>
-                        </FormReact>
-
+                    <Col md={{ span: 10, offset: 1 }}>
+                        <Card>
+                            <Card.Body>
+                                <FormReact onSubmit={submitFile('nwb')}>
+                                    <FormReact.Group>
+                                        <FormReact.File label="Load NWB Metadata" onChange={handleLoad} />
+                                        <Button type='submit' className='btn btn-info'>Submit</Button>
+                                        <Button onClick={clearSchema('nwb')} className='btn btn-info'>Clear Schema</Button>
+                                    </FormReact.Group>
+                                </FormReact>
+                            </Card.Body>
+                        </Card>
                     </Col>
                 </Row>
                 <Row>

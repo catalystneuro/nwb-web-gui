@@ -9,7 +9,7 @@ from pathlib import Path
 from .utils import yaml_to_json, get_index, ovewrite_schemas
 
 schema = [1]
-inputSchema = None
+inputSchema = [1]
 nwb_save_path = None
 new_schema = []
 
@@ -17,20 +17,29 @@ new_schema = []
 def upload_file():
     global schema
     global new_schema
+    global inputSchema
 
-    # if sending metatada json file (load metadata)
-    myFile = request.files['myFile'] 
-    filename = secure_filename(myFile.filename)
+    if 'input' in request.files.keys():
+        myFile = request.files['input'] 
+        filename = secure_filename(myFile.filename)
+        destination = Path(app.root_path) / "uploads/metadata/inputsMetadata.json"
+        myFile.save(destination)
+        with open(destination, 'r') as inp:
+            inputSchema = json.load(inp)
 
-    destination = Path(app.root_path) / "uploads/metadata/metadata.json"
-    myFile.save(destination)
+        return jsonify({'schemaOne': inputSchema}), 200
+    else:
+        myFile = request.files['nwb'] 
+        filename = secure_filename(myFile.filename)
+        destination = Path(app.root_path) / "uploads/metadata/metadata.json"
+        myFile.save(destination)
 
-    with open(destination, 'r') as inp:
-        schema = json.load(inp)
+        with open(destination, 'r') as inp:
+            schema = json.load(inp)
 
-    new_schema = schema
+        new_schema = schema
 
-    return jsonify({'schemaTwo': schema}), 200
+        return jsonify({'schemaTwo': schema}), 200
 
 
 def save_all_schemas():
@@ -67,8 +76,12 @@ def save_metadata():
             new_schema[new_schema_index] = schema_json
         save_all_schemas()
     elif 'clear' in title.lower():
-        schema = [1]
-        return jsonify({'schemaTwo': schema}), 200
+        if request.json['formChoice'] == 'nwb':
+            schema = [1]
+            return jsonify({'schemaTwo': schema}), 200
+        else:
+            inputSchema = [1]
+            return jsonify({'schemaOne': inputSchema}), 200
     else:
         form_index = get_index(inputSchema, title)
         form_schema = inputSchema[form_index]
@@ -91,13 +104,7 @@ def index():
     global inputSchema
     global new_schema
 
-    # Read inputs json schema
-    input_json_path = '/home/vinicius/Área de Trabalho/Trabalhos/nwb-web-gui/inputsSchema.json'
-
-    with open(input_json_path, 'r') as inp:
-        inputSchema = json.load(inp)
-
-    return jsonify({'schemaOne': inputSchema, 'schemaTwo':schema})
+    return jsonify({'schemaOne': inputSchema, 'schemaTwo': schema})
 
 
 def convert_nwb():
