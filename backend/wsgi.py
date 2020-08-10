@@ -1,4 +1,8 @@
-from app import server
+from app import server, dashApp
+from werkzeug.wsgi import DispatcherMiddleware
+from werkzeug.serving import run_simple
+
 
 if __name__ == '__main__':
-    server.run(host='0.0.0.0', port=5000, debug=True)
+    application = DispatcherMiddleware(server, {'/dash': dashApp.server})
+    run_simple('localhost', 5000, application, use_reloader=True, use_debugger=True)

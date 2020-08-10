@@ -23,7 +23,7 @@ def upload_file():
         myFile = request.files['input'] 
         filename = secure_filename(myFile.filename)
         destination = Path(app.root_path) / "uploads/metadata/inputsMetadata.json"
-        myFile.save(destination)
+        myFile.save(str(destination))
         with open(destination, 'r') as inp:
             inputSchema = json.load(inp)
 
@@ -32,7 +32,7 @@ def upload_file():
         myFile = request.files['nwb'] 
         filename = secure_filename(myFile.filename)
         destination = Path(app.root_path) / "uploads/metadata/metadata.json"
-        myFile.save(destination)
+        myFile.save(str(destination))
 
         with open(destination, 'r') as inp:
             schema = json.load(inp)

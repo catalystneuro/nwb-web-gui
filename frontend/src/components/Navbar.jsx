@@ -23,8 +23,8 @@ const NavigationBar = () => {
                         <Nav.Link href='http://localhost:5000/explorer'>
                             <a className='link'>NWB Explorer</a>
                         </Nav.Link>
-                        <Nav.Link>
-                            <Link className='link' to="/custom_dashboards" >Custom Dashboards </Link>
+                        <Nav.Link href='http://localhost:5000/custom_dashboard'>
+                            <a className='link'>Custom Dashboards</a>
                         </Nav.Link>
                     </Nav>
                 </Navbar.Collapse>
