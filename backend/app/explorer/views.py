@@ -59,7 +59,7 @@ def check_exit():
 
         nwb_file = None
         if request.form['exitApp'] == 'dashboard':
-            return 'http://localhost:3000/custom_dashboard'
+            return 'http://localhost:5000/custom_dashboard'
         else:
             return 'http://localhost:3000/'
     else:
