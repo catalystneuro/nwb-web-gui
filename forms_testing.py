@@ -39,10 +39,9 @@ def iter_fields(object):
             item = html.Div(id="form_group_" + k)
             item.children = iter_fields(v['properties'])
         elif v['type'] == 'string':
-            print(v)
             item = FormItem(key=k, value=v)
-            print(item)
         children.append(item)
+    return children
 
 
 # App layout
@@ -56,8 +55,6 @@ app.layout = html.Div([
 
     form
 ])
-
-print(form)
 
 # @app.callback(dash.dependencies.Output('page-content', 'children'),
 #               [dash.dependencies.Input('url', 'pathname')])
