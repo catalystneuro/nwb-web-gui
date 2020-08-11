@@ -16,16 +16,16 @@ with open('apps/uploads/formData/NWBFile_form0.json') as json_file:
 
 
 class FormItem(dbc.FormGroup):
-    def __init__(self, label):
+    def __init__(self, key, value):
         super().__init__([])
         self.row = True
         self.children = [
             dbc.Col(
-                dbc.Label(label, html_for="example-email-row", width=2),
+                dbc.Label(key, html_for="example-email-row", width=2),
                 width=10,
             ),
             dbc.Col(
-                dbc.Input(type="email", id="example-email-row"),
+                dbc.Input(type="", id="example-email-row"),
                 width=10,
             ),
         ]
@@ -39,13 +39,23 @@ def iter_fields(object):
             item = html.Div(id="form_group_" + k)
             item.children = iter_fields(v['properties'])
         elif v['type'] == 'string':
-            item = FormItem(label=k)
+            print(v)
+            item = FormItem(key=k, value=v)
+            print(item)
         children.append(item)
 
 
 # App layout
 form = iter_fields(metadata)
-app.layout = html.Div(form)
+app.layout = html.Div([
+    html.H1(
+        "Conversion Forms",
+        style={'text-align': 'center'}
+    ),
+    html.Hr(),
+
+    form
+])
 
 print(form)
 
