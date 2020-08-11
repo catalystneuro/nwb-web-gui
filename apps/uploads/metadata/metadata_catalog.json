@@ -9,12 +9,12 @@
             "session_description": {
                 "type": "string",
                 "description": "a description of the session where this data was generated",
-                "default": "ADDME",
+                "default": "ADDME"
             },
             "identifier": {
                 "type": "string",
                 "description": "a unique text identifier for the file",
-                "default": "ADDME",
+                "default": "ADDME"
             },
             "session_start_time": {
                 "type": "datetime",
@@ -28,7 +28,7 @@
             "institution": {
                 "type": "string",
                 "description": "institution(s) where experiment is performed"
-            },
+            }
         },
         "type": "object",
         "additionalProperties": false,

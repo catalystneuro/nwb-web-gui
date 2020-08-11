@@ -1,0 +1,38 @@
+{
+    "NWBFile": {
+        "required": [
+            "identifier",
+            "session_description",
+            "session_start_time"
+        ],
+        "properties": {
+            "session_description": {
+                "type": "string",
+                "description": "a description of the session where this data was generated",
+                "default": "ADDME"
+            },
+            "identifier": {
+                "type": "string",
+                "description": "a unique text identifier for the file",
+                "default": "ADDME"
+            },
+            "session_start_time": {
+                "type": "datetime",
+                "description": "the start date and time of the recording session",
+                "default": ""
+            },
+            "experimenter": {
+                "type": "string",
+                "description": "name of person who performed experiment"
+            },
+            "institution": {
+                "type": "string",
+                "description": "institution(s) where experiment is performed"
+            }
+        },
+        "type": "object",
+        "additionalProperties": false,
+        "title": "NWBFile",
+        "class": "pynwb.file.NWBFile"
+    }
+}

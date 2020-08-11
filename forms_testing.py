@@ -11,7 +11,7 @@ external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
 # Load JSON schema
-with open('apps/uploads/formData/NWBFile_form.json') as json_file:
+with open('apps/uploads/formData/NWBFile_form0.json') as json_file:
     metadata = json.load(json_file)
 
 
@@ -37,7 +37,7 @@ def iter_fields(object):
     for k, v in object.items():
         if v['type'] == 'object':
             item = html.Div(id="form_group_" + k)
-            item.children = iter_fields(v)
+            item.children = iter_fields(v['properties'])
         elif v['type'] == 'string':
             item = FormItem(label=k)
         children.append(item)
@@ -47,6 +47,7 @@ def iter_fields(object):
 form = iter_fields(metadata)
 app.layout = html.Div(form)
 
+print(form)
 
 # @app.callback(dash.dependencies.Output('page-content', 'children'),
 #               [dash.dependencies.Input('url', 'pathname')])
