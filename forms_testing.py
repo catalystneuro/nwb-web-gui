@@ -35,8 +35,6 @@ def iter_fields(object):
     """Recursively iterate over items in schema to assemble form"""
     children = []
     for k, v in object.items():
-        print(v)
-        print('#######')
         if v['type'] == 'object':
             item = html.Div(id="form_group_" + k)
             item.children = iter_fields(v)

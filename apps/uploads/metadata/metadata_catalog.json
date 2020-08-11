@@ -1,33 +1,34 @@
 {
     "NWBFile": {
         "required": [
-            "experimenter",
             "identifier",
-            "institution",
             "session_description",
             "session_start_time"
         ],
         "properties": {
-            "experimenter": {
+            "session_description": {
                 "type": "string",
-                "default": "Lawrence Huang"
+                "description": "a description of the session where this data was generated",
+                "default": "ADDME",
             },
             "identifier": {
                 "type": "string",
-                "default": "ADDME"
+                "description": "a unique text identifier for the file",
+                "default": "ADDME",
+            },
+            "session_start_time": {
+                "type": "datetime",
+                "description": "the start date and time of the recording session",
+                "default": ""
+            },
+            "experimenter": {
+                "type": "string",
+                "description": "name of person who performed experiment"
             },
             "institution": {
                 "type": "string",
-                "default": "Allen Institute for Brain Science"
+                "description": "institution(s) where experiment is performed"
             },
-            "session_description": {
-                "type": "string",
-                "default": "ADDME"
-            },
-            "session_start_time": {
-                "type": "string",
-                "format": "date-time"
-            }
         },
         "type": "object",
         "additionalProperties": false,
