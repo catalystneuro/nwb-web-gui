@@ -28,6 +28,18 @@ class FormItem(dbc.FormGroup):
                 placeholder='MMMM Y',
                 date=datetime.date(2020, 2, 29)
             )
+        elif type == 'link':
+            # gets path to Devices in list
+            input_field = dcc.Dropdown(
+                id='dropdown-' + key,
+                options=[
+                    {'label': 'Device 1', 'value': 'dev1'},
+                    {'label': 'Device 2', 'value': 'dev2'},
+                    {'label': 'Device 3', 'value': 'dev3'}
+                ],
+                value='dev1',
+                clearable=False
+            )
         else:
             input_field = dbc.Input(type="")
         self.children = [

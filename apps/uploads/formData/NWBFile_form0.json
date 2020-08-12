@@ -68,7 +68,8 @@
                 "description": "the weight of the subject"
             },
             "date_of_birth": {
-                "type": "datetime",
+                "format": "date-time",
+                "type": "string",
                 "description": "datetime of date of birth. May be supplied instead of age"
             }
         },
@@ -84,7 +85,7 @@
         "title": "Ecephys",
         "class": "None",
         "properties": {
-            "Device": {
+            "Device": [{
                 "required": [
                     "name"
                 ],
@@ -109,7 +110,7 @@
                 "additionalProperties": false,
                 "title": "Device",
                 "class": "pynwb.device.Device"
-            },
+            }],
             "ElectrodeGroup": {
                 "required": [
                     "name",
@@ -130,7 +131,8 @@
                     },
                     "device": {
                         "type": "link",
-                        "description": "the device that was used to record from this electrode group"
+                        "description": "the device that was used to record from this electrode group",
+                        "target": "pynwb.device.Device"
                     },
                     "location": {
                         "type": "string",
