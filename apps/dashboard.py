@@ -1,6 +1,5 @@
 import dash_core_components as dcc
 import dash_html_components as html
-
 from pynwb import NWBHDF5IO
 # import dash
 from nwbwidgets.dashboards.allen_dash import AllenDashboard
@@ -42,8 +41,7 @@ def make_dashboard(app):
             },
             multiple=False
         ),
-
-        # dashboard
+        dashboard
     ])
 
-    return dashboard
+    return layout
