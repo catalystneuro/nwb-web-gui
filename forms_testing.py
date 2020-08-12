@@ -25,7 +25,7 @@ class FormItem(dbc.FormGroup):
                 width=10,
             ),
             dbc.Col(
-                dbc.Input(type="", id="example-email-row"),
+                dbc.Input(type=""), # unique id for each input?
                 width=10,
             ),
         ]
@@ -38,9 +38,13 @@ def iter_fields(object):
         if v['type'] == 'object':
             item = html.Div(id="form_group_" + k)
             item.children = iter_fields(v['properties'])
+            children.append(item)
         elif v['type'] == 'string':
             item = FormItem(key=k, value=v)
-        children.append(item)
+            children.append(item)
+        else:
+            # we were getting duplicate values ​​because we have to treat all types of fields (and give a unique id for each input?)
+            pass
     return children
 
 
