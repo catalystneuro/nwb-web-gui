@@ -18,35 +18,40 @@ class ConverterForms(html.Div):
         self.children = html.Div([
             html.H2('Converter Forms', style={'text-align': 'center'}),
             html.Br(),
-
-            dcc.Upload(
-                id="upload_schema",
-                children=html.Div(
-                    ["Drag and drop or click to select a file to upload."]
-                ),
-                style={
-                    "width": "100%",
-                    "height": "60px",
-                    "lineHeight": "60px",
-                    "borderWidth": "1px",
-                    "borderStyle": "dashed",
-                    "borderRadius": "5px",
-                    "textAlign": "center",
-                    "margin": "10px",
-                },
-                multiple=False,
+            dbc.Row(
+                [dbc.Col([
+                    dcc.Upload(
+                        id="upload_schema",
+                        children=html.Div(
+                            ["Drag and drop or click to select a file to upload."]
+                        ),
+                        style={
+                            "width": "100%",
+                            "height": "60px",
+                            "lineHeight": "60px",
+                            "borderWidth": "1px",
+                            "borderStyle": "dashed",
+                            "borderRadius": "5px",
+                            "textAlign": "center",
+                        },
+                        multiple=False,
+                    ),
+                ], className='col-md-4')], 
+                style={'justify-content': 'center'}
             ),
             html.Br(),
             html.Div(id='uploaded_input_schema'),
             html.Br(),
-
             html.Div(id='forms_div'),
+            html.Br(),
+            html.Div(id='forms_button'),
+            html.Div(id='noDiv')
         ])
 
         self.style ={'text-align': 'center', 'justify-content': 'left'}
 
         @self.parent_app.callback(
-            [Output("uploaded_input_schema", "children"), Output('forms_div', 'children')],
+            [Output("uploaded_input_schema", "children"), Output('forms_div', 'children'), Output('forms_button', 'children')],
             [Input("upload_schema", "contents")],
         )
         def load_metadata(contents):
@@ -71,9 +76,17 @@ class ConverterForms(html.Div):
 
                     all_forms = html.Div(layout_children)
 
-                    return 'JSON schema loaded', all_forms
-                else:
-                    return 'Something went wrong', ''
-            else:
-                return '', ''
+                    button = dbc.Button('Submit', id='button_submit')
 
+                    return 'JSON schema loaded', all_forms, button
+                else:
+                    return 'Something went wrong', '', ''
+            else:
+                return '', '', ''
+
+        @self.parent_app.callback(
+            Output('noDiv', 'children'),
+            [Input('button_submit', component_property='n_clicks')]
+        )
+        def submit_form(click):
+            print(click)
