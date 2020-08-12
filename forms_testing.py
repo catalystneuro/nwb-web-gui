@@ -7,7 +7,7 @@ from base64 import b64decode
 import json
 
 
-external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
+external_stylesheets = [dbc.themes.BOOTSTRAP]  # ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
 # Load JSON schema
@@ -20,13 +20,10 @@ class FormItem(dbc.FormGroup):
         super().__init__([])
         self.row = True
         self.children = [
+            dbc.Label(key, html_for="example-email-row", width={'size': 2, 'offset': 1}),
             dbc.Col(
-                dbc.Label(key, html_for="example-email-row", width=2),
-                width=10,
-            ),
-            dbc.Col(
-                dbc.Input(type=""), # unique id for each input?
-                width=10,
+                dbc.Input(type=""),  # unique id for each input?
+                width={'size': 3, 'offset': 0},
             ),
         ]
 
@@ -36,9 +33,12 @@ def iter_fields(object):
     children = []
     for k, v in object.items():
         if v['type'] == 'object':
-            item = html.Div(id="form_group_" + k)
-            item.children = iter_fields(v['properties'])
+            # item = html.Div(id="form_group_" + k, style={"border": "1px black solid"})
+            item = dbc.Card(id="form_group_" + k)
+            item.children = [dbc.CardHeader(k)]
+            item.children.extend(iter_fields(v['properties']))
             children.append(item)
+            print(v['properties'])
         elif v['type'] == 'string':
             item = FormItem(key=k, value=v)
             children.append(item)
@@ -49,16 +49,16 @@ def iter_fields(object):
 
 
 # App layout
-form = iter_fields(metadata)
-app.layout = html.Div([
+forms = iter_fields(metadata)
+layout_children = [
     html.H1(
         "Conversion Forms",
         style={'text-align': 'center'}
     ),
     html.Hr(),
-
-    form[0]
-])
+]
+layout_children.extend([f for f in forms])
+app.layout = html.Div(layout_children)
 
 # @app.callback(dash.dependencies.Output('page-content', 'children'),
 #               [dash.dependencies.Input('url', 'pathname')])
