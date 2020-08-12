@@ -5,3 +5,5 @@ env37
 # nwb and h5 files
 *.nwb
 venvDash
+
+*__pycache__

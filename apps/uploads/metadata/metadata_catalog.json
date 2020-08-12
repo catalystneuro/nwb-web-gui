@@ -114,6 +114,10 @@
 
 {
     "ElectrodeGroup": {
+        "type": "object",
+        "additionalProperties": false,
+        "title": "ElectrodeGroup",
+        "class": "pynwb.ecephys.ElectrodeGroup",
         "required": [
             "name",
             "description",
@@ -134,17 +138,14 @@
             "device": {
                 "type": "link",
                 "description": "the device that was used to record from this electrode group",
+                "target": "pynwb.device.Device"
             },
             "location": {
                 "type": "string",
                 "description": "description of location of this electrode group",
                 "default": "ADDME"
             }
-        },
-        "type": "object",
-        "additionalProperties": false,
-        "title": "ElectrodeGroup",
-        "class": "pynwb.ecephys.ElectrodeGroup"
+        }
     }
 }
 
