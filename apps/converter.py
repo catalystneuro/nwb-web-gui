@@ -3,7 +3,7 @@ import dash_html_components as html
 import dash_core_components as dcc
 from dash.dependencies import Input, Output, State
 import dash_bootstrap_components as dbc
-from base64 import b64decode
+import base64
 import json
 from pathlib import Path
 import datetime
@@ -13,8 +13,6 @@ import datetime
 # THIS SHOULD BE REMOVED FORM HERE ONCE A FORMS CREATING FUNCTION IS IS PLACE
 ################################################################################
 # Load JSON schema
-with open('apps/uploads/formData/NWBFile_form0.json') as json_file:
-    metadata = json.load(json_file)
 
 
 class FormItem(dbc.FormGroup):
@@ -59,17 +57,6 @@ def iter_fields(object):
         #     pass
     return children
 
-
-forms = iter_fields(metadata)
-layout_children = [
-    html.H1(
-        "Conversion Forms",
-        style={'text-align': 'center'}
-    ),
-    html.Hr(),
-]
-layout_children.extend([f for f in forms])
-all_forms = html.Div(layout_children)
 ################################################################################
 ################################################################################
 
@@ -84,69 +71,61 @@ class ConverterForms(html.Div):
             html.H2('Converter Forms', style={'text-align': 'center'}),
             html.Br(),
 
-            dcc.Upload(id="input_schema", children=html.A('Input JSON File')),
-            dcc.Input(id="uploaded_input_schema", type='text'),
-            html.Br(),
-
-            dcc.Upload(id="metadata_schema", children=html.A('Metadata JSON File')),
-            html.Br(),
-
-            html.Div(
-                [
-                    dbc.Row([
-                        dbc.Col([
-                            dbc.Form(
-                            [
-                                dbc.FormGroup(
-                                    [
-                                        dbc.Label("Path to local metadata JSON schema"),
-                                        dbc.Input(type="text", id='local_metadata', placeholder="Path/to/metadata.json"),
-                                    ],
-                                ),
-                                dbc.Button('Submit', id='submit_metadata'),
-                            ],
-                        )
-                        ], className='col-md-6'),
-                    ], style={'align-items': 'center', 'justify-content': 'center', 'text-align':'center'})
-                ]
+            dcc.Upload(
+                id="upload_schema",
+                children=html.Div(
+                    ["Drag and drop or click to select a file to upload."]
+                ),
+                style={
+                    "width": "100%",
+                    "height": "60px",
+                    "lineHeight": "60px",
+                    "borderWidth": "1px",
+                    "borderStyle": "dashed",
+                    "borderRadius": "5px",
+                    "textAlign": "center",
+                    "margin": "10px",
+                },
+                multiple=False,
             ),
-            html.Div(id='my-output'),
-            html.Div(id='converter-content'),
+            html.Br(),
+            html.Div(id='uploaded_input_schema'),
             html.Br(),
 
-            all_forms
+            html.Div(id='forms_div'),
         ])
 
-        self.style ={'text-align': 'center', 'justify-content':'left'}
-
-
-        @self.parent_app.callback(
-            Output("uploaded_input_schema", "children"),
-            [Input("input_schema", "contents")],
-        )
-        def load_input_schema(contents):
-
-            dc = b64decode(contents.split(',')[1]).decode()
-            input_schema = json.loads(dc)
-            for k, v in data.items():
-                print(k)
-
-            return 'JSON schema loaded'
-
+        self.style ={'text-align': 'center', 'justify-content': 'left'}
 
         @self.parent_app.callback(
-            Output('my-output', 'children'),
-            [Input("submit_metadata", component_property='n_clicks'),
-            Input('local_metadata', component_property='value')]
+            [Output("uploaded_input_schema", "children"), Output('forms_div', 'children')],
+            [Input("upload_schema", "contents")],
         )
-        def submit_local_schema(click, input_value):
-            if click is not None:
-                metadata_path = Path(input_value)
+        def load_metadata(contents):
+            ctx = dash.callback_context
+            source = ctx.triggered[0]['prop_id'].split('.')[0]
 
-                if not metadata_path.is_file():
-                    return 'Must be a JSON'
+            if source == 'upload_schema':
+                if isinstance(contents, str):
+                    content_type, content_string = contents.split(',')
+                    bs4decode = base64.b64decode(content_string)
+                    json_string = bs4decode.decode('utf8').replace("'", '"')
+                    json_schema = json.loads(json_string)
+                    forms = iter_fields(json_schema)
+                    layout_children = [
+                        html.H1(
+                            "Conversion Forms",
+                            style={'text-align': 'center'}
+                        ),
+                        html.Hr(),
+                    ]
+                    layout_children.extend([f for f in forms])
+
+                    all_forms = html.Div(layout_children)
+
+                    return 'JSON schema loaded', all_forms
                 else:
-                    with open(metadata_path, 'r') as inp:
-                        schema = json.load(inp)
+                    return 'Something went wrong'
+            else:
+                return '', ''
 
-                    return ('JSON schema loaded')
