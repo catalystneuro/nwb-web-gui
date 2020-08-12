@@ -4,6 +4,7 @@ import dash_bootstrap_components as dbc
 import dash_html_components as html
 
 from base64 import b64decode
+import datetime
 import json
 
 
@@ -16,13 +17,23 @@ with open('apps/uploads/formData/NWBFile_form0.json') as json_file:
 
 
 class FormItem(dbc.FormGroup):
-    def __init__(self, key, value):
+    def __init__(self, key, value, type):
         super().__init__([])
         self.row = True
+        if type == 'string':
+            input_field = dbc.Input(type="")
+        elif type == 'datetime':
+            input_field = dcc.DatePickerSingle(
+                month_format='MMMM Y',
+                placeholder='MMMM Y',
+                date=datetime.date(2020, 2, 29)
+            )
+        else:
+            input_field = dbc.Input(type="")
         self.children = [
             dbc.Label(key, html_for="example-email-row", width={'size': 2, 'offset': 1}),
             dbc.Col(
-                dbc.Input(type=""),  # unique id for each input?
+                input_field,
                 width={'size': 3, 'offset': 0},
             ),
         ]
@@ -38,13 +49,13 @@ def iter_fields(object):
             item.children = [dbc.CardHeader(k)]
             item.children.extend(iter_fields(v['properties']))
             children.append(item)
-            print(v['properties'])
-        elif v['type'] == 'string':
-            item = FormItem(key=k, value=v)
-            children.append(item)
+        # elif v['type'] == 'string':
         else:
-            # we were getting duplicate values ​​because we have to treat all types of fields (and give a unique id for each input?)
-            pass
+            item = FormItem(key=k, value=v, type=v['type'])
+            children.append(item)
+        # else:
+        #     # we were getting duplicate values ​​because we have to treat all types of fields (and give a unique id for each input?)
+        #     pass
     return children
 
 
