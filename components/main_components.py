@@ -24,7 +24,7 @@ def render_navbar():
         ],
         brand="NWB GUI",
         brand_href="#",
-        color="primary",
+        color="info",
         dark=True,
     )
     return navbar
