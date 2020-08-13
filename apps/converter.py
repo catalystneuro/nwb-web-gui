@@ -73,7 +73,8 @@ class ConverterForms(html.Div):
                     bs4decode = base64.b64decode(content_string)
                     json_string = bs4decode.decode('utf8').replace("'", '"')
                     json_schema = json.loads(json_string)
-                    forms = iter_fields(json_schema)
+                    forms = iter_fields(json_schema, set_counter=True)
+
                     layout_children = [
                         html.H1(
                             "Conversion Forms",
@@ -96,7 +97,9 @@ class ConverterForms(html.Div):
         @self.parent_app.callback(
             Output('noDiv', 'children'),
             [Input('button_submit', component_property='n_clicks')],
-            [State('forms_div', 'value')]
+            [State('0', 'value'), State('1', 'value')]
         )
-        def submit_form(click, form):
+        def submit_form(click, form, form2):
             print(form)
+            print(form2)
+            

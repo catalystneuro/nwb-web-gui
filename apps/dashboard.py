@@ -16,6 +16,7 @@ class Dashboard(html.Div):
 
         # Dashboard page layout
         self.children = html.Div([
+            dbc.Container([
             dbc.Row([dbc.Col([
                 html.Br(),
                 dcc.Upload(
@@ -34,7 +35,7 @@ class Dashboard(html.Div):
                     },
                     multiple=False
                 )
-            ], className='col-md-4',)], style={'justify-content': 'center', 'text-align':'center'}),
+            ], className='col-md-4',)], style={'justify-content': 'center', 'text-align':'center'})]),
             html.Br(),
             dbc.Container(
                 [
