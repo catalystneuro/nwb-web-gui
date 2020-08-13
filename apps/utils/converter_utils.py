@@ -5,6 +5,7 @@ import datetime
 
 
 counter = 0
+forms_ids = []
 
 
 class FormItem(dbc.FormGroup):
@@ -60,6 +61,7 @@ def iter_fields(object, ids_list=[], set_counter=False):
     """Recursively iterate over items in schema to assemble form"""
     children = []
     global counter
+    global forms_ids
 
     if set_counter:
         counter = 0
@@ -73,12 +75,29 @@ def iter_fields(object, ids_list=[], set_counter=False):
             item.children.extend(iter_fields(v['properties'], ids_list))
             children.append(item)
         else:
-            item = FormItem(key=k, value=v, type=v['type'], input_id=counter)
+            item = dbc.CardBody(FormItem(key=k, value=v, type=v['type'], input_id=counter))
+            ids_list.append({'key': k, 'id': counter})
             counter += 1
-            ids_list.append(counter)
             children.append(item)
+
         # else:
         #     # we were getting duplicate values ​​because we have to treat all types of fields (and give a unique id for each input?)
         #     pass
+    forms_ids = ids_list
 
     return children
+
+
+def format_schema(default_schema, new_data):
+
+    for k, v in default_schema.items():
+        if v['type'] == 'object':
+            format_schema(v['properties'], new_data)
+        else:
+            if k in new_data.keys():
+                if v['type'] == 'string':
+                    v['default'] = new_data[k]
+
+    return default_schema
+                
+

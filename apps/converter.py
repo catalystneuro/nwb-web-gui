@@ -6,7 +6,7 @@ import dash_bootstrap_components as dbc
 import base64
 import json
 import datetime
-from .utils.converter_utils import iter_fields
+from .utils.converter_utils import iter_fields, format_schema
 
 
 class ConverterForms(html.Div):
@@ -59,6 +59,8 @@ class ConverterForms(html.Div):
 
         self.style ={'text-align': 'center', 'justify-content': 'left'}
 
+        self.forms_ids = ['']
+
         @self.parent_app.callback(
             [Output("uploaded_input_schema", "children"), Output('forms_div', 'children'), Output('forms_button', 'children')],
             [Input("upload_schema", "contents")],
@@ -73,7 +75,11 @@ class ConverterForms(html.Div):
                     bs4decode = base64.b64decode(content_string)
                     json_string = bs4decode.decode('utf8').replace("'", '"')
                     json_schema = json.loads(json_string)
+                    self.uploaded_schema = json_schema
                     forms = iter_fields(json_schema, set_counter=True)
+                    from .utils.converter_utils import forms_ids # returning on iter_fields is breaking the recursion stack *check this*
+
+                    self.forms_ids = forms_ids
 
                     layout_children = [
                         html.H1(
@@ -97,9 +103,18 @@ class ConverterForms(html.Div):
         @self.parent_app.callback(
             Output('noDiv', 'children'),
             [Input('button_submit', component_property='n_clicks')],
-            [State('0', 'value'), State('1', 'value')]
+            [State(f"{i}", "value") for i in range(0, 20)] # range not working with variable (like len(self.forms_ids) )
         )
-        def submit_form(click, form, form2):
-            print(form)
-            print(form2)
-            
+        def submit_form(click, *args):
+
+            form_data = {}
+            if click is not None:
+                for i, e in enumerate(args):
+                    if e is not None:
+                        form_data[self.forms_ids[i]['key']] = e
+
+                default_schema = format_schema(self.uploaded_schema, form_data)
+
+                # Save new json shema (tests)
+                with open('test.json', 'w') as inp:
+                    json.dump(default_schema, inp, indent=4)
