@@ -7,6 +7,7 @@ import datetime
 class FormItem(dbc.FormGroup):
     def __init__(self, key, value, type):
         super().__init__([])
+
         self.row = True
         if type == 'string':
             input_field = dbc.Input(type="")

@@ -86,7 +86,8 @@ class ConverterForms(html.Div):
 
         @self.parent_app.callback(
             Output('noDiv', 'children'),
-            [Input('button_submit', component_property='n_clicks')]
+            [Input('button_submit', component_property='n_clicks')],
+            [State('forms_div', 'value')]
         )
-        def submit_form(click):
-            print(click)
+        def submit_form(click, form):
+            print(form)
