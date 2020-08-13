@@ -16,33 +16,42 @@ class ConverterForms(html.Div):
 
         # Converter page layout
         self.children = html.Div([
-            html.H2('Converter Forms', style={'text-align': 'center'}),
+            html.H2('Converter Forms', style={'text-align': 'center', 'margin-top': '15px'}),
             html.Br(),
-            dbc.Row(
-                [dbc.Col([
-                    dcc.Upload(
-                        id="upload_schema",
-                        children=html.Div(
-                            ["Drag and drop or click to select a file to upload."]
+            dbc.Container([
+                dbc.Row(
+                    [dbc.Col([
+                        dcc.Upload(
+                            id="upload_schema",
+                            children=html.Div(
+                                ["Drag and drop or click to select a file to upload."],
+                            ),
+                            style={
+                                "width": "100%",
+                                "height": "60px",
+                                "lineHeight": "60px",
+                                "borderWidth": "1px",
+                                "borderStyle": "dashed",
+                                "borderRadius": "5px",
+                                "textAlign": "center",
+                            },
+                            multiple=False,
                         ),
-                        style={
-                            "width": "100%",
-                            "height": "60px",
-                            "lineHeight": "60px",
-                            "borderWidth": "1px",
-                            "borderStyle": "dashed",
-                            "borderRadius": "5px",
-                            "textAlign": "center",
-                        },
-                        multiple=False,
-                    ),
-                ], className='col-md-4')], 
-                style={'justify-content': 'center'}
-            ),
+                    ], className='col-md-4')], 
+                    style={'justify-content': 'center'}
+            )]),
             html.Br(),
             html.Div(id='uploaded_input_schema'),
             html.Br(),
-            html.Div(id='forms_div'),
+            dbc.Container([
+                dbc.Row(
+                    [
+                        dbc.Col([
+                            html.Div(id='forms_div'),
+                            ], className='col-md-12'
+                        )
+                    ])
+            ], fluid=True),
             html.Br(),
             html.Div(id='forms_button'),
             html.Div(id='noDiv')

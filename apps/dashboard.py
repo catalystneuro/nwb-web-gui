@@ -36,7 +36,7 @@ class Dashboard(html.Div):
                 )
             ], className='col-md-4',)], style={'justify-content': 'center', 'text-align':'center'}),
             html.Br(),
-            html.Div(
+            dbc.Container(
                 [
                     dbc.Row([
                         dbc.Col([

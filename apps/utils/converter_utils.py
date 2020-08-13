@@ -10,13 +10,14 @@ class FormItem(dbc.FormGroup):
 
         self.row = True
         if type == 'string':
-            input_field = dbc.Input(type="")
-        elif type == 'datetime':
-            input_field = dcc.DatePickerSingle(
-                month_format='MMMM Y',
-                placeholder='MMMM Y',
-                date=datetime.date(2020, 2, 29)
-            )
+            if 'format' in value and value['format'] == 'date-time':
+                input_field = dcc.DatePickerSingle(
+                    month_format='MMMM Y',
+                    placeholder='MMMM Y',
+                    date=datetime.date(2020, 2, 29)
+                )
+            else:
+                input_field = dbc.Input(type="")
         elif type == 'link':
             input_field = dcc.Dropdown(
                 id='dropdown-' + key,
@@ -27,6 +28,18 @@ class FormItem(dbc.FormGroup):
                 ],
                 value='dev1',
                 clearable=False
+            )
+        elif type == 'boolean':
+            input_field = dbc.FormGroup(
+                [
+                    dbc.Checklist(
+                        options=[
+                            {"label": "", "value": key},
+                        ],
+                        value=[],
+                        id="checklist-input",
+                    ),
+                ]
             )
         else:
             input_field = dbc.Input(type="")
@@ -42,11 +55,12 @@ class FormItem(dbc.FormGroup):
 def iter_fields(object):
     """Recursively iterate over items in schema to assemble form"""
     children = []
+
     for k, v in object.items():
         if v['type'] == 'object':
             # item = html.Div(id="form_group_" + k, style={"border": "1px black solid"})
-            item = dbc.Card(id="form_group_" + k)
-            item.children = [dbc.CardHeader(k)]
+            item = dbc.Card(id="form_group_" + k, style={'margin-bottom': '5px'})
+            item.children = [dbc.CardHeader(k, style={'margin-bottom': '10px'})]
             item.children.extend(iter_fields(v['properties']))
             children.append(item)
         # elif v['type'] == 'string':
