@@ -99,5 +99,3 @@ def format_schema(default_schema, new_data):
                     v['default'] = new_data[k]
 
     return default_schema
-                
-

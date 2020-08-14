@@ -77,6 +77,8 @@ class ConverterForms(html.Div):
                     json_schema = json.loads(json_string)
                     self.uploaded_schema = json_schema
                     forms = iter_fields(json_schema, set_counter=True)
+                    tabs = [dbc.Tab(e, label=e.children[0].children) for i, e in enumerate(forms)]
+
                     from .utils.converter_utils import forms_ids # returning on iter_fields is breaking the recursion stack *check this*
 
                     self.forms_ids = forms_ids
@@ -87,8 +89,8 @@ class ConverterForms(html.Div):
                             style={'text-align': 'center'}
                         ),
                         html.Hr(),
+                        dbc.Tabs(tabs)
                     ]
-                    layout_children.extend([f for f in forms])
 
                     all_forms = html.Div(layout_children)
 
@@ -103,7 +105,7 @@ class ConverterForms(html.Div):
         @self.parent_app.callback(
             Output('noDiv', 'children'),
             [Input('button_submit', component_property='n_clicks')],
-            [State(f"{i}", "value") for i in range(0, 20)] # range not working with variable (like len(self.forms_ids) )
+            [State(f"{i}", "value") for i in range(0, 20)]
         )
         def submit_form(click, *args):
 
@@ -116,5 +118,5 @@ class ConverterForms(html.Div):
                 default_schema = format_schema(self.uploaded_schema, form_data)
 
                 # Save new json shema (tests)
-                with open('test.json', 'w') as inp:
+                with open('output_schema.json', 'w') as inp:
                     json.dump(default_schema, inp, indent=4)

@@ -74,8 +74,7 @@ class Dashboard(html.Div):
                 nwb_path = Path(input_value)
                 if nwb_path.is_file():
                     # NWB file
-                    fpath = 'apps/nwbfiles/102086.nwb'
-                    io = NWBHDF5IO(fpath, mode='r')
+                    io = NWBHDF5IO(str(nwb_path), mode='r')
                     nwb = io.read()
                     # Dashboard
                     dashboard = AllenDashboard(parent_app=self.parent_app, nwb=nwb)

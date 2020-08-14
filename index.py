@@ -5,7 +5,7 @@ import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output
 from app import app
 from apps.converter import ConverterForms
-from apps.viewer import viewer_layout
+from apps.viewer import Viewer
 from apps.dashboard import Dashboard
 from components.main_components import render_home
 
@@ -19,6 +19,8 @@ converter_layout = ConverterForms(parent_app=app)
 # Dashboard layout
 # NWB file
 dashboard_layout = Dashboard(parent_app=app)
+
+viewer_layout = Viewer(parent_app=app)
 
 
 @app.callback(
