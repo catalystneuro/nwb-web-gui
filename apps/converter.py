@@ -105,18 +105,21 @@ class ConverterForms(html.Div):
         @self.parent_app.callback(
             Output('noDiv', 'children'),
             [Input('button_submit', component_property='n_clicks')],
-            [State(f"{i}", "value") for i in range(0, 20)]
+            [State(f"{i}", "value") for i in range(0, 20)] ## states watch type for boolean fields must be "on" instead of "value" and for datetime object must be "date" instead of "value"
         )
         def submit_form(click, *args):
+
+            print(args)
 
             form_data = {}
             if click is not None:
                 for i, e in enumerate(args):
                     if e is not None:
-                        form_data[self.forms_ids[i]['key']] = e
+                        #form_data[self.forms_ids[i]['key']] = {'field': e, 'father_name': self.forms_ids[i]['father_name']}
+                        form_key = '{}_{}'.format(self.forms_ids[i]['key'], self.forms_ids[i]['father_name'])
+                        form_data[form_key] = e
 
                 default_schema = format_schema(self.uploaded_schema, form_data)
-
                 # Save new json shema (tests)
                 with open('output_schema.json', 'w') as inp:
                     json.dump(default_schema, inp, indent=4)

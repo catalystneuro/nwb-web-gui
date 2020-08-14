@@ -47,7 +47,6 @@ class Viewer(html.Div):
             html.Div(id='voila_div', style={'justify-content':'center', 'text-align': 'center'})
         ]
 
-
         @self.parent_app.callback(
             [Output("uploaded_voila_nwb", "children"), Output('voila_div', 'children')],
             [Input('submit_voila_nwb', component_property='n_clicks')],

@@ -2,6 +2,7 @@ import dash_core_components as dcc
 import dash_bootstrap_components as dbc
 import base64
 import datetime
+import dash_daq as daq
 
 
 counter = 0
@@ -37,11 +38,8 @@ class FormItem(dbc.FormGroup):
         elif type == 'boolean':
             input_field = dbc.FormGroup(
                 [
-                    dbc.Checklist(
-                        options=[
-                            {"label": "", "value": key},
-                        ],
-                        value=[],
+                    daq.BooleanSwitch(
+                        on=value['value'],
                         id=str(input_id),
                     ),
                 ]
@@ -57,7 +55,7 @@ class FormItem(dbc.FormGroup):
         ]
 
 
-def iter_fields(object, ids_list=[], set_counter=False):
+def iter_fields(object, ids_list=[], set_counter=False, father_name=None):
     """Recursively iterate over items in schema to assemble form"""
     children = []
     global counter
@@ -69,33 +67,30 @@ def iter_fields(object, ids_list=[], set_counter=False):
 
     for k, v in object.items():
         if v['type'] == 'object':
-            # item = html.Div(id="form_group_" + k, style={"border": "1px black solid"})
             item = dbc.Card(id="form_group_" + k, style={'margin-bottom': '20px', 'box-shadow': '6px 6px 6px rgba(0, 0, 0, 0.2)'})
             item.children = [dbc.CardHeader(k, style={'margin-bottom': '10px'})]
-            item.children.extend(iter_fields(v['properties'], ids_list))
+            item.children.extend(iter_fields(v['properties'], ids_list, father_name=k))
             children.append(item)
         else:
             item = dbc.CardBody(FormItem(key=k, value=v, type=v['type'], input_id=counter))
-            ids_list.append({'key': k, 'id': counter})
+            ids_list.append({'key': k, 'id': counter, 'father_name': father_name})
             counter += 1
             children.append(item)
 
-        # else:
-        #     # we were getting duplicate values ​​because we have to treat all types of fields (and give a unique id for each input?)
-        #     pass
     forms_ids = ids_list
 
     return children
 
 
-def format_schema(default_schema, new_data):
+def format_schema(default_schema, new_data, father_name=None):
 
     for k, v in default_schema.items():
         if v['type'] == 'object':
-            format_schema(v['properties'], new_data)
+            format_schema(v['properties'], new_data, father_name=k)
         else:
-            if k in new_data.keys():
+            key_checker = '{}_{}'.format(k, father_name)
+            if key_checker in new_data.keys():
                 if v['type'] == 'string':
-                    v['default'] = new_data[k]
+                    v['default'] = new_data[key_checker]
 
     return default_schema
