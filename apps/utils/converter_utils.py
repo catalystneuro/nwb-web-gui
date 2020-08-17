@@ -1,4 +1,5 @@
 import dash_core_components as dcc
+import dash_html_components as html
 import dash_bootstrap_components as dbc
 import base64
 import datetime
@@ -14,16 +15,19 @@ class FormItem(dbc.FormGroup):
         super().__init__([])
 
         self.row = True
+        self.className = 'item'
         if type == 'string':
             if 'format' in value and value['format'] == 'date-time':
                 input_field = dcc.DatePickerSingle(
                     month_format='MMMM Y',
                     placeholder='MMMM Y',
                     date=datetime.date(2020, 2, 29),
-                    id=str(input_id)
+                    id=str(input_id),
+                    className='date_input',
+                    style={'font-size':'5px'}
                 )
             else:
-                input_field = dbc.Input(type="", id=str(input_id))
+                input_field = dbc.Input(type="", id=str(input_id), className='string_input')
         elif type == 'link':
             input_field = dcc.Dropdown(
                 id=str(input_id),
@@ -33,7 +37,8 @@ class FormItem(dbc.FormGroup):
                     {'label': 'Device 3', 'value': 'dev3'}
                 ],
                 value='dev1',
-                clearable=False
+                clearable=False,
+                className='dropdown_input'
             )
         elif type == 'boolean':
             input_field = dbc.FormGroup(
@@ -41,16 +46,18 @@ class FormItem(dbc.FormGroup):
                     daq.BooleanSwitch(
                         on=value['value'],
                         id=str(input_id),
+                        className='boolean_input'
                     ),
                 ]
             )
         else:
-            input_field = dbc.Input(type="", id=str(input_id))
+            input_field = dbc.Input(type="", id=str(input_id), className='string_input')
         self.children = [
-            dbc.Label(key, html_for="example-email-row", width={'size': 2, 'offset': 1}),
+            dbc.Label(key, html_for="example-email-row", width={'size': 2, 'offset': 0}, style={'text-align':'right'}),
             dbc.Col(
                 input_field,
                 width={'size': 3, 'offset': 0},
+                className='col_inputs'
             ),
         ]
 
@@ -72,7 +79,7 @@ def iter_fields(object, ids_list=[], set_counter=False, father_name=None):
             item.children.extend(iter_fields(v['properties'], ids_list, father_name=k))
             children.append(item)
         else:
-            item = dbc.CardBody(FormItem(key=k, value=v, type=v['type'], input_id=counter))
+            item = dbc.CardBody(FormItem(key=k, value=v, type=v['type'], input_id=counter), className='body')
             ids_list.append({'key': k, 'id': counter, 'father_name': father_name})
             counter += 1
             children.append(item)

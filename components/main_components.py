@@ -8,6 +8,7 @@ from dash.dependencies import Input, Output
 def render_navbar():
     navbar = dbc.NavbarSimple(
         children=[
+            dbc.NavItem(dbc.NavLink(id="home", children="Home", href="home")),
             dbc.NavItem(dbc.NavLink(id="nwb_converter", children="NWB Converter", href="converter")),
             dbc.NavItem(dbc.NavLink(id="nwb_viewer", children="NWB Viewer", href="viewer")),
             dbc.NavItem(dbc.NavLink(id="nwb_dashboard", children="Dashboard", href="dashboard")),

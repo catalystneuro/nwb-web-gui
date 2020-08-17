@@ -54,7 +54,7 @@ class ConverterForms(html.Div):
             ], fluid=True),
             html.Br(),
             html.Div(id='forms_button'),
-            html.Div(id='noDiv')
+            html.Div(id='noDiv'),
         ])
 
         self.style ={'text-align': 'center', 'justify-content': 'left'}
@@ -109,17 +109,15 @@ class ConverterForms(html.Div):
         )
         def submit_form(click, *args):
 
-            print(args)
-
             form_data = {}
             if click is not None:
                 for i, e in enumerate(args):
                     if e is not None:
-                        #form_data[self.forms_ids[i]['key']] = {'field': e, 'father_name': self.forms_ids[i]['father_name']}
                         form_key = '{}_{}'.format(self.forms_ids[i]['key'], self.forms_ids[i]['father_name'])
                         form_data[form_key] = e
 
                 default_schema = format_schema(self.uploaded_schema, form_data)
+
                 # Save new json shema (tests)
                 with open('output_schema.json', 'w') as inp:
                     json.dump(default_schema, inp, indent=4)
