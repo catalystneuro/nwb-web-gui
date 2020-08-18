@@ -4,6 +4,7 @@ import dash_bootstrap_components as dbc
 import base64
 import datetime
 import dash_daq as daq
+from dash.dependencies import Input, Output, State
 
 
 counter = 0
@@ -62,7 +63,40 @@ class FormItem(dbc.FormGroup):
         ]
 
 
-def instance_to_forms(object, ids_list=[], set_counter=False, father_name=None):
+class CollapsibleItem(html.Div):
+    def __init__(self, parent_app, k, v):
+        super().__init__([])
+        self.parent_app = parent_app
+
+        card_body = dbc.CardBody("This content is hidden in the collapse")
+
+        self.children = [
+            dbc.Button(
+                k,
+                id="collapse_button_" + k,
+                className="mb-3",
+                color="primary",
+            ),
+            dbc.Collapse(
+                dbc.Card(
+                    children=card_body
+                ),
+                id="collapse_" + k,
+            ),
+        ]
+
+        @self.parent_app.callback(
+            Output("collapse_" + k, "is_open"),
+            [Input("collapse_button_" + k, "n_clicks")],
+            [State("collapse_" + k, "is_open")],
+        )
+        def toggle_collapse(n, is_open):
+            if n:
+                return not is_open
+            return is_open
+
+
+def instance_to_forms(parent_app, object, ids_list=[], set_counter=False, father_name=None):
     """
     Iterate over items in dictionary to assemble form
 
@@ -83,10 +117,18 @@ def instance_to_forms(object, ids_list=[], set_counter=False, father_name=None):
 
     for k, v in object.items():
         if isinstance(v, dict):
-            item = dbc.Card(id="form_group_" + k, style={'margin-bottom': '20px', 'box-shadow': '6px 6px 6px rgba(0, 0, 0, 0.2)'})
             if k not in ['NWBFile', 'Subject', 'Ecephys', 'Ophys']:
-                item.children = [dbc.CardHeader(k, style={'margin-bottom': '10px'})]
+                # card = dbc.Card(
+                #     id="form_group_" + k,
+                #     style={'margin-bottom': '20px', 'box-shadow': '6px 6px 6px rgba(0, 0, 0, 0.2)'},
+                # )
+                # card.children = [
+                #     dbc.CardHeader(k, style={'margin-bottom': '10px'}),
+                # ]
+                # item = dbc.Collapse(card, id="collapse_" + k)
+                item = CollapsibleItem(parent_app=parent_app, k=k, v=v)
             else:
+                item = dbc.CardBody(id="form_group_" + k, style={'margin-bottom': '20px', 'box-shadow': '6px 6px 6px rgba(0, 0, 0, 0.2)'})
                 item.children = []
             item.children.extend(instance_to_forms(v, ids_list, father_name=k))
             forms.append(item)

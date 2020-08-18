@@ -32,8 +32,7 @@
         },
         "type": "object",
         "additionalProperties": false,
-        "title": "NWBFile",
-        "class": "pynwb.file.NWBFile"
+        "title": "pynwb.file.NWBFile"
     }
 }
 
@@ -92,7 +91,7 @@
             "name": {
                 "type": "string",
                 "description": "the name of this device",
-                "default": "2-p targeted cell-attached"
+                "default": ""
             },
             "description": {
                 "type": "string",
@@ -107,8 +106,7 @@
         },
         "type": "object",
         "additionalProperties": false,
-        "title": "Device",
-        "class": "pynwb.device.Device",
+        "title": "pynwb.device.Device"
     }
 }
 
