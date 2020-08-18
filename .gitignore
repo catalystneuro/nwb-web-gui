@@ -7,4 +7,6 @@ env37
 venvDash
 
 *__pycache__
+__pycache__/
 .vscode
+output_schema.json

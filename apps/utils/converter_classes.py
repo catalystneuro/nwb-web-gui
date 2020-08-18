@@ -96,8 +96,23 @@ class CompositeForm(html.Div):
                         label = dbc.Label(k, id=label_id)
                         form_group = FormItem(label, form_input, parent_app=parent_app, label_id=label_id, input_id=input_id)
                         children.append(form_group)
-                    elif isinstance(v, dict): # target handler - todo
-                        pass
+                    elif isinstance(v, dict):
+                        form_input = dcc.Dropdown(
+                            id=input_id,
+                            options=[
+                                {'label': 'Device 1', 'value': 'dev1'},
+                                {'label': 'Device 2', 'value': 'dev2'},
+                                {'label': 'Device 3', 'value': 'dev3'}
+                            ],
+                            value='dev1',
+                            clearable=False,
+                            className='dropdown_input',
+                            style={"margin-bottom": '20px'}
+                        )
+                        form_group = FormItem(label, form_input, parent_app=parent_app, label_id=label_id, input_id=input_id)
+                        children.append(form_group)
+                    else:
+                        pass # list? optical channel?
 
             form = dbc.Form(children, style={'margin-top':'5px'})
             tab = dbc.Tab(form, label=tab_title)
