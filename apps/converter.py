@@ -6,7 +6,7 @@ import dash_bootstrap_components as dbc
 import base64
 import json
 import datetime
-from .utils.converter_utils import iter_fields, format_schema
+from .utils.converter_utils import iter_fields, format_schema, instance_to_forms
 
 
 class ConverterForms(html.Div):
@@ -64,7 +64,11 @@ class ConverterForms(html.Div):
         self.forms_ids = ['']
 
         @self.parent_app.callback(
-            [Output("uploaded_input_schema", "children"), Output('forms_div', 'children'), Output('forms_button', 'children')],
+            [
+                Output("uploaded_input_schema", "children"),
+                Output('forms_div', 'children'),
+                Output('forms_button', 'children')
+            ],
             [Input("upload_schema", "contents")],
         )
         def load_metadata(contents):
@@ -78,8 +82,10 @@ class ConverterForms(html.Div):
                     json_string = bs4decode.decode('utf8').replace("'", '"')
                     json_schema = json.loads(json_string)
                     self.uploaded_schema = json_schema
-                    forms = iter_fields(json_schema, set_counter=True)
-                    tabs = [dbc.Tab(e, label=e.children[0].children) for i, e in enumerate(forms)]
+                    # forms = iter_fields(json_schema, set_counter=True)
+                    # tabs = [dbc.Tab(e, label=e.children[0].children) for i, e in enumerate(forms)]
+                    forms = instance_to_forms(json_schema, set_counter=True)
+                    tabs = [dbc.Tab(f, label=f.id.split('_')[-1]) for f in forms]
 
                     from .utils.converter_utils import forms_ids  # returning on iter_fields is breaking the recursion stack *check this*
 

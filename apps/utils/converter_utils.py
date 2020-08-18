@@ -24,7 +24,7 @@ class FormItem(dbc.FormGroup):
                     date=datetime.date(2020, 2, 29),
                     id=str(input_id),
                     className='date_input',
-                    style={'font-size':'5px'}
+                    style={'font-size': '5px'}
                 )
             else:
                 input_field = dbc.Input(type="", id=str(input_id), className='string_input')
@@ -60,6 +60,51 @@ class FormItem(dbc.FormGroup):
                 className='col_inputs'
             ),
         ]
+
+
+def instance_to_forms(object, ids_list=[], set_counter=False, father_name=None):
+    """
+    Iterate over items in dictionary to assemble form
+
+    Inputs:
+    -------
+    object : dict
+    ids_list : list
+    set_counter : boolean
+    father_name : str
+    """
+    forms = []
+    global counter
+    global forms_ids
+
+    if set_counter:
+        counter = 0
+        ids_list = []
+
+    for k, v in object.items():
+        if isinstance(v, dict):
+            item = dbc.Card(id="form_group_" + k, style={'margin-bottom': '20px', 'box-shadow': '6px 6px 6px rgba(0, 0, 0, 0.2)'})
+            if k not in ['NWBFile', 'Subject', 'Ecephys', 'Ophys']:
+                item.children = [dbc.CardHeader(k, style={'margin-bottom': '10px'})]
+            else:
+                item.children = []
+            item.children.extend(instance_to_forms(v, ids_list, father_name=k))
+            forms.append(item)
+        elif isinstance(v, list):
+            item = dbc.Card(id="form_group_" + k, style={'margin-bottom': '20px', 'box-shadow': '6px 6px 6px rgba(0, 0, 0, 0.2)'})
+            item.children = [dbc.CardHeader(k, style={'margin-bottom': '10px'})]
+            for sub in v:
+                item.children.extend(instance_to_forms(sub, ids_list, father_name=k))
+                forms.append(item)
+        else:
+            item = dbc.CardBody(FormItem(key=k, value=v, type=type(v), input_id=counter), className='body')
+            ids_list.append({'key': k, 'id': counter, 'father_name': father_name})
+            counter += 1
+            forms.append(item)
+
+    forms_ids = ids_list
+
+    return forms
 
 
 def iter_fields(object, ids_list=[], set_counter=False, father_name=None):
