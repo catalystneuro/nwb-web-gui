@@ -1,3 +1,4 @@
+import pynwb
 import inspect
 from copy import deepcopy
 
