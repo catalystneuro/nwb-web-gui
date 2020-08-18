@@ -17,7 +17,8 @@
                 "default": "ADDME"
             },
             "session_start_time": {
-                "type": "datetime",
+                "type": "string",
+                "format": "date-time",
                 "description": "the start date and time of the recording session",
                 "default": ""
             },
@@ -158,105 +159,105 @@
 
 
 
-    {
-        "Ophys": {
-            "required": [
-                "Ophys Device name",
-                "Ophys ImagingPlane description",
-                "Ophys ImagingPlane device",
-                "Ophys ImagingPlane excitation_lambda",
-                "Ophys ImagingPlane imaging_rate",
-                "Ophys ImagingPlane indicator",
-                "Ophys ImagingPlane location",
-                "Ophys ImagingPlane name",
-                "Ophys ImagingPlane optical_channel description",
-                "Ophys ImagingPlane optical_channel emission_lambda",
-                "Ophys ImagingPlane optical_channel name",
-                "Ophys TwoPhotonSeries name",
-                "Ophys TwoPhotonSeries imaging_plane",
-                "Ophys ImageSegmentation name",
-                "Ophys ImageSegmentation plane_segmentations name",
-                "Ophys ImageSegmentation plane_segmentations description",
-                "Ophys ImageSegmentation plane_segmentations imaging_plane",
-                "Ophys ImageSegmentation plane_segmentations reference_images"
-            ],
-            "properties": {
-                "Ophys Device name": {
-                    "type": "string",
-                    "default": "Bruker 2-p microscope"
-                },
-                "Ophys ImagingPlane description": {
-                    "type": "string",
-                    "default": "ADDME"
-                },
-                "Ophys ImagingPlane device": {
-                    "type": "string",
-                    "default": "Bruker 2-p microscope"
-                },
-                "Ophys ImagingPlane excitation_lambda": {
-                    "type": "number",
-                    "default": 920.0
-                },
-                "Ophys ImagingPlane imaging_rate": {
-                    "type": "string",
-                    "default": "ADDME"
-                },
-                "Ophys ImagingPlane indicator": {
-                    "type": "string",
-                    "default": "ADDME"
-                },
-                "Ophys ImagingPlane location": {
-                    "type": "string",
-                    "default": "primary visual cortex - layer 2/3"
-                },
-                "Ophys ImagingPlane name": {
-                    "type": "string",
-                    "default": "imaging_plane"
-                },
-                "Ophys ImagingPlane optical_channel description": {
-                    "type": "string",
-                    "default": "2P Optical Channel"
-                },
-                "Ophys ImagingPlane optical_channel emission_lambda": {
-                    "type": "number",
-                    "default": 510.0
-                },
-                "Ophys ImagingPlane optical_channel name": {
-                    "type": "string",
-                    "default": "optical_channel"
-                },
-                "Ophys TwoPhotonSeries name": {
-                    "type": "string",
-                    "default": "raw_ophys"
-                },
-                "Ophys TwoPhotonSeries imaging_plane": {
-                    "type": "string",
-                    "default": "imaging_plane"
-                },
-                "Ophys ImageSegmentation name": {
-                	"type": "string",
-                	"default": "image_segmentation"
-                },
-                "Ophys ImageSegmentation plane_segmentations name": {
-                	"type": "string",
-                	"default": "plane_segmentation"
-                },
-                "Ophys ImageSegmentation plane_segmentations description": {
-                	"type": "string",
-                	"default": "ADDME"
-                },
-                "Ophys ImageSegmentation plane_segmentations imaging_plane": {
-                	"type": "string",
-                	"default": "imaging_plane"
-                },
-                "Ophys ImageSegmentation plane_segmentations reference_images": {
-                	"type": "string",
-                	"default": "raw_ophys"
-                }
+{
+    "Ophys": {
+        "required": [
+            "Ophys Device name",
+            "Ophys ImagingPlane description",
+            "Ophys ImagingPlane device",
+            "Ophys ImagingPlane excitation_lambda",
+            "Ophys ImagingPlane imaging_rate",
+            "Ophys ImagingPlane indicator",
+            "Ophys ImagingPlane location",
+            "Ophys ImagingPlane name",
+            "Ophys ImagingPlane optical_channel description",
+            "Ophys ImagingPlane optical_channel emission_lambda",
+            "Ophys ImagingPlane optical_channel name",
+            "Ophys TwoPhotonSeries name",
+            "Ophys TwoPhotonSeries imaging_plane",
+            "Ophys ImageSegmentation name",
+            "Ophys ImageSegmentation plane_segmentations name",
+            "Ophys ImageSegmentation plane_segmentations description",
+            "Ophys ImageSegmentation plane_segmentations imaging_plane",
+            "Ophys ImageSegmentation plane_segmentations reference_images"
+        ],
+        "properties": {
+            "Ophys Device name": {
+                "type": "string",
+                "default": "Bruker 2-p microscope"
             },
-            "type": "object",
-            "additionalProperties": false,
-            "title": "Ophys"
-        }
+            "Ophys ImagingPlane description": {
+                "type": "string",
+                "default": "ADDME"
+            },
+            "Ophys ImagingPlane device": {
+                "type": "string",
+                "default": "Bruker 2-p microscope"
+            },
+            "Ophys ImagingPlane excitation_lambda": {
+                "type": "number",
+                "default": 920.0
+            },
+            "Ophys ImagingPlane imaging_rate": {
+                "type": "string",
+                "default": "ADDME"
+            },
+            "Ophys ImagingPlane indicator": {
+                "type": "string",
+                "default": "ADDME"
+            },
+            "Ophys ImagingPlane location": {
+                "type": "string",
+                "default": "primary visual cortex - layer 2/3"
+            },
+            "Ophys ImagingPlane name": {
+                "type": "string",
+                "default": "imaging_plane"
+            },
+            "Ophys ImagingPlane optical_channel description": {
+                "type": "string",
+                "default": "2P Optical Channel"
+            },
+            "Ophys ImagingPlane optical_channel emission_lambda": {
+                "type": "number",
+                "default": 510.0
+            },
+            "Ophys ImagingPlane optical_channel name": {
+                "type": "string",
+                "default": "optical_channel"
+            },
+            "Ophys TwoPhotonSeries name": {
+                "type": "string",
+                "default": "raw_ophys"
+            },
+            "Ophys TwoPhotonSeries imaging_plane": {
+                "type": "string",
+                "default": "imaging_plane"
+            },
+            "Ophys ImageSegmentation name": {
+            	"type": "string",
+            	"default": "image_segmentation"
+            },
+            "Ophys ImageSegmentation plane_segmentations name": {
+            	"type": "string",
+            	"default": "plane_segmentation"
+            },
+            "Ophys ImageSegmentation plane_segmentations description": {
+            	"type": "string",
+            	"default": "ADDME"
+            },
+            "Ophys ImageSegmentation plane_segmentations imaging_plane": {
+            	"type": "string",
+            	"default": "imaging_plane"
+            },
+            "Ophys ImageSegmentation plane_segmentations reference_images": {
+            	"type": "string",
+            	"default": "raw_ophys"
+            }
+        },
+        "type": "object",
+        "additionalProperties": false,
+        "title": "Ophys"
     }
-]
+}
+

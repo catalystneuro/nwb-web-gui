@@ -1,7 +1,8 @@
 .item{
-    margin-top:0px;
-    margin-bottom: 0px;
-    height: 13px;
+    margin:0;
+    padding: 0;
+    text-align: left;
+    justify-content: left;
 }
 
 .string_input, .dropdown_input, .date_input, .boolean_input{

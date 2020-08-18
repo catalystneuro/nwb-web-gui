@@ -7,6 +7,7 @@ import base64
 import json
 import datetime
 from .utils.converter_utils import iter_fields, format_schema, instance_to_forms
+from .utils.utils import get_form_from_metadata
 
 
 class ConverterForms(html.Div):
@@ -80,16 +81,9 @@ class ConverterForms(html.Div):
                     content_type, content_string = contents.split(',')
                     bs4decode = base64.b64decode(content_string)
                     json_string = bs4decode.decode('utf8').replace("'", '"')
-                    json_schema = json.loads(json_string)
-                    self.uploaded_schema = json_schema
-                    # forms = iter_fields(json_schema, set_counter=True)
-                    # tabs = [dbc.Tab(e, label=e.children[0].children) for i, e in enumerate(forms)]
-                    forms = instance_to_forms(json_schema, set_counter=True)
-                    tabs = [dbc.Tab(f, label=f.id.split('_')[-1]) for f in forms]
+                    metadata_json = json.loads(json_string)
 
-                    from .utils.converter_utils import forms_ids  # returning on iter_fields is breaking the recursion stack *check this*
-
-                    self.forms_ids = forms_ids
+                    form_tabs = get_form_from_metadata(metadata_json, self.parent_app)
 
                     layout_children = [
                         html.H1(
@@ -97,11 +91,9 @@ class ConverterForms(html.Div):
                             style={'text-align': 'center'}
                         ),
                         html.Hr(),
-                        dbc.Tabs(tabs)
+                        form_tabs
                     ]
-
                     all_forms = html.Div(layout_children)
-
                     button = dbc.Button('Submit', id='button_submit')
 
                     return 'JSON schema loaded', all_forms, button
@@ -110,6 +102,7 @@ class ConverterForms(html.Div):
             else:
                 return '', '', ''
 
+        '''
         @self.parent_app.callback(
             Output('noDiv', 'children'),
             [Input('button_submit', component_property='n_clicks')],
@@ -129,3 +122,4 @@ class ConverterForms(html.Div):
                 # Save new json shema (tests)
                 with open('output_schema.json', 'w') as inp:
                     json.dump(default_schema, inp, indent=4)
+        '''
