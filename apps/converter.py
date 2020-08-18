@@ -37,7 +37,7 @@ class ConverterForms(html.Div):
                             },
                             multiple=False,
                         ),
-                    ], className='col-md-4')], 
+                    ], className='col-md-4')],
                     style={'justify-content': 'center'}
             )]),
             html.Br(),
@@ -46,9 +46,11 @@ class ConverterForms(html.Div):
             dbc.Container([
                 dbc.Row(
                     [
-                        dbc.Col([
-                            html.Div(id='forms_div'),
-                            ], className='col-md-12'
+                        dbc.Col(
+                            [
+                                html.Div(id='forms_div'),
+                            ],
+                            className='col-md-12'
                         )
                     ])
             ], fluid=True),
@@ -57,7 +59,7 @@ class ConverterForms(html.Div):
             html.Div(id='noDiv'),
         ])
 
-        self.style ={'text-align': 'center', 'justify-content': 'left'}
+        self.style = {'text-align': 'center', 'justify-content': 'left'}
 
         self.forms_ids = ['']
 
@@ -79,7 +81,7 @@ class ConverterForms(html.Div):
                     forms = iter_fields(json_schema, set_counter=True)
                     tabs = [dbc.Tab(e, label=e.children[0].children) for i, e in enumerate(forms)]
 
-                    from .utils.converter_utils import forms_ids # returning on iter_fields is breaking the recursion stack *check this*
+                    from .utils.converter_utils import forms_ids  # returning on iter_fields is breaking the recursion stack *check this*
 
                     self.forms_ids = forms_ids
 
@@ -105,7 +107,7 @@ class ConverterForms(html.Div):
         @self.parent_app.callback(
             Output('noDiv', 'children'),
             [Input('button_submit', component_property='n_clicks')],
-            [State(f"{i}", "value") for i in range(0, 20)] ## states watch type for boolean fields must be "on" instead of "value" and for datetime object must be "date" instead of "value"
+            [State(f"{i}", "value") for i in range(0, 20)]  # states watch type for boolean fields must be "on" instead of "value" and for datetime object must be "date" instead of "value"
         )
         def submit_form(click, *args):
 
