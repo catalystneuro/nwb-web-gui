@@ -10,6 +10,7 @@ class Home(html.Div):
 
         card_converter = [
             dbc.CardHeader("NWB Converter Forms"),
+            dbc.CardImg(src="/assets/logo_nwb_square.png", top=True),
             dbc.CardBody(
                 children=[
                     html.P(
@@ -22,6 +23,7 @@ class Home(html.Div):
 
         card_viewer = [
             dbc.CardHeader("NWB File Viewer"),
+            dbc.CardImg(src="/assets/logo_nwb_square.png", top=True),
             dbc.CardBody(
                 children=[
                     html.P(
@@ -33,7 +35,8 @@ class Home(html.Div):
         ]
 
         card_dashboard = [
-            dbc.CardHeader("Dashboard"),
+            dbc.CardHeader("NWB Custom Dashboards"),
+            dbc.CardImg(src="/assets/logo_nwb_square.png", top=True),
             dbc.CardBody(
                 children=[
                     html.P(
@@ -46,6 +49,7 @@ class Home(html.Div):
 
         card_nwb = [
             dbc.CardHeader("Learn NWB"),
+            dbc.CardImg(src="/assets/logo_nwb_square.png", top=True),
             dbc.CardBody(
                 children=[
                     html.P(
