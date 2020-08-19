@@ -105,12 +105,13 @@ class CompositeForm(html.Div):
                 label_id = f'label_{parent_name}_{k}_{i}'
 
                 if k in base_schema['properties'].keys():
-                    if isinstance(v, str):
+                    if isinstance(v, str) or isinstance(v, float) or isinstance(v, int):
                         form_input = dbc.Input(placeholder=v, id=input_id, className='string_input')
                         label = dbc.Label(k, id=label_id)
                         form_group = FormItem(label, form_input, parent_app=parent_app, label_id=label_id, input_id=input_id)
                         children.append(form_group)
                     elif isinstance(v, dict):
+                        label = dbc.Label(k, id=label_id)
                         form_input = dcc.Dropdown(
                             id=input_id,
                             options=[
@@ -125,8 +126,24 @@ class CompositeForm(html.Div):
                         )
                         form_group = FormItem(label, form_input, parent_app=parent_app, label_id=label_id, input_id=input_id)
                         children.append(form_group)
-                    else:
-                        pass # list? optical channel?
+                    elif isinstance(v, list):
+                        optical_tabs = []
+                        for index, element in enumerate(v):
+                            optical_children = []
+                            for key_optical, val in element.items():
+                                input_id = f'input_{parent_name}_{k}_{key_optical}_{index}'
+                                label_id = f'label_{parent_name}_{k}_{key_optical}_{index}'
+                                form_input = dbc.Input(placeholder=val, id=input_id, className='string_input')
+                                label = dbc.Label(key_optical, id=label_id)
+                                form_group = FormItem(label, form_input, parent_app=parent_app, label_id=label_id, input_id=input_id)
+                                optical_children.append(form_group)
+
+                            form = dbc.Form(optical_children, style={'margin-top': '5px'})
+                            tab = dbc.Tab(form, label='Optical_Channel_{}'.format(index))
+                            optical_tabs.append(tab)
+
+                        optical_tab = dbc.Tabs(optical_tabs)
+                        children.append(optical_tab)
 
             form = dbc.Form(children, style={'margin-top':'5px'})
             tab = dbc.Tab(form, label=tab_title)
