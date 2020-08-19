@@ -17,64 +17,65 @@ class AllenDashboard(html.Div):
         self.parent_app = parent_app
         self.nwb = nwb
 
-        # Create traces figure
-        self.traces = make_subplots(rows=3, cols=1, row_heights=[0.4, 0.2, 0.4],
-                                    shared_xaxes=False, vertical_spacing=0.02)
+        if self.nwb is not None:
+            # Create traces figure
+            self.traces = make_subplots(rows=3, cols=1, row_heights=[0.4, 0.2, 0.4],
+                                        shared_xaxes=False, vertical_spacing=0.02)
 
-        # Electrophysiology
-        self.ecephys_trace = nwb.processing['ecephys'].data_interfaces['filtered_membrane_voltage']
-        self.traces.add_trace(
-            go.Scattergl(
-                x=[0],
-                y=[0],
-                line={"color": "black", "width": 1},
-                mode='lines'
-            ),
-            row=1, col=1
-        )
+            # Electrophysiology
+            self.ecephys_trace = nwb.processing['ecephys'].data_interfaces['filtered_membrane_voltage']
+            self.traces.add_trace(
+                go.Scattergl(
+                    x=[0],
+                    y=[0],
+                    line={"color": "black", "width": 1},
+                    mode='lines'
+                ),
+                row=1, col=1
+            )
 
-        # Optophysiology
-        self.ophys_trace = nwb.processing['ophys'].data_interfaces['fluorescence'].roi_response_series['roi_response_series']
-        self.traces.add_trace(
-            go.Scattergl(
-                x=[0],
-                y=[0],
-                line={"color": "black", "width": 1},
-                mode='lines'),
-            row=3, col=1
-        )
+            # Optophysiology
+            self.ophys_trace = nwb.processing['ophys'].data_interfaces['fluorescence'].roi_response_series['roi_response_series']
+            self.traces.add_trace(
+                go.Scattergl(
+                    x=[0],
+                    y=[0],
+                    line={"color": "black", "width": 1},
+                    mode='lines'),
+                row=3, col=1
+            )
 
-        # Layout
-        self.traces.update_layout(
-            height=400, width=800, showlegend=False, title=None,
-            paper_bgcolor='rgba(0, 0, 0, 0)', plot_bgcolor='rgba(0, 0, 0, 0)',
-            margin=dict(l=60, r=200, t=8, b=20)
-        )
-        self.traces.update_xaxes(patch={
-            'showgrid': False,
-            'visible': False,
-        })
-        self.traces.update_xaxes(patch={
-            'visible': True,
-            'showline': True,
-            'linecolor': 'rgb(0, 0, 0)',
-            'title_text': 'time [s]'},
-            row=3, col=1
-        )
-        self.traces.update_yaxes(patch={
-            'showgrid': False,
-            'visible': True,
-            'showline': True,
-            'linecolor': 'rgb(0, 0, 0)'
-        })
-        self.traces.update_yaxes(title_text="Ephys [V]", row=1, col=1)
-        self.traces.update_yaxes(title_text="dF/F", row=3, col=1)
-        self.traces.update_yaxes(patch={
-            "title_text": "Spikes",
-            "showticklabels": False,
-            "ticks": ""},
-            row=2, col=1
-        )
+            # Layout
+            self.traces.update_layout(
+                height=400, width=800, showlegend=False, title=None,
+                paper_bgcolor='rgba(0, 0, 0, 0)', plot_bgcolor='rgba(0, 0, 0, 0)',
+                margin=dict(l=60, r=200, t=8, b=20)
+            )
+            self.traces.update_xaxes(patch={
+                'showgrid': False,
+                'visible': False,
+            })
+            self.traces.update_xaxes(patch={
+                'visible': True,
+                'showline': True,
+                'linecolor': 'rgb(0, 0, 0)',
+                'title_text': 'time [s]'},
+                row=3, col=1
+            )
+            self.traces.update_yaxes(patch={
+                'showgrid': False,
+                'visible': True,
+                'showline': True,
+                'linecolor': 'rgb(0, 0, 0)'
+            })
+            self.traces.update_yaxes(title_text="Ephys [V]", row=1, col=1)
+            self.traces.update_yaxes(title_text="dF/F", row=3, col=1)
+            self.traces.update_yaxes(patch={
+                "title_text": "Spikes",
+                "showticklabels": False,
+                "ticks": ""},
+                row=2, col=1
+            )
 
         # Dashboard main layout
         self.children = [

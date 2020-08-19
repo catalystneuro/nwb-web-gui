@@ -5,7 +5,16 @@ import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output
 
 
+'''
+Collor pallete of icon:
+orange: #d17128
+grey: #8f8f8f
+blue: #114b7c
+'''
+
+
 NAV_LOGO = "assets/logo_nwb.png"
+
 
 def render_navbar():
     navbar = dbc.NavbarSimple(
@@ -33,7 +42,7 @@ def render_navbar():
 
     navbar = dbc.Navbar(
         [
-            html.A(
+            dbc.NavLink(
                 dbc.Row(
                     [
                         dbc.Col(html.Img(src=NAV_LOGO, height="60px")),
@@ -43,21 +52,24 @@ def render_navbar():
                     no_gutters=True,
                 ),
                 href="home",
+                id="nav_brand"
             ),
             dbc.Nav(
                 [
                     dbc.NavItem(dbc.NavLink(id="nav_nwb_converter", children="NWB Converter", href="converter")),
                     dbc.NavItem(dbc.NavLink(id="nav_nwb_viewer", children="NWB Viewer", href="viewer")),
                     dbc.NavItem(dbc.NavLink(id="nav_nwb_dashboard", children="Dashboard", href="dashboard")),
-                    dbc.DropdownMenu(
-                        children=[
-                            dbc.DropdownMenuItem("More pages", header=True),
-                            dbc.DropdownMenuItem("Page 2", href="#"),
-                            dbc.DropdownMenuItem("Page 3", href="#"),
-                        ],
-                        nav=True,
-                        in_navbar=True,
-                        label="More",
+                    dbc.NavItem(
+                        dbc.DropdownMenu(
+                            children=[
+                                dbc.DropdownMenuItem("More pages", header=True),
+                                dbc.DropdownMenuItem("Page 2", href="#"),
+                                dbc.DropdownMenuItem("Page 3", href="#"),
+                            ],
+                            nav=True,
+                            in_navbar=True,
+                            label="More",
+                        )
                     ),
                 ],
                 horizontal='end'
