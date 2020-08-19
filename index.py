@@ -42,10 +42,13 @@ def routing(converter, viewer, dashboard, home):
     if source == 'nav_nwb_converter':
         page = converter_layout
     elif source == 'nav_nwb_viewer':
+        converter_layout.clean_converter_forms()
         page = viewer_layout
     elif source == 'nav_nwb_dashboard':
+        converter_layout.clean_converter_forms()
         page = dashboard_layout  # make_dashboard(app=app)
     elif source == 'nav_brand':
+        converter_layout.clean_converter_forms()
         page = home_layout
 
     return page

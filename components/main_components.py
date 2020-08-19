@@ -56,23 +56,29 @@ def render_navbar():
             ),
             dbc.Nav(
                 [
-                    dbc.NavItem(dbc.NavLink(id="nav_nwb_converter", children="NWB Converter", href="converter")),
-                    dbc.NavItem(dbc.NavLink(id="nav_nwb_viewer", children="NWB Viewer", href="viewer")),
-                    dbc.NavItem(dbc.NavLink(id="nav_nwb_dashboard", children="Dashboard", href="dashboard")),
-                    dbc.NavItem(
-                        dbc.DropdownMenu(
-                            children=[
-                                dbc.DropdownMenuItem("More pages", header=True),
-                                dbc.DropdownMenuItem("Page 2", href="#"),
-                                dbc.DropdownMenuItem("Page 3", href="#"),
-                            ],
-                            nav=True,
-                            in_navbar=True,
-                            label="More",
+                    dbc.Container([
+                        dbc.NavItem(dbc.NavLink(id="nav_nwb_converter", children="NWB Converter", href="converter")),
+                        dbc.NavItem(dbc.NavLink(id="nav_nwb_viewer", children="NWB Viewer", href="viewer")),
+                        dbc.NavItem(dbc.NavLink(id="nav_nwb_dashboard", children="Dashboard", href="dashboard")),
+                        dbc.NavItem(
+                            dbc.DropdownMenu(
+                                children=[
+                                    dbc.DropdownMenuItem("More pages", header=True),
+                                    dbc.DropdownMenuItem("Page 2", href="#"),
+                                    dbc.DropdownMenuItem("Page 3", href="#"),
+                                ],
+                                nav=True,
+                                in_navbar=True,
+                                label="More",
+                                toggle_style={"color": "#d17128"},
+                                toggleClassName="toggle",
+                                className='toggle'
+                            )
                         )
-                    ),
+                    ])
                 ],
-                horizontal='end'
+                horizontal='end',
+                className="ml-auto flex-nowrap mt-3 mt-md-0"
             )
         ],
         color="dark",
