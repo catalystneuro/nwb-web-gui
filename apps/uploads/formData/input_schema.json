@@ -1,0 +1,18 @@
+{
+  	"input_files":{
+  	    "required": [],
+        "type": "object",
+  	    "additionalProperties": true,
+  	    "title": "Input Files",
+        "description": "Source files with data to be converted",
+  	    "properties": {}
+    },
+    "boolean_options":{
+  	    "required": [],
+        "type": "object",
+  	    "additionalProperties": true,
+  	    "title": "Options",
+        "description": "Conversion options",
+  	    "properties": {}
+    }
+}
