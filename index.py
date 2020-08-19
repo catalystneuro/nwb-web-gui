@@ -28,22 +28,24 @@ home_layout = Home(parent_app=app)
 
 @app.callback(
     Output('page-content', 'children'),
-    [Input(component_id='nwb_converter', component_property='n_clicks'),
-     Input(component_id='nwb_viewer', component_property='n_clicks'),
-     Input(component_id='nwb_dashboard', component_property='n_clicks'),
-     Input(component_id='home', component_property='n_clicks')]
+    [
+        Input(component_id='nav_home', component_property='n_clicks'),
+        Input(component_id='nav_nwb_converter', component_property='n_clicks'),
+        Input(component_id='nav_nwb_viewer', component_property='n_clicks'),
+        Input(component_id='nav_nwb_dashboard', component_property='n_clicks'),
+    ]
 )
 def routing(home, converter, viewer, dashboard):
     ctx = dash.callback_context
     source = ctx.triggered[0]['prop_id'].split('.')[0]
     page = home_layout
-    if source == 'nwb_converter':
+    if source == 'nav_nwb_converter':
         page = converter_layout
-    elif source == 'nwb_viewer':
+    elif source == 'nav_nwb_viewer':
         page = viewer_layout
-    elif source == 'nwb_dashboard':
+    elif source == 'nav_nwb_dashboard':
         page = dashboard_layout  # make_dashboard(app=app)
-    elif source == 'home':
+    elif source == 'nav_home':
         page = home_layout
 
     return page

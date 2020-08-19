@@ -8,10 +8,9 @@ from dash.dependencies import Input, Output
 def render_navbar():
     navbar = dbc.NavbarSimple(
         children=[
-            dbc.NavItem(dbc.NavLink(id="home", children="Home", href="home")),
-            dbc.NavItem(dbc.NavLink(id="nwb_converter", children="NWB Converter", href="converter")),
-            dbc.NavItem(dbc.NavLink(id="nwb_viewer", children="NWB Viewer", href="viewer")),
-            dbc.NavItem(dbc.NavLink(id="nwb_dashboard", children="Dashboard", href="dashboard")),
+            dbc.NavItem(dbc.NavLink(id="nav_nwb_converter", children="NWB Converter", href="converter")),
+            dbc.NavItem(dbc.NavLink(id="nav_nwb_viewer", children="NWB Viewer", href="viewer")),
+            dbc.NavItem(dbc.NavLink(id="nav_nwb_dashboard", children="Dashboard", href="dashboard")),
             dbc.DropdownMenu(
                 children=[
                     dbc.DropdownMenuItem("More pages", header=True),
@@ -23,8 +22,9 @@ def render_navbar():
                 label="More",
             ),
         ],
+        id="nav_home",
         brand="NWB GUI",
-        brand_href="#",
+        brand_href="home",
         color="info",
         dark=True,
     )
