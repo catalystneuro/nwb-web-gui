@@ -18,11 +18,11 @@ class FormItem(dbc.FormGroup):
         self.children = dbc.Row([
             dbc.Col(
                 label,
-                width={'size': 2, 'offset': 0}
+                width={'size': 4, 'offset': 0}
             ),
             dbc.Col(
                 form_input,
-                width={'size': 3, 'offset': 0}
+                width={'size': 8, 'offset': 0}
             )
         ])
 

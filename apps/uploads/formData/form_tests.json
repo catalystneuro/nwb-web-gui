@@ -90,6 +90,16 @@
                     }
                 ]
             }
+        ],
+        "TwoPhotonSeries": [
+            {
+                "name": "TwoPhotonSeries_G",
+                "imaging_plane": "ImagingPlane_G"
+            },
+            {
+                "name": "TwoPhotonSeries_R",
+                "imaging_plane": "ImagingPlane_R"
+            }
         ]
     }
 }
