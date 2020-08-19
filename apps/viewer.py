@@ -1,3 +1,5 @@
+from .utils.file_picker import make_file_picker
+
 import dash_core_components as dcc
 import dash_html_components as html
 import dash_bootstrap_components as dbc
@@ -27,27 +29,12 @@ class Viewer(html.Div):
         self.nwb_file = None
 
         # Viewer page layout
+        filepicker = make_file_picker(id_suffix='voila')
+
         self.children = [
             html.H1('NWB File Viewer', style={'text-align': 'center'}),
             html.Br(),
-            dbc.Container(
-                [
-                    dbc.Row([
-                        dbc.Col([
-                            dbc.Form(
-                            [
-                                dbc.FormGroup(
-                                    [
-                                        dbc.Label("Path to local NWB file"),
-                                        dbc.Input(type="text", id='local_voila_nwb', placeholder="Path/to/local.nwb"),
-                                    ],
-                                ),
-                                dbc.Button('Submit', id='submit_voila_nwb'),
-                            ],
-                        )
-                        ], className='col-md-4'),
-                    ], style={'align-items': 'center', 'justify-content': 'center', 'text-align':'center'})
-                ]),
+            filepicker,
             html.Br(),
             html.Div(id='uploaded_voila_nwb', style={'justify-content': 'center', 'text-align': 'center'}),
             html.Div(id='voila_div', style={'justify-content': 'center', 'text-align': 'center'})
@@ -58,14 +45,14 @@ class Viewer(html.Div):
                 Output("uploaded_voila_nwb", "children"),
                 Output('voila_div', 'children')
             ],
-            [Input('submit_voila_nwb', component_property='n_clicks')],
-            [State('local_voila_nwb', 'value')]
+            [Input('submit_nwb_voila', component_property='n_clicks')],
+            [State('nwb_voila', 'value')]
         )
         def submit_nwb(click, input_value):
             ctx = dash.callback_context
             source = ctx.triggered[0]['prop_id'].split('.')[0]
 
-            if source == 'submit_voila_nwb':
+            if source == 'submit_nwb_voila':
                 nwb_path = Path(input_value)
                 if nwb_path.is_file() and str(nwb_path).endswith('.nwb'):
                     self.nwb_path = nwb_path

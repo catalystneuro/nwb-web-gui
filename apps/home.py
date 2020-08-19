@@ -9,7 +9,7 @@ class Home(html.Div):
         self.parent_app = parent_app
 
         card_converter = [
-            dbc.CardHeader("Converter Forms"),
+            dbc.CardHeader("NWB Converter Forms"),
             dbc.CardBody(
                 children=[
                     html.P(
@@ -60,10 +60,10 @@ class Home(html.Div):
             [
                 dbc.Row(
                     [
-                        dbc.Col(dbc.Card(card_converter, color="secondary", outline=True)),
-                        dbc.Col(dbc.Card(card_viewer, color="secondary", outline=True)),
-                        dbc.Col(dbc.Card(card_dashboard, color="secondary", outline=True)),
-                        dbc.Col(dbc.Card(card_nwb, color="secondary", outline=True)),
+                        dbc.Col(dbc.Card(card_converter, color="secondary", outline=True), width={"size": 2, "offset": 1}),
+                        dbc.Col(dbc.Card(card_viewer, color="secondary", outline=True), width={"size": 2, "offset": 0}),
+                        dbc.Col(dbc.Card(card_dashboard, color="secondary", outline=True), width={"size": 2, "offset": 0}),
+                        dbc.Col(dbc.Card(card_nwb, color="secondary", outline=True), width={"size": 2, "offset": 0}),
                     ],
                     className="mb-4",
                 ),
@@ -71,7 +71,8 @@ class Home(html.Div):
         )
 
         self.children = [
-            html.H1('NWB Web GUI', className='header'),
+            html.Br(),
+            dbc.Col(html.H2('NWB Web GUI', className='header'), width={"offset": 1}),
             html.Br(),
             html.Hr(),
             row_of_cards

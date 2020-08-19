@@ -1,11 +1,13 @@
+from .dashboards.allen_dash import AllenDashboard
+from .utils.file_picker import make_file_picker
+
 import dash_core_components as dcc
 import dash_html_components as html
 import dash_bootstrap_components as dbc
-from pynwb import NWBHDF5IO
 from dash.dependencies import Input, Output, State
 import dash
-from .dashboards.allen_dash import AllenDashboard
-import base64
+
+from pynwb import NWBHDF5IO
 from pathlib import Path
 
 
@@ -15,25 +17,10 @@ class Dashboard(html.Div):
         self.parent_app = parent_app
 
         # Dashboard page layout
+        filepicker = make_file_picker(id_suffix='dashboard')
+
         self.children = html.Div([
-            dbc.Container(
-                [
-                    dbc.Row([
-                        dbc.Col([
-                            dbc.Form(
-                                [
-                                    dbc.FormGroup(
-                                        [
-                                            dbc.Label("Path to local NWB file"),
-                                            dbc.Input(type="text", id='local_nwb', placeholder="Path/to/local.nwb"),
-                                        ],
-                                    ),
-                                    dbc.Button('Submit', id='submit_nwb'),
-                                ],
-                            )
-                        ], className='col-md-4'),
-                    ], style={'align-items': 'center', 'justify-content': 'center', 'text-align': 'center'})
-                ]),
+            filepicker,
             html.Div(id='uploaded_nwb', style={'justify-content': 'center', 'text-align': 'center'}),
             html.Div(id='dashboard_div', style={'justify-content': 'center', 'text-align': 'center'})
         ])
@@ -42,14 +29,14 @@ class Dashboard(html.Div):
 
         @self.parent_app.callback(
             [Output("uploaded_nwb", "children"), Output('dashboard_div', 'children')],
-            [Input('submit_nwb', component_property='n_clicks')],
-            [State('local_nwb', 'value')]
+            [Input('submit_nwb_dashboard', component_property='n_clicks')],
+            [State('nwb_dashboard', 'value')]
         )
         def local_nwb(click, input_value):
             ctx = dash.callback_context
             source = ctx.triggered[0]['prop_id'].split('.')[0]
 
-            if source == 'submit_nwb':
+            if source == 'submit_nwb_dashboard':
                 nwb_path = Path(input_value)
                 if nwb_path.is_file():
                     # NWB file

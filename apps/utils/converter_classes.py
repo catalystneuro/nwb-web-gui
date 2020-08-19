@@ -1,4 +1,3 @@
-import dash
 import dash_html_components as html
 import dash_core_components as dcc
 from dash.dependencies import Input, Output, State
@@ -16,15 +15,15 @@ class FormItem(dbc.FormGroup):
         self.className = 'item'
 
         self.children = dbc.Row([
-                dbc.Col(
-                    label,
-                    width={'size': 2, 'offset': 0}
-                ),
-                dbc.Col(
-                    form_input,
-                    width={'size': 3, 'offset': 0}
-                )
-            ])
+            dbc.Col(
+                label,
+                width={'size': 2, 'offset': 0}
+            ),
+            dbc.Col(
+                form_input,
+                width={'size': 3, 'offset': 0}
+            )
+        ])
 
         '''
         @self.parent_app.callback(
