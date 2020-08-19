@@ -51,7 +51,7 @@ def render_navbar():
                     align="center",
                     no_gutters=True,
                 ),
-                href="home",
+                href="/",
                 id="nav_brand"
             ),
             dbc.Nav(

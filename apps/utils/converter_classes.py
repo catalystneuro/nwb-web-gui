@@ -3,6 +3,7 @@ import dash_core_components as dcc
 from dash.dependencies import Input, Output, State
 import dash_bootstrap_components as dbc
 import datetime
+import dash_daq as daq
 
 
 class FormItem(dbc.FormGroup):
@@ -65,6 +66,11 @@ class SingleForm(dbc.Form):
                         id=input_id,
                         className='string_input'
                     )
+                elif schema_v['type'] == 'boolean':
+                    form_input = daq.BooleanSwitch(
+                        id=input_id,
+                        on=schema_v['default']
+                    ),
 
                 label = dbc.Label(schema_k, id=label_id)
 
