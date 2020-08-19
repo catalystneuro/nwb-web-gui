@@ -17,7 +17,7 @@ class ConverterForms(html.Div):
 
         # Converter page layout
         self.children = html.Div([
-            html.H1("Conversion Forms", style={'text-align': 'center'}),
+            html.H1("NWB Conversion Forms", style={'text-align': 'center'}),
             html.Br(),
             dbc.Container([
                 dbc.Row(

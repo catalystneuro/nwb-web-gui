@@ -23,7 +23,7 @@ def render_navbar():
             ),
         ],
         id="nav_home",
-        brand="NWB GUI",
+        brand="NWB Web GUI",
         brand_href="home",
         color="info",
         dark=True,

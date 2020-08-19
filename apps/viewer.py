@@ -12,6 +12,12 @@ import nbformat as nbf
 import os
 
 
+def call_voila(run_cmd):
+    """Call voila processes"""
+    subp = subprocess.run(run_cmd, shell=True, capture_output=True)
+    print(subp.stdout.decode())
+
+
 class Viewer(html.Div):
     def __init__(self, parent_app):
         super().__init__([])
@@ -43,12 +49,15 @@ class Viewer(html.Div):
                     ], style={'align-items': 'center', 'justify-content': 'center', 'text-align':'center'})
                 ]),
             html.Br(),
-            html.Div(id='uploaded_voila_nwb', style={'justify-content':'center', 'text-align': 'center'}),
-            html.Div(id='voila_div', style={'justify-content':'center', 'text-align': 'center'})
+            html.Div(id='uploaded_voila_nwb', style={'justify-content': 'center', 'text-align': 'center'}),
+            html.Div(id='voila_div', style={'justify-content': 'center', 'text-align': 'center'})
         ]
 
         @self.parent_app.callback(
-            [Output("uploaded_voila_nwb", "children"), Output('voila_div', 'children')],
+            [
+                Output("uploaded_voila_nwb", "children"),
+                Output('voila_div', 'children')
+            ],
             [Input('submit_voila_nwb', component_property='n_clicks')],
             [State('local_voila_nwb', 'value')]
         )
@@ -69,13 +78,8 @@ class Viewer(html.Div):
 
             return '', ''
 
-    def call_voila(self, run_cmd):
-        ''' Call voila processes'''
-        subp = subprocess.run(run_cmd, shell=True, capture_output=True)
-        print(subp.stdout.decode())
-
     def kill_processes(self):
-
+        """"""
         if len(self.processes_list) > 0:
             for p in self.processes_list:
                 p.terminate()
@@ -85,6 +89,7 @@ class Viewer(html.Div):
             self.processes_list = []
 
     def run_explorer(self):
+        """"""
         self.kill_processes()
         self.aux_notebook = self.create_notebook()
 
@@ -101,7 +106,7 @@ class Viewer(html.Div):
             """--Voila.tornado_settings="{}" """.format(settings_voila)
         ])
 
-        proc_voila = multiprocessing.Process(target=self.call_voila, args=(run_cmd,))
+        proc_voila = multiprocessing.Process(target=call_voila, args=(run_cmd,))
         proc_voila.start()
         self.processes_list.append(proc_voila)
         voila_address = 'http://localhost:8866'

@@ -1,7 +1,5 @@
-import dash_core_components as dcc
 import dash_html_components as html
 import dash_bootstrap_components as dbc
-import dash
 
 
 class Home(html.Div):
@@ -62,10 +60,10 @@ class Home(html.Div):
             [
                 dbc.Row(
                     [
-                        dbc.Col(dbc.Card(card_converter, color="info", inverse=True)),
-                        dbc.Col(dbc.Card(card_viewer, color="info", inverse=True)),
-                        dbc.Col(dbc.Card(card_dashboard, color="info", inverse=True)),
-                        dbc.Col(dbc.Card(card_nwb, color="info", inverse=True)),
+                        dbc.Col(dbc.Card(card_converter, color="secondary", outline=True)),
+                        dbc.Col(dbc.Card(card_viewer, color="secondary", outline=True)),
+                        dbc.Col(dbc.Card(card_dashboard, color="secondary", outline=True)),
+                        dbc.Col(dbc.Card(card_nwb, color="secondary", outline=True)),
                     ],
                     className="mb-4",
                 ),
