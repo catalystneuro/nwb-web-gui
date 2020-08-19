@@ -1,5 +1,6 @@
 import dash_html_components as html
 import dash_bootstrap_components as dbc
+import dash_core_components as dcc
 
 
 class Home(html.Div):
@@ -9,7 +10,7 @@ class Home(html.Div):
         self.parent_app = parent_app
 
         card_converter = [
-            dbc.CardHeader("NWB Converter Forms"),
+            dcc.Link(href='/converter', children=[dbc.CardHeader("NWB Converter Forms")], className='cardLink'),
             dbc.CardImg(src="/assets/logo_nwb_square.png", top=True),
             dbc.CardBody(
                 children=[
@@ -22,7 +23,7 @@ class Home(html.Div):
         ]
 
         card_viewer = [
-            dbc.CardHeader("NWB File Viewer"),
+            dcc.Link(href='/viewer', children=[dbc.CardHeader("NWB File Viewer")], className='cardLink'),
             dbc.CardImg(src="/assets/logo_nwb_square.png", top=True),
             dbc.CardBody(
                 children=[
@@ -35,7 +36,7 @@ class Home(html.Div):
         ]
 
         card_dashboard = [
-            dbc.CardHeader("NWB Custom Dashboards"),
+            dcc.Link(href='/dashboard', children=[dbc.CardHeader("NWB Custom Dashboards")], className='cardLink'),
             dbc.CardImg(src="/assets/logo_nwb_square.png", top=True),
             dbc.CardBody(
                 children=[
@@ -48,7 +49,7 @@ class Home(html.Div):
         ]
 
         card_nwb = [
-            dbc.CardHeader("Learn NWB"),
+            html.A(href='https://www.nwb.org/', target='_blank', children=[dbc.CardHeader("Learn NWB")], className='cardLink'),
             dbc.CardImg(src="/assets/logo_nwb_square.png", top=True),
             dbc.CardBody(
                 children=[

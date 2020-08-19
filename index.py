@@ -29,27 +29,26 @@ home_layout = Home(parent_app=app)
 @app.callback(
     Output('page-content', 'children'),
     [
-        Input(component_id='nav_nwb_converter', component_property='n_clicks'),
-        Input(component_id='nav_nwb_viewer', component_property='n_clicks'),
-        Input(component_id='nav_nwb_dashboard', component_property='n_clicks'),
-        Input(component_id='nav_brand', component_property='n_clicks')
+        Input('url', 'pathname')
     ]
 )
-def routing(converter, viewer, dashboard, home):
-    ctx = dash.callback_context
-    source = ctx.triggered[0]['prop_id'].split('.')[0]
+def routing(pathname):
+
     page = home_layout
-    if source == 'nav_nwb_converter':
-        page = converter_layout
-    elif source == 'nav_nwb_viewer':
-        converter_layout.clean_converter_forms()
-        page = viewer_layout
-    elif source == 'nav_nwb_dashboard':
-        converter_layout.clean_converter_forms()
-        page = dashboard_layout  # make_dashboard(app=app)
-    elif source == 'nav_brand':
+    if pathname == '/':
         converter_layout.clean_converter_forms()
         page = home_layout
+    elif pathname == '/converter':
+        page = converter_layout
+    elif pathname == '/viewer':
+        converter_layout.clean_converter_forms()
+        page = viewer_layout
+    elif pathname == '/dashboard':
+        converter_layout.clean_converter_forms()
+        page = dashboard_layout
+    else:
+        converter_layout.clean_converter_forms()
+        page = html.Div([html.H1('Page not found')])
 
     return page
 

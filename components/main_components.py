@@ -82,7 +82,7 @@ def render_navbar():
             )
         ],
         color="dark",
-        dark=True,
+        dark=True
     )
     return navbar
 
