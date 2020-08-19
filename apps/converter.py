@@ -90,7 +90,7 @@ class ConverterForms(html.Div):
                         form_tabs
                     ]
                     all_forms = html.Div(layout_children)
-                    button = dbc.Button('Submit', id='button_submit')
+                    button = dbc.Button('Run conversion', id='button_run_conversion')
 
                     return 'JSON schema loaded', all_forms, button
                 else:
@@ -101,7 +101,7 @@ class ConverterForms(html.Div):
         '''
         @self.parent_app.callback(
             Output('noDiv', 'children'),
-            [Input('button_submit', component_property='n_clicks')],
+            [Input('button_run_conversion', component_property='n_clicks')],
             [State(f"{i}", "value") for i in range(0, 20)]  # states watch type for boolean fields must be "on" instead of "value" and for datetime object must be "date" instead of "value"
         )
         def submit_form(click, *args):
