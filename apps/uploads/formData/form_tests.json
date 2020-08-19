@@ -1,0 +1,47 @@
+{
+    "NWBFile": {
+        "session_description": "ADDME",
+        "identifier": "ADDME",
+        "session_start_time": "1900-01-01 00:00:00",
+        "experimenter": "",
+        "institution": ""
+    },
+    "Subject": {
+        "age": "",
+        "description": "some description",
+        "genotype": "",
+        "sex": "M",
+        "species": "",
+        "subject_id": "ID123",
+        "weight": "",
+        "date_of_birth": "1900-01-01 00:00:00"
+    },
+    "Ecephys": {
+        "Device": [
+            {
+                "name": "device_ecephys_1",
+                "description": "",
+                "manufacturer": ""
+            },
+            {
+                "name": "device_ecephys_2",
+                "description": "",
+                "manufacturer": ""
+            }
+        ],
+        "ElectrodeGroup": [
+            {
+                "name": "electrode_group_1",
+                "description": "",
+                "device": {"target": "device_ecephys_1"},
+                "location": ""
+            },
+            {
+                "name": "electrode_group_2",
+                "description": "",
+                "device": {"target": "device_ecephys_2"},
+                "location": ""
+            }
+        ]
+    }
+}

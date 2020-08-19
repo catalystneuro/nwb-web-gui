@@ -1,0 +1,263 @@
+{
+    "NWBFile": {
+        "required": [
+            "identifier",
+            "session_description",
+            "session_start_time"
+        ],
+        "properties": {
+            "session_description": {
+                "type": "string",
+                "description": "a description of the session where this data was generated",
+                "default": "ADDME"
+            },
+            "identifier": {
+                "type": "string",
+                "description": "a unique text identifier for the file",
+                "default": "ADDME"
+            },
+            "session_start_time": {
+                "type": "string",
+                "format": "date-time",
+                "description": "the start date and time of the recording session",
+                "default": ""
+            },
+            "experimenter": {
+                "type": "string",
+                "description": "name of person who performed experiment"
+            },
+            "institution": {
+                "type": "string",
+                "description": "institution(s) where experiment is performed"
+            }
+        },
+        "type": "object",
+        "additionalProperties": false,
+        "title": "pynwb.file.NWBFile"
+    }
+}
+
+
+{
+    "Subject": {
+        "required": [],
+        "properties": {
+            "age": {
+                "type": "string",
+                "description": "the age of the subject"
+            },
+            "description": {
+                "type": "string",
+                "description": "a description of the subject"
+            },
+            "genotype": {
+                "type": "string",
+                "description": "the genotype of the subject",
+            },
+            "sex": {
+                "type": "string",
+                "description": "the sex of the subject",
+            },
+            "species": {
+                "type": "string",
+                "description": "the species of the subject",
+            },
+            "subject_id": {
+                "type": "string",
+                "description": "a unique identifier for the subject"
+            },
+            "weight": {
+                "type": "string",
+                "description": "the weight of the subject",
+            },
+            "date_of_birth": {
+                "type": "datetime",
+                "description": "datetime of date of birth. May be supplied instead of age",
+            },
+        },
+        "type": "object",
+        "additionalProperties": false,
+        "title": "Subject",
+        "class": "pynwb.file.Subject"
+    }
+}
+
+
+{
+    "Device": {
+        "required": [
+            "name",
+        ],
+        "properties": {
+            "name": {
+                "type": "string",
+                "description": "the name of this device",
+                "default": ""
+            },
+            "description": {
+                "type": "string",
+                "description": " Description of the device (e.g., model, firmware version, processing software version, etc.)",
+                "default": "ADDME"
+            },
+            "manufacturer": {
+                "type": "string",
+                "description": "the name of the manufacturer of this device",
+                "default": "ADDME"
+            }
+        },
+        "type": "object",
+        "additionalProperties": false,
+        "title": "pynwb.device.Device"
+    }
+}
+
+{
+    "ElectrodeGroup": {
+        "type": "object",
+        "additionalProperties": false,
+        "title": "ElectrodeGroup",
+        "class": "pynwb.ecephys.ElectrodeGroup",
+        "required": [
+            "name",
+            "description",
+            "location",
+            "device",
+        ],
+        "properties": {
+            "name": {
+                "type": "string",
+                "description": "the name of this electrode",
+                "default": "2-p targeted cell-attached"
+            },
+            "description": {
+                "type": "string",
+                "description": "description of this electrode group",
+                "default": "ADDME"
+            },
+            "device": {
+                "type": "link",
+                "description": "the device that was used to record from this electrode group",
+                "target": "pynwb.device.Device"
+            },
+            "location": {
+                "type": "string",
+                "description": "description of location of this electrode group",
+                "default": "ADDME"
+            }
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+{
+    "Ophys": {
+        "required": [
+            "Ophys Device name",
+            "Ophys ImagingPlane description",
+            "Ophys ImagingPlane device",
+            "Ophys ImagingPlane excitation_lambda",
+            "Ophys ImagingPlane imaging_rate",
+            "Ophys ImagingPlane indicator",
+            "Ophys ImagingPlane location",
+            "Ophys ImagingPlane name",
+            "Ophys ImagingPlane optical_channel description",
+            "Ophys ImagingPlane optical_channel emission_lambda",
+            "Ophys ImagingPlane optical_channel name",
+            "Ophys TwoPhotonSeries name",
+            "Ophys TwoPhotonSeries imaging_plane",
+            "Ophys ImageSegmentation name",
+            "Ophys ImageSegmentation plane_segmentations name",
+            "Ophys ImageSegmentation plane_segmentations description",
+            "Ophys ImageSegmentation plane_segmentations imaging_plane",
+            "Ophys ImageSegmentation plane_segmentations reference_images"
+        ],
+        "properties": {
+            "Ophys Device name": {
+                "type": "string",
+                "default": "Bruker 2-p microscope"
+            },
+            "Ophys ImagingPlane description": {
+                "type": "string",
+                "default": "ADDME"
+            },
+            "Ophys ImagingPlane device": {
+                "type": "string",
+                "default": "Bruker 2-p microscope"
+            },
+            "Ophys ImagingPlane excitation_lambda": {
+                "type": "number",
+                "default": 920.0
+            },
+            "Ophys ImagingPlane imaging_rate": {
+                "type": "string",
+                "default": "ADDME"
+            },
+            "Ophys ImagingPlane indicator": {
+                "type": "string",
+                "default": "ADDME"
+            },
+            "Ophys ImagingPlane location": {
+                "type": "string",
+                "default": "primary visual cortex - layer 2/3"
+            },
+            "Ophys ImagingPlane name": {
+                "type": "string",
+                "default": "imaging_plane"
+            },
+            "Ophys ImagingPlane optical_channel description": {
+                "type": "string",
+                "default": "2P Optical Channel"
+            },
+            "Ophys ImagingPlane optical_channel emission_lambda": {
+                "type": "number",
+                "default": 510.0
+            },
+            "Ophys ImagingPlane optical_channel name": {
+                "type": "string",
+                "default": "optical_channel"
+            },
+            "Ophys TwoPhotonSeries name": {
+                "type": "string",
+                "default": "raw_ophys"
+            },
+            "Ophys TwoPhotonSeries imaging_plane": {
+                "type": "string",
+                "default": "imaging_plane"
+            },
+            "Ophys ImageSegmentation name": {
+            	"type": "string",
+            	"default": "image_segmentation"
+            },
+            "Ophys ImageSegmentation plane_segmentations name": {
+            	"type": "string",
+            	"default": "plane_segmentation"
+            },
+            "Ophys ImageSegmentation plane_segmentations description": {
+            	"type": "string",
+            	"default": "ADDME"
+            },
+            "Ophys ImageSegmentation plane_segmentations imaging_plane": {
+            	"type": "string",
+            	"default": "imaging_plane"
+            },
+            "Ophys ImageSegmentation plane_segmentations reference_images": {
+            	"type": "string",
+            	"default": "raw_ophys"
+            }
+        },
+        "type": "object",
+        "additionalProperties": false,
+        "title": "Ophys"
+    }
+}
+

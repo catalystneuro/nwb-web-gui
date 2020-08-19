@@ -1,0 +1,150 @@
+{
+    "NWBFile": {
+        "required": [
+            "identifier",
+            "session_description",
+            "session_start_time"
+        ],
+        "properties": {
+            "session_description": {
+                "type": "string",
+                "description": "a description of the session where this data was generated",
+                "default": "ADDME"
+            },
+            "identifier": {
+                "type": "string",
+                "description": "a unique text identifier for the file",
+                "default": "ADDME"
+            },
+            "session_start_time": {
+                "type": "datetime",
+                "description": "the start date and time of the recording session",
+                "default": ""
+            },
+            "experimenter": {
+                "type": "string",
+                "description": "name of person who performed experiment"
+            },
+            "institution": {
+                "type": "string",
+                "description": "institution(s) where experiment is performed"
+            }
+        },
+        "type": "object",
+        "additionalProperties": false,
+        "title": "NWBFile",
+        "class": "pynwb.file.NWBFile"
+    },
+
+    "Subject": {
+        "required": [],
+        "properties": {
+            "age": {
+                "type": "string",
+                "description": "the age of the subject"
+            },
+            "description": {
+                "type": "string",
+                "description": "a description of the subject"
+            },
+            "genotype": {
+                "type": "string",
+                "description": "the genotype of the subject"
+            },
+            "sex": {
+                "type": "string",
+                "description": "the sex of the subject"
+            },
+            "species": {
+                "type": "string",
+                "description": "the species of the subject"
+            },
+            "subject_id": {
+                "type": "string",
+                "description": "a unique identifier for the subject"
+            },
+            "weight": {
+                "type": "string",
+                "description": "the weight of the subject"
+            },
+            "date_of_birth": {
+                "format": "date-time",
+                "type": "string",
+                "description": "datetime of date of birth. May be supplied instead of age"
+            }
+        },
+        "type": "object",
+        "additionalProperties": false,
+        "title": "Subject",
+        "class": "pynwb.file.Subject"
+    },
+
+    "Ecephys": {
+        "type": "object",
+        "additionalProperties": false,
+        "title": "Ecephys",
+        "class": "None",
+        "properties": {
+            "Device": [{
+                "required": [
+                    "name"
+                ],
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "description": "the name of this device",
+                        "default": "2-p targeted cell-attached"
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": " Description of the device (e.g., model, firmware version, processing software version, etc.)",
+                        "default": "ADDME"
+                    },
+                    "manufacturer": {
+                        "type": "string",
+                        "description": "the name of the manufacturer of this device",
+                        "default": "ADDME"
+                    }
+                },
+                "type": "object",
+                "additionalProperties": false,
+                "title": "Device",
+                "class": "pynwb.device.Device"
+            }],
+            "ElectrodeGroup": {
+                "required": [
+                    "name",
+                    "description",
+                    "location",
+                    "device"
+                ],
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "description": "the name of this electrode",
+                        "default": "2-p targeted cell-attached"
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "description of this electrode group",
+                        "default": "ADDME"
+                    },
+                    "device": {
+                        "type": "link",
+                        "description": "the device that was used to record from this electrode group",
+                        "target": "pynwb.device.Device"
+                    },
+                    "location": {
+                        "type": "string",
+                        "description": "description of location of this electrode group",
+                        "default": "ADDME"
+                    }
+                },
+                "type": "object",
+                "additionalProperties": false,
+                "title": "ElectrodeGroup",
+                "class": "pynwb.ecephys.ElectrodeGroup"
+            }
+        }
+    }
+}
