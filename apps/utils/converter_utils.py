@@ -118,14 +118,6 @@ def instance_to_forms(parent_app, object, ids_list=[], set_counter=False, father
     for k, v in object.items():
         if isinstance(v, dict):
             if k not in ['NWBFile', 'Subject', 'Ecephys', 'Ophys']:
-                # card = dbc.Card(
-                #     id="form_group_" + k,
-                #     style={'margin-bottom': '20px', 'box-shadow': '6px 6px 6px rgba(0, 0, 0, 0.2)'},
-                # )
-                # card.children = [
-                #     dbc.CardHeader(k, style={'margin-bottom': '10px'}),
-                # ]
-                # item = dbc.Collapse(card, id="collapse_" + k)
                 item = CollapsibleItem(parent_app=parent_app, k=k, v=v)
             else:
                 item = dbc.CardBody(id="form_group_" + k, style={'margin-bottom': '20px', 'box-shadow': '6px 6px 6px rgba(0, 0, 0, 0.2)'})

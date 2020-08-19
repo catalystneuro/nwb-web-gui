@@ -8,13 +8,13 @@
     },
     "Subject": {
         "age": "",
-        "description": "",
+        "description": "some description",
         "genotype": "",
-        "sex": "",
+        "sex": "M",
         "species": "",
-        "subject_id": "",
+        "subject_id": "ID123",
         "weight": "",
-        "date_of_birth": ""
+        "date_of_birth": "1900-01-01 00:00:00"
     },
     "Ecephys": {
         "Device": [

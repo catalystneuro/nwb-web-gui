@@ -36,22 +36,22 @@ class FormItem(dbc.FormGroup):
 
 
 class SingleForm(dbc.Form):
-    """Single form instance """
+    """Single form instance"""
 
-    def __init__(self, value, base_schema, parent_app, parent_name):
+    def __init__(self, value, base_schema, parent_app, item_name):
         super().__init__([])
 
         required_fields = base_schema['required']
         children = []
 
-        self.id = parent_name
+        self.id = item_name
 
-        for k, v in base_schema['properties'].items():
-            if k in value.keys():
-                label_id = f'label_{parent_name}_{k}'
-                input_id = f'input_{parent_name}_{k}'
-                hidden_id = f'hidden_{parent_name}_{k}'
-                if 'format' in v and v['format'] == 'date-time':
+        for schema_k, schema_v in base_schema['properties'].items():
+            if schema_k in value.keys():
+                label_id = f'label_{item_name}_{schema_k}'
+                input_id = f'input_{item_name}_{schema_k}'
+                hidden_id = f'hidden_{item_name}_{schema_k}'
+                if 'format' in schema_v and schema_v['format'] == 'date-time':
                     form_input = dcc.DatePickerSingle(
                         month_format='MMMM Y',
                         placeholder='MMMM Y',
@@ -60,13 +60,22 @@ class SingleForm(dbc.Form):
                         style={'font-size': '5px'},
                         id=input_id
                     )
-                elif v['type'] == 'string':
-                    form_input = dbc.Input(placeholder=value[k], id=input_id, className='string_input')
+                elif schema_v['type'] == 'string':
+                    form_input = dbc.Input(
+                        placeholder=value[schema_k],
+                        id=input_id,
+                        className='string_input'
+                    )
 
-                label = dbc.Label(k, id=label_id)
+                label = dbc.Label(schema_k, id=label_id)
 
-                form_group = FormItem(label, form_input, parent_app=parent_app, label_id=label_id, input_id=input_id)
-
+                form_group = FormItem(
+                    label,
+                    form_input,
+                    parent_app=parent_app,
+                    label_id=label_id,
+                    input_id=input_id
+                )
                 children.append(form_group)
 
         self.children = html.Div(children, style={'margin-top': '5px'})
@@ -78,7 +87,7 @@ class CompositeForm(html.Div):
     def __init__(self, value, key, base_schema, parent_app, parent_name):
         super().__init__([])
 
-        self.parent_name = parent_name # Ecephys, ophys etc
+        self.parent_name = parent_name  # Ecephys, ophys etc
         self.id = parent_name
 
         tabs = []

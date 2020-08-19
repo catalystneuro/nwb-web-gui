@@ -17,7 +17,7 @@ class ConverterForms(html.Div):
 
         # Converter page layout
         self.children = html.Div([
-            html.H2('Converter Forms', style={'text-align': 'center', 'margin-top': '15px'}),
+            html.H1("Conversion Forms", style={'text-align': 'center'}),
             html.Br(),
             dbc.Container([
                 dbc.Row(
@@ -86,10 +86,6 @@ class ConverterForms(html.Div):
                     form_tabs = get_form_from_metadata(metadata_json, self.parent_app)
 
                     layout_children = [
-                        html.H1(
-                            "Conversion Forms",
-                            style={'text-align': 'center'}
-                        ),
                         html.Hr(),
                         form_tabs
                     ]

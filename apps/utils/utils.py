@@ -1,37 +1,49 @@
-import dash
-import dash_html_components as html
-import dash_core_components as dcc
-from dash.dependencies import Input, Output, State
 import dash_bootstrap_components as dbc
-from pathlib import Path
-import json
+import pynwb
+from .nwb_schema import get_schema_from_hdmf_class
 from .converter_classes import SingleForm, CompositeForm
 
 
-def iter_metadata(metadata_json, default_schema, parent_app, parent_name=None, forms = []):
+map_name_to_class = {
+    "NWBFile": pynwb.file.NWBFile,
+    "Subject": pynwb.file.Subject,
+    "Device": pynwb.device.Device,
+    # Ecephys
+    "ElectrodeGroup": pynwb.ecephys.ElectrodeGroup,
+    "ElectricalSeries": pynwb.ecephys.ElectricalSeries,
+    # Ophys
+    "OpticalChannel": pynwb.ophys.OpticalChannel,
+    "ImagingPlane": pynwb.ophys.ImagingPlane,
+    "TwoPhotonSeries": pynwb.ophys.TwoPhotonSeries,
+    "PlaneSegmentation": pynwb.ophys.PlaneSegmentation
+}
 
+
+def iter_metadata(metadata_json, parent_app, parent_name=None, forms=[]):
+    """"""
     for k, v in metadata_json.items():
-        if k in default_schema.keys():
+        if k in map_name_to_class.keys():
+            item_schema = get_schema_from_hdmf_class(hdmf_class=map_name_to_class[k])
             if k in ['NWBFile', 'Subject']:
-                form = SingleForm(v, default_schema[k], parent_app, k)
+                form = SingleForm(
+                    value=v,
+                    base_schema=item_schema,
+                    parent_app=parent_app,
+                    item_name=k
+                )
                 forms.append(form)
             else:
-                form = CompositeForm(v, k, default_schema[k], parent_app, parent_name)
+                form = CompositeForm(v, k, item_schema, parent_app, parent_name)
                 forms.append(form)
         else:
-            iter_metadata(v, default_schema, parent_app, parent_name=k, forms=forms)
+            iter_metadata(v, parent_app, parent_name=k, forms=forms)
 
     return forms
 
 
 def get_form_from_metadata(metadata_json, parent_app):
-
-    default_schema_path = Path.cwd() / 'apps' / 'uploads' / 'metadata' / 'schema_catalog_reduced.json'
-
-    with open(default_schema_path, 'r') as inp:
-        default_schema = json.load(inp)
-
-    forms = iter_metadata(metadata_json, default_schema, parent_app, forms=[])
+    """"""
+    forms = iter_metadata(metadata_json, parent_app, forms=[])
 
     tabs_dict = {}
     for f in forms:
