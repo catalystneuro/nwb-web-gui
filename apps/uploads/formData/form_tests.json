@@ -2,7 +2,7 @@
     "NWBFile": {
         "session_description": "ADDME",
         "identifier": "ADDME",
-        "session_start_time": "1900-01-01 00:00:00",
+        "session_start_time": "1900-01-01T00:00:00",
         "experimenter": "",
         "institution": ""
     },
@@ -14,7 +14,7 @@
         "species": "",
         "subject_id": "ID123",
         "weight": "",
-        "date_of_birth": "1900-01-01 00:00:00"
+        "date_of_birth": "1900-01-01T00:00:00",
     },
     "Ecephys": {
         "Device": [
