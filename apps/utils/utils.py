@@ -98,9 +98,7 @@ def get_form_from_metadata(metadata_json, parent_app):
     else:
         tabs = [dbc.Tab(f, label=f.id) for f in inputs_forms]
         form_tabs = dbc.Tabs(tabs)
-
         cards = [dbc.Card([dbc.CardHeader(f.id), dbc.CardBody(f)]) for f in inputs_forms]
-
         form_tabs = cards
 
     return form_tabs

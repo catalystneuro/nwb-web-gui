@@ -70,6 +70,7 @@ class Home(html.Div):
                         dbc.Col(dbc.Card(card_nwb, color="secondary", outline=True), lg=2, md=6),
                     ],
                     className="mb-4",
+                    style={'justify-content': 'space-between'}
                 ),
             ], fluid=True
         )
