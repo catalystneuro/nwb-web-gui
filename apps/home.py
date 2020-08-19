@@ -60,18 +60,18 @@ class Home(html.Div):
             ),
         ]
 
-        row_of_cards = html.Div(
+        row_of_cards = dbc.Container(
             [
                 dbc.Row(
                     [
-                        dbc.Col(dbc.Card(card_converter, color="secondary", outline=True), width={"size": 2, "offset": 1}),
-                        dbc.Col(dbc.Card(card_viewer, color="secondary", outline=True), width={"size": 2, "offset": 0}),
-                        dbc.Col(dbc.Card(card_dashboard, color="secondary", outline=True), width={"size": 2, "offset": 0}),
-                        dbc.Col(dbc.Card(card_nwb, color="secondary", outline=True), width={"size": 2, "offset": 0}),
+                        dbc.Col(dbc.Card(card_converter, color="secondary", outline=True), lg=3, md=6),
+                        dbc.Col(dbc.Card(card_viewer, color="secondary", outline=True), lg=3, md=6),
+                        dbc.Col(dbc.Card(card_dashboard, color="secondary", outline=True), lg=3, md=6),
+                        dbc.Col(dbc.Card(card_nwb, color="secondary", outline=True), lg=3, md=6),
                     ],
                     className="mb-4",
                 ),
-            ]
+            ], fluid=True
         )
 
         self.children = [
