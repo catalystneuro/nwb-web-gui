@@ -64,10 +64,10 @@ class Home(html.Div):
             [
                 dbc.Row(
                     [
-                        dbc.Col(dbc.Card(card_converter, color="secondary", outline=True), lg=3, md=6),
-                        dbc.Col(dbc.Card(card_viewer, color="secondary", outline=True), lg=3, md=6),
-                        dbc.Col(dbc.Card(card_dashboard, color="secondary", outline=True), lg=3, md=6),
-                        dbc.Col(dbc.Card(card_nwb, color="secondary", outline=True), lg=3, md=6),
+                        dbc.Col(dbc.Card(card_converter, color="secondary", outline=True), lg=2, md=6),
+                        dbc.Col(dbc.Card(card_viewer, color="secondary", outline=True), lg=2, md=6),
+                        dbc.Col(dbc.Card(card_dashboard, color="secondary", outline=True), lg=2, md=6),
+                        dbc.Col(dbc.Card(card_nwb, color="secondary", outline=True), lg=2, md=6),
                     ],
                     className="mb-4",
                 ),
