@@ -57,7 +57,7 @@ class Home(html.Div):
                         "Resources to learn more about NWB",
                         className="card-text",
                     ),
-                ]
+                ],
             ),
         ]
 
@@ -65,21 +65,17 @@ class Home(html.Div):
             [
                 dbc.Row(
                     [
-                        dbc.Col(dbc.Card(card_converter, color="secondary", outline=True), lg=2, md=6),
-                        dbc.Col(dbc.Card(card_viewer, color="secondary", outline=True), lg=2, md=6),
-                        dbc.Col(dbc.Card(card_dashboard, color="secondary", outline=True), lg=2, md=6),
-                        dbc.Col(dbc.Card(card_nwb, color="secondary", outline=True), lg=2, md=6),
+                        dbc.Col(dbc.Card(card_converter, color="secondary", outline=True), lg=3, md=6),
+                        dbc.Col(dbc.Card(card_viewer, color="secondary", outline=True), lg=3, md=6),
+                        dbc.Col(dbc.Card(card_dashboard, color="secondary", outline=True), lg=3, md=6),
+                        dbc.Col(dbc.Card(card_nwb, color="secondary", outline=True), lg=3, md=6),
                     ],
-                    className="mb-4",
-                    style={'justify-content': 'space-between'}
+                    style={'justify-content': 'space-between', 'margin-top': '5%'}
                 ),
             ], fluid=True
         )
 
         self.children = [
-            html.Br(),
-            dbc.Col(html.H2('NWB Web GUI', className='header'), width={"offset": 1}),
-            html.Br(),
-            html.Hr(),
+            #dbc.Col(html.H2('NWB Web GUI', className='header'), style={'margin-top': '2%'}),
             row_of_cards
         ]

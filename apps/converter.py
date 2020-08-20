@@ -23,7 +23,7 @@ class ConverterForms(html.Div):
         upload_inputs = make_upload_file('upload_inputs')
 
         self.children = dbc.Container([
-            html.H1("NWB Conversion Forms", style={'text-align': 'center'}),
+            html.H1("NWB Conversion Forms", style={'text-align': 'center', 'margin-top': '2%'}),
             html.Br(),
             dbc.Label(id='warnings', color='danger'),
             dbc.Row([
