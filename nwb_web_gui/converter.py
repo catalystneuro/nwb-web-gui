@@ -25,10 +25,8 @@ class ConverterForms(html.Div):
         self.children = dbc.Container([
             html.Br(),
             html.H1("NWB Converter", style={'text-align': 'center'}),
-            html.Br(),
-            html.Hr(),
-
             dbc.Label(id='warnings', color='danger'),
+            html.Hr(),
             dbc.Row([
                 dbc.Col([
                     html.H3('Source data'),

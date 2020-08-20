@@ -72,7 +72,7 @@ def make_json_file_buttons(id_suffix):
                 dbc.Col(
                     children=[
                         dcc.Upload(
-                            children=dbc.Button('Load JSON'),
+                            children=dbc.Button('Load JSON', color='dark'),
                             id='load_json_' + id_suffix
                         )
                     ],
@@ -80,7 +80,7 @@ def make_json_file_buttons(id_suffix):
                     style={'margin-left': '10px'}
                 ),
                 dbc.Col(
-                    children=[dbc.Button('Save JSON', id='save_json_' + id_suffix)],
+                    children=[dbc.Button('Save JSON', color='dark', id='save_json_' + id_suffix)],
                     width={'size': '30px'},
                     style={'margin-left': '10px'}
                 ),
