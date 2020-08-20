@@ -4,6 +4,7 @@ from dash.dependencies import Input, Output, State
 import dash_bootstrap_components as dbc
 import datetime
 import dash_daq as daq
+from date_time_picker import DateTimePicker
 
 
 class FormItem(dbc.FormGroup):
@@ -65,14 +66,7 @@ class SingleForm(dbc.Form):
                 input_id = f'input_{item_name}_{schema_k}'
                 hidden_id = f'hidden_{item_name}_{schema_k}'
                 if 'format' in schema_v and schema_v['format'] == 'date-time':
-                    form_input = dcc.DatePickerSingle(
-                        month_format='MMMM Y',
-                        placeholder='MMMM Y',
-                        date=datetime.date(2020, 2, 29),
-                        className='date_input',
-                        style={'font-size': '5px'},
-                        id=input_id
-                    )
+                    form_input = DateTimePicker(id=input_id, value=value[schema_k], style={"border":"solid 1px","border-color": "#ced4da", "border-radius": "5px", "color": '#545057'})
                 elif schema_v['type'] == 'string':
                     form_input = dbc.Input(
                         value=value[schema_k],
