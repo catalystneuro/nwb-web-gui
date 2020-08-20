@@ -18,7 +18,7 @@
 /* Fix the font size, border color and other stuff of datepicker*/
 .DateInput_input, .DateInput_input_1 {
     text-align: center;
-    line-height: calc(1.5em + 0.75rem); 
+    line-height: calc(1.5em + 0.75rem);
     height: 25px;
     font-size: 0.9375rem;
     font-weight: 400;
@@ -31,10 +31,11 @@
 }
 
 .nav-link{
-    color:#d17128
+    color: #a8a8a8;
+    font-size: 1.2rem
 }
 .nav-link:hover{
-    color: #8f8f8f
+    color: #d17128
 }
 
 .cardLink{
