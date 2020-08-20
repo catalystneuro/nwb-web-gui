@@ -93,10 +93,10 @@ def get_form_from_metadata(metadata_json, parent_app):
                 else:
                     tabs_dict[f.id].children.children.extend(f.children.children)
 
-        tabs = [dbc.Tab(v, label=k) for k, v in tabs_dict.items()]
+        tabs = [dbc.Tab(v, label=k, tab_style={'background-color': '#f7f7f7', 'border':'solid', 'border-color': '#f7f7f7', 'border-width': '1px'}) for k, v in tabs_dict.items()]
         form_tabs = dbc.Tabs(tabs)
     else:
-        tabs = [dbc.Tab(f, label=f.id) for f in inputs_forms]
+        tabs = [dbc.Tab(f, label=f.id, tab_style={'background-color': '#f7f7f7', 'border':'solid', 'border-color': '#f7f7f7', 'border-width': '1px'}) for f in inputs_forms]
         form_tabs = dbc.Tabs(tabs)
         cards = [dbc.Card([dbc.CardHeader(f.id), dbc.CardBody(f)]) for f in inputs_forms]
         form_tabs = cards

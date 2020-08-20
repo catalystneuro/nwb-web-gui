@@ -15,16 +15,29 @@ class FormItem(dbc.FormGroup):
         self.parent_app = parent_app
         self.className = 'item'
 
-        self.children = dbc.Row([
-            dbc.Col(
-                label,
-                width={'size': 4, 'offset': 0}
-            ),
-            dbc.Col(
-                form_input,
-                width={'size': 8, 'offset': 0}
-            )
-        ])
+        if 'input_files' in input_id or 'boolean_options' in input_id:
+            self.children = dbc.Row([
+                dbc.Col(
+                    label,
+                    width={'size': 4, 'offset': 0}
+                ),
+                dbc.Col(
+                    form_input,
+                    width={'size': 8, 'offset': 0}
+                )
+            ])
+        else:
+            self.children = dbc.Row([
+                dbc.Col(
+                    label,
+                    width={'size': 2, 'offset': 0}
+                ),
+                dbc.Col(
+                    form_input,
+                    width={'size': 10, 'offset': 0}
+                )
+            ])
+
 
         '''
         @self.parent_app.callback(
@@ -139,14 +152,14 @@ class CompositeForm(html.Div):
                                 optical_children.append(form_group)
 
                             form = dbc.Form(optical_children, style={'margin-top': '5px'})
-                            tab = dbc.Tab(form, label='Optical_Channel_{}'.format(index))
+                            tab = dbc.Tab(form, label='Optical_Channel_{}'.format(index), tab_style={'background-color': '#f7f7f7', 'border':'solid', 'border-color': '#f7f7f7', 'border-width': '1px'})
                             optical_tabs.append(tab)
 
                         optical_tab = dbc.Tabs(optical_tabs)
                         children.append(optical_tab)
 
             form = dbc.Form(children, style={'margin-top':'5px'})
-            tab = dbc.Tab(form, label=tab_title)
+            tab = dbc.Tab(form, label=tab_title, tab_style={'background-color': '#f7f7f7', 'border':'solid', 'border-color': '#f7f7f7', 'border-width': '1px'})
             tabs.append(tab)
 
         self.children = dbc.Tabs(tabs)
