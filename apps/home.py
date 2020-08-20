@@ -36,12 +36,12 @@ class Home(html.Div):
         ]
 
         card_dashboard = [
-            dcc.Link(href='/dashboard', children=[dbc.CardHeader("NWB Custom Dashboards")], className='cardLink'),
+            dcc.Link(href='/dashboard', children=[dbc.CardHeader("Custom Dashboards")], className='cardLink'),
             dbc.CardImg(src="/assets/logo_nwb_square.png", top=True),
             dbc.CardBody(
                 children=[
                     html.P(
-                        "Customized Dashboards",
+                        "Customized Dashboards for NWB files",
                         className="card-text",
                     ),
                 ]
@@ -71,14 +71,14 @@ class Home(html.Div):
                         dbc.Col(dbc.Card(card_nwb, color="secondary", outline=True), lg=2, md=6),
                     ],
                     className="mb-4",
-                    style={'justify-content': 'space-between'}
+                    style={'justify-content': 'center'}
                 ),
             ], fluid=True
         )
 
         self.children = [
             html.Br(),
-            dbc.Col(html.H2('NWB Web GUI', className='header'), width={"offset": 1}),
+            html.H1('NWB Web GUI', style={'text-align': 'center'}),
             html.Br(),
             html.Hr(),
             row_of_cards
