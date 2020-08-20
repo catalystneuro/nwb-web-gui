@@ -82,11 +82,6 @@
                         "name": "OpticalChannel_R",
                         "description": "R Optical Channel",
                         "emission_lambda": 633.0
-                    },
-                    {
-                        "name": "OpticalChannel_R2",
-                        "description": "R2 Optical Channel",
-                        "emission_lambda": 633.0
                     }
                 ]
             }

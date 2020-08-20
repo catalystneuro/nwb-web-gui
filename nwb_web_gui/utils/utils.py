@@ -19,19 +19,19 @@ map_name_to_class = {
 }
 
 map_input_form_schema = {
-    "input_files": {
+    "source_data": {
         "required": [],
         "type": "object",
         "additionalProperties": True,
-        "title": "Input Files",
-        "description": "Source files with data to be converted",
+        "title": "Source data",
+        "description": "Source data to be converted",
         "properties": {}
     },
-    "boolean_options": {
+    "conversion_options": {
         "required": [],
         "type": "object",
         "additionalProperties": True,
-        "title": "Options",
+        "title": "Conversion options",
         "description": "Conversion options",
         "properties": {}
     }
@@ -70,7 +70,11 @@ def iter_metadata(metadata_json, parent_app, parent_name=None, forms=[], inputs_
         elif k in map_input_form_schema.keys():
             item_schema = map_input_form_schema[k]
             schema = get_inputs_additional_properties(v, item_schema, k)
-            form = SingleForm(v, schema[k], parent_app, k)
+            form = SingleForm(
+                value=v,
+                base_schema=schema[k],
+                parent_app=parent_app,
+                item_name=map_input_form_schema[k]['title'])
             inputs_forms.append(form)
         else:
             iter_metadata(v, parent_app, parent_name=k, forms=forms, inputs_forms=inputs_forms)

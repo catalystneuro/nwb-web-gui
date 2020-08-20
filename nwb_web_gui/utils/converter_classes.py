@@ -16,7 +16,7 @@ class FormItem(dbc.FormGroup):
         self.parent_app = parent_app
         self.className = 'item'
 
-        if 'input_files' in input_id or 'boolean_options' in input_id:
+        if 'source_data' in input_id or 'conversion_options' in input_id:
             self.children = dbc.Row([
                 dbc.Col(
                     label,

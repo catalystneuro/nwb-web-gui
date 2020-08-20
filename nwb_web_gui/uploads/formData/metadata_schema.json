@@ -17,8 +17,7 @@
                 "default": "ADDME"
             },
             "session_start_time": {
-                "type": "string",
-                "format": "date-time",
+                "type": "datetime",
                 "description": "the start date and time of the recording session",
                 "default": ""
             },
