@@ -8,7 +8,7 @@ import json
 import datetime
 from .utils.converter_utils import iter_fields, format_schema, instance_to_forms
 from .utils.utils import get_form_from_metadata
-from .utils.file_picker import make_upload_file
+from .utils.file_picker import make_upload_file, make_json_file_buttons
 
 
 class ConverterForms(html.Div):
@@ -19,26 +19,27 @@ class ConverterForms(html.Div):
         self.input_forms = ''
         self.conversion_button = ''
 
-        upload_schema = make_upload_file('upload_schema')
-        upload_inputs = make_upload_file('upload_inputs')
+        json_buttons_source = make_json_file_buttons(id_suffix='source')
+        json_buttons_metadata = make_json_file_buttons(id_suffix='metadata')
 
         self.children = dbc.Container([
-            html.H1("NWB Conversion Forms", style={'text-align': 'center', 'margin-top': '2%'}),
             html.Br(),
+            html.H1("NWB Converter", style={'text-align': 'center'}),
             dbc.Label(id='warnings', color='danger'),
+            html.Hr(),
             dbc.Row([
                 dbc.Col([
-                    html.H3('Inputs Forms'),
-                    upload_inputs,
-                    html.Br(),
-                    html.Div(id='inputs_forms_div'),
-                ], lg=6),
+                    html.H3('Source data'),
+                    json_buttons_source,
+                    html.Hr(),
+                    html.Div(id='source_data_div'),
+                ], lg=4),
                 dbc.Col([
-                    html.H3('Metadata Forms'),
-                    upload_schema,
-                    html.Br(),
+                    html.H3('Metadata'),
+                    json_buttons_metadata,
+                    html.Hr(),
                     html.Div(id='metadata_forms_div'),
-                ], lg=6)
+                ], lg=8)
             ]),
             html.Br(),
             dbc.Row(
@@ -54,22 +55,25 @@ class ConverterForms(html.Div):
         self.forms_ids = ['']
 
         @self.parent_app.callback(
-            [   
+            [
                 Output('metadata_forms_div', 'children'),
-                Output('inputs_forms_div', 'children'),
+                Output('source_data_div', 'children'),
                 Output('button_row', 'children'),
                 Output('warnings', 'children')
             ],
-            [Input("upload_schema", "contents"), Input("upload_inputs", "contents")],
+            [
+                Input("load_json_source", "contents"),
+                Input("load_json_metadata", "contents")
+            ],
         )
         def load_metadata(*args):
             ctx = dash.callback_context
             source = ctx.triggered[0]['prop_id'].split('.')[0]
             contents = None
 
-            if source == 'upload_schema':
+            if source == 'load_json_source':
                 contents = args[0]
-            elif source == 'upload_inputs':
+            elif source == 'load_json_metadata':
                 contents = args[1]
 
             if isinstance(contents, str):
@@ -77,25 +81,24 @@ class ConverterForms(html.Div):
                 bs4decode = base64.b64decode(content_string)
                 json_string = bs4decode.decode('utf8').replace("'", '"')
                 metadata_json = json.loads(json_string)
-            if source == 'upload_schema':
+
+            if source == 'load_json_metadata':
                 form_tabs = get_form_from_metadata(metadata_json, self.parent_app)
                 if isinstance(form_tabs, list):
                     return '', '', '', 'Something went wrong'
 
                 layout_children = [
-                    html.Hr(),
                     form_tabs
                 ]
                 self.metadata_forms = html.Div(layout_children)
                 self.conversion_button = dbc.Button('Run conversion', id='button_run_conversion')
 
                 return self.metadata_forms, self.input_forms, self.conversion_button, ''
-            elif source == 'upload_inputs':
+
+            elif source == 'load_json_source':
                 form_tabs = get_form_from_metadata(metadata_json, self.parent_app)
                 if isinstance(form_tabs, list):
-                    layout_children = [
-                        html.Hr(),
-                    ]
+                    layout_children = []
                     layout_children.extend([f for f in form_tabs])
                     self.input_forms = html.Div(layout_children)
                     self.conversion_button = dbc.Button('Run conversion', id='button_run_conversion')

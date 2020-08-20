@@ -32,8 +32,11 @@ class Viewer(html.Div):
         filepicker = make_file_picker(id_suffix='voila')
 
         self.children = [
+            html.Br(),
             html.H1('NWB File Viewer', style={'text-align': 'center'}),
             html.Br(),
+            html.Hr(),
+
             filepicker,
             html.Br(),
             html.Div(id='uploaded_voila_nwb', style={'justify-content': 'center', 'text-align': 'center'}),
