@@ -80,10 +80,10 @@ class ConverterForms(html.Div):
                 content_type, content_string = contents.split(',')
                 bs4decode = base64.b64decode(content_string)
                 json_string = bs4decode.decode('utf8').replace("'", '"')
-                metadata_json = json.loads(json_string)
+                data_json = json.loads(json_string)
 
             if source == 'load_json_metadata':
-                form_tabs = get_form_from_metadata(metadata_json, self.parent_app)
+                form_tabs = get_form_from_metadata(data_json, self.parent_app)
                 if isinstance(form_tabs, list):
                     return '', '', '', 'Something went wrong'
 
@@ -96,7 +96,7 @@ class ConverterForms(html.Div):
                 return self.metadata_forms, self.input_forms, self.conversion_button, ''
 
             elif source == 'load_json_source':
-                form_tabs = get_form_from_metadata(metadata_json, self.parent_app)
+                form_tabs = get_form_from_metadata(data_json, self.parent_app)
                 if isinstance(form_tabs, list):
                     layout_children = []
                     layout_children.extend([f for f in form_tabs])

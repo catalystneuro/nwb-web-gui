@@ -1,10 +1,10 @@
 {
-		"input_files": {
+		"source_data": {
 				"raw_data": "path/to/file",
 				"processed_data": "path/to/file",
 				"ref image": "path/to/file"
 		},
-		"boolean_options": {
+		"conversion_options": {
 				"add_raw": true,
 				"add_processed": false,
 				"add_behavior": true
