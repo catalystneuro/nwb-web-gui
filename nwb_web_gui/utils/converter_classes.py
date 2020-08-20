@@ -75,7 +75,7 @@ class SingleForm(dbc.Form):
                     )
                 elif schema_v['type'] == 'string':
                     form_input = dbc.Input(
-                        placeholder=value[schema_k],
+                        value=value[schema_k],
                         id=input_id,
                         className='string_input'
                     )
@@ -119,7 +119,7 @@ class CompositeForm(html.Div):
 
                 if k in base_schema['properties'].keys():
                     if isinstance(v, str) or isinstance(v, float) or isinstance(v, int):
-                        form_input = dbc.Input(placeholder=v, id=input_id, className='string_input')
+                        form_input = dbc.Input(value=v, id=input_id, className='string_input')
                         label = dbc.Label(k, id=label_id)
                         form_group = FormItem(label, form_input, parent_app=parent_app, label_id=label_id, input_id=input_id)
                         children.append(form_group)
@@ -146,7 +146,7 @@ class CompositeForm(html.Div):
                             for key_optical, val in element.items():
                                 input_id = f'input_{parent_name}_{k}_{key_optical}_{index}'
                                 label_id = f'label_{parent_name}_{k}_{key_optical}_{index}'
-                                form_input = dbc.Input(placeholder=val, id=input_id, className='string_input')
+                                form_input = dbc.Input(value=val, id=input_id, className='string_input')
                                 label = dbc.Label(key_optical, id=label_id)
                                 form_group = FormItem(label, form_input, parent_app=parent_app, label_id=label_id, input_id=input_id)
                                 optical_children.append(form_group)
