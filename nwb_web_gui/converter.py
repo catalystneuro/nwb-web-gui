@@ -54,7 +54,7 @@ class ConverterForms(html.Div):
         self.forms_ids = ['']
 
         @self.parent_app.callback(
-            [   
+            [
                 Output('metadata_forms_div', 'children'),
                 Output('inputs_forms_div', 'children'),
                 Output('button_row', 'children'),
