@@ -31,8 +31,11 @@ def create_dash_app():
             __name__,
             external_stylesheets=external_stylesheets,
             suppress_callback_exceptions=True,
-            server=server
+            server=server,
+            title='NWB GUI'
         )
+
+        dash_app.enable_dev_tools(debug=True)
 
         # Create Initial page layout
         render_home(dash_app)

@@ -10,7 +10,7 @@ class Home(html.Div):
         self.parent_app = parent_app
 
         card_converter = [
-            dcc.Link(href='/converter', children=[dbc.CardHeader("NWB Converter Forms")], className='cardLink'),
+            dcc.Link(href='/converter', children=[dbc.CardHeader("NWB Converter")], className='cardLink'),
             dbc.CardImg(src="/assets/logo_nwb_square.png", top=True),
             dbc.CardBody(
                 children=[
