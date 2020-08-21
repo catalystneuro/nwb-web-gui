@@ -171,11 +171,23 @@ class CompositeForm(html.Div):
                                 optical_children.append(form_group)
 
                             form = dbc.Form(optical_children, style={'margin-top': '5px'})
-                            tab = dbc.Tab(form, label='Optical_Channel_{}'.format(index), tab_style={'background-color': '#f7f7f7', 'border':'solid', 'border-color': '#f7f7f7', 'border-width': '1px'})
-                            optical_tabs.append(tab)
+                            optical_card = dbc.Card(
+                                [
+                                    dbc.CardBody(form)
+                                ]
+                            )
 
-                        optical_tab = dbc.Tabs(optical_tabs)
-                        children.append(optical_tab)
+                            optical_div = dbc.Row([
+                                dbc.Col(f'{k}', md=2, style={'justify-content': 'left', 'text-align': 'left'}),
+                                dbc.Col(optical_card, md=10)
+                            ])
+                            children.append(optical_div)
+
+                            #tab = dbc.Tab(form, label='Optical_Channel_{}'.format(index), tab_style={'background-color': '#f7f7f7', 'border':'solid', 'border-color': '#f7f7f7', 'border-width': '1px'})
+                            #optical_tabs.append(tab)
+
+                        #optical_tab = dbc.Tabs(optical_tabs)
+                        #children.append(optical_tab)
 
             form = dbc.Form(children, style={'margin-top':'5px'})
             tab = dbc.Tab(form, label=tab_title, tab_style={'background-color': '#f7f7f7', 'border':'solid', 'border-color': '#f7f7f7', 'border-width': '1px'})
