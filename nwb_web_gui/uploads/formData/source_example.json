@@ -1,12 +1,21 @@
 {
-		"source_data": {
-				"raw_data": "path/to/file",
-				"processed_data": "path/to/file",
-				"ref_image": "path/to/file"
+	"source_data": {
+		"raw_data": {
+			"path": "path/to/file",
+			"type": "file"
 		},
-		"conversion_options": {
-				"add_raw": true,
-				"add_processed": false,
-				"add_behavior": true
+		"processed_data": {
+			"path": "path/to/file",
+			"type": "dir"
+		},
+		"ref_image": {
+			"path": "path/to/file",
+			"type": "file"
 		}
+	},
+	"conversion_options": {
+		"add_raw": true,
+		"add_processed": false,
+		"add_behavior": true
+	}
 }
