@@ -57,6 +57,11 @@ class SingleForm(dbc.Form):
         required_fields = base_schema['required']
         children = []
 
+        if 'Source' in item_name or 'Conversion' in item_name:
+            prefix = 'source'
+        else:
+            prefix = 'metadata'
+
         self.id = item_name
         item_name = item_name.replace(' ', '_').lower()
 
@@ -67,19 +72,20 @@ class SingleForm(dbc.Form):
                 hidden_id = f'hidden_{item_name}_{schema_k}'
                 if 'format' in schema_v and schema_v['format'] == 'date-time':
                     form_input = DateTimePicker(
-                        id=input_id,
+                        id={'name': f'{prefix}-date-input', 'index': input_id},
                         value=value[schema_k],
                         style={"border": "solid 1px", "border-color": "#ced4da", "border-radius": "5px", "color": '#545057'}
                     )
                 elif schema_v['type'] == 'string':
                     form_input = dbc.Input(
                         value=value[schema_k],
-                        id=input_id,
-                        className='string_input'
+                        id={'name': f'{prefix}-string-input', 'index': input_id},
+                        className='string_input',
+                        type='input'
                     )
                 elif schema_v['type'] == 'boolean':
                     form_input = dbc.Checkbox(
-                        id=input_id, className="form-check-input"
+                        id={'name': f'{prefix}-boolean-input', 'index':input_id}, className="form-check-input"
                     ),
 
                 label = dbc.Label(schema_k, id=label_id)

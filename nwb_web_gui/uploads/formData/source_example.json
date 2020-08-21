@@ -2,7 +2,7 @@
 		"source_data": {
 				"raw_data": "path/to/file",
 				"processed_data": "path/to/file",
-				"ref image": "path/to/file"
+				"ref_image": "path/to/file"
 		},
 		"conversion_options": {
 				"add_raw": true,

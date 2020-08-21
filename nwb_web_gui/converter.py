@@ -1,13 +1,13 @@
 import dash
 import dash_html_components as html
 import dash_core_components as dcc
-from dash.dependencies import Input, Output, State
+from dash.dependencies import Input, Output, State, ALL
 import dash_bootstrap_components as dbc
 import base64
 import json
 import datetime
 from .utils.converter_utils import iter_fields, format_schema, instance_to_forms
-from .utils.utils import get_form_from_metadata
+from .utils.utils import get_form_from_metadata, edit_output_form
 from .utils.file_picker import make_upload_file, make_json_file_buttons
 
 
@@ -18,6 +18,8 @@ class ConverterForms(html.Div):
         self.metadata_forms = ''
         self.input_forms = ''
         self.conversion_button = ''
+        self.source_json = ''
+        self.metadata_json = ''
 
         json_buttons_source = make_json_file_buttons(id_suffix='source')
         json_buttons_metadata = make_json_file_buttons(id_suffix='metadata')
@@ -47,7 +49,8 @@ class ConverterForms(html.Div):
                     id='button_row',
                     lg=12
                 )
-            )
+            ),
+            html.Div(style={'display':'none'}, id='hidden_div')
         ], fluid=True)
 
         self.style = {'text-align': 'center', 'justify-content': 'left'}
@@ -83,6 +86,7 @@ class ConverterForms(html.Div):
                 data_json = json.loads(json_string)
 
             if source == 'load_json_metadata':
+                self.metadata_json = data_json
                 form_tabs = get_form_from_metadata(data_json, self.parent_app)
                 if isinstance(form_tabs, list):
                     return '', '', '', 'Something went wrong'
@@ -96,6 +100,7 @@ class ConverterForms(html.Div):
                 return self.metadata_forms, self.input_forms, self.conversion_button, ''
 
             elif source == 'load_json_source':
+                self.source_json = data_json
                 form_tabs = get_form_from_metadata(data_json, self.parent_app)
                 if isinstance(form_tabs, list):
                     layout_children = []
@@ -109,26 +114,42 @@ class ConverterForms(html.Div):
             else:
                 return '', '', '', ''
 
+
+
+
         '''
         @self.parent_app.callback(
-            Output('noDiv', 'children'),
-            [Input('button_run_conversion', component_property='n_clicks')],
-            [State(f"{i}", "value") for i in range(0, 20)]  # states watch type for boolean fields must be "on" instead of "value" and for datetime object must be "date" instead of "value"
+            Output('hidden_div', 'children'),
+            [Input('save_json_source', 'n_clicks')],
+            [
+                State({'name': 'source-string-input', 'index': ALL}, 'value'), State({'name': 'source-string-input', 'index': ALL}, 'id'),
+                State({'name': 'source-boolean-input', 'index': ALL}, 'value'), State({'name': 'source-boolean-input', 'index': ALL}, 'id')
+
+            ]
         )
-        def submit_form(click, *args):
+        def send_source_forms(n_click, string_values, string_id, boolean_values, boolean_id):
+            print(boolean_values, boolean_id)
+            
+            if len(string_id) > 0 and len(string_values) > 0:
+                index_list = [e['index'].split('input_source_data_')[-1] for e in string_id]
 
-            form_data = {}
-            if click is not None:
-                for i, e in enumerate(args):
-                    if e is not None:
-                        form_key = '{}_{}'.format(self.forms_ids[i]['key'], self.forms_ids[i]['father_name'])
-                        form_data[form_key] = e
+                string_dict = {}
+                for idx, value in zip(index_list, string_values):
+                    string_dict[idx] = value
 
-                default_schema = format_schema(self.uploaded_schema, form_data)
+                string_dict['add_raw'] = True
+                string_dict['add_processed'] = True
+                string_dict['add_behavior'] = True
+                
+                output_form = edit_output_form(self.source_json, string_dict)
+        
 
-                # Save new json shema (tests)
-                with open('output_schema.json', 'w') as inp:
-                    json.dump(default_schema, inp, indent=4)
+        @self.parent_app.callback(
+            Output('hidden_div2', 'children'),
+            [Input('save_json_metadata', 'n_clicks')]
+        )
+        def send_metadata_forms(n_click):
+            pass
         '''
 
     def clean_converter_forms(self):

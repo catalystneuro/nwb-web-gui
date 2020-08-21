@@ -106,3 +106,14 @@ def get_form_from_metadata(metadata_json, parent_app):
         form_tabs = cards
 
     return form_tabs
+
+
+def edit_output_form(output_form, data_dict):
+
+    for k, v in output_form.items():
+        if isinstance(v, dict):
+            edit_output_form(v, data_dict)
+        else:
+            output_form[k] = data_dict[k]
+
+    return output_form
