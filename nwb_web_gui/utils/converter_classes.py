@@ -66,7 +66,11 @@ class SingleForm(dbc.Form):
                 input_id = f'input_{item_name}_{schema_k}'
                 hidden_id = f'hidden_{item_name}_{schema_k}'
                 if 'format' in schema_v and schema_v['format'] == 'date-time':
-                    form_input = DateTimePicker(id=input_id, value=value[schema_k], style={"border":"solid 1px","border-color": "#ced4da", "border-radius": "5px", "color": '#545057'})
+                    form_input = DateTimePicker(
+                        id=input_id,
+                        value=value[schema_k],
+                        style={"border": "solid 1px", "border-color": "#ced4da", "border-radius": "5px", "color": '#545057'}
+                    )
                 elif schema_v['type'] == 'string':
                     form_input = dbc.Input(
                         value=value[schema_k],
