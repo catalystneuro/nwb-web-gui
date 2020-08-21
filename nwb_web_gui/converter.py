@@ -6,9 +6,8 @@ import dash_bootstrap_components as dbc
 import base64
 import json
 import datetime
-from .utils.converter_utils import iter_fields, format_schema, instance_to_forms
-from .utils.utils import get_form_from_metadata
-from .utils.file_picker import make_upload_file, make_json_file_buttons
+from nwb_web_gui.utils.utils import get_form_from_metadata
+from nwb_web_gui.utils.file_picker import make_upload_file, make_json_file_buttons
 
 
 class ConverterForms(html.Div):
