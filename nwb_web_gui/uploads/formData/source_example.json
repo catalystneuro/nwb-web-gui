@@ -1,8 +1,8 @@
 {
 		"source_data": {
-				"raw_data": "path/to/file",
-				"processed_data": "path/to/file",
-				"ref image": "path/to/file"
+				"raw_data": {"path": "path/to/file", "type": "file"},
+				"processed_data": {"path": "path/to/file", "type": "dir"},
+				"ref image": {"path": "path/to/file", "type": "file"}
 		},
 		"conversion_options": {
 				"add_raw": true,
