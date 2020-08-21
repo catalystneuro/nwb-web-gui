@@ -39,7 +39,6 @@ class FormItem(dbc.FormGroup):
                 )
             ])
 
-
         '''
         @self.parent_app.callback(
             State(input_id, "value")
@@ -59,6 +58,7 @@ class SingleForm(dbc.Form):
         children = []
 
         self.id = item_name
+        item_name = item_name.replace(' ', '_').lower()
 
         for schema_k, schema_v in base_schema['properties'].items():
             if schema_k in value.keys():
@@ -78,9 +78,8 @@ class SingleForm(dbc.Form):
                         className='string_input'
                     )
                 elif schema_v['type'] == 'boolean':
-                    form_input = daq.BooleanSwitch(
-                        id=input_id,
-                        on=schema_v['default']
+                    form_input = dbc.Checkbox(
+                        id=input_id, className="form-check-input"
                     ),
 
                 label = dbc.Label(schema_k, id=label_id)
