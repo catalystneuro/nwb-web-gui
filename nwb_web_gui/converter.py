@@ -7,7 +7,7 @@ import base64
 import json
 import datetime
 from nwb_web_gui.utils.utils import get_form_from_metadata
-from nwb_web_gui.utils.file_picker import make_upload_file, make_json_file_buttons
+from nwb_web_gui.utils.make_components import make_upload_file, make_json_file_buttons, make_modal
 
 
 class ConverterForms(html.Div):
@@ -22,6 +22,7 @@ class ConverterForms(html.Div):
 
         json_buttons_source = make_json_file_buttons(id_suffix='source')
         json_buttons_metadata = make_json_file_buttons(id_suffix='metadata')
+        modal = make_modal()
 
         self.children = dbc.Container([
             html.Br(),
@@ -49,6 +50,7 @@ class ConverterForms(html.Div):
                     lg=12
                 )
             ),
+            modal,
             html.Div(style={'display':'none'}, id='hidden_div')
         ], fluid=True)
 
@@ -112,6 +114,21 @@ class ConverterForms(html.Div):
                     return '', '', '', 'Something went wrong'
             else:
                 return '', '', '', ''
+
+
+        @self.parent_app.callback(
+            Output('modal_explorer', 'is_open'),
+            [Input({'name': 'source_explorer', 'index': ALL}, 'n_clicks'), Input('close_explorer_modal', 'n_clicks')],
+            [State("modal_explorer", "is_open")]
+        )
+        def open_explorer(click_open, click_close, is_open):
+            ctx = dash.callback_context
+            source = ctx.triggered[0]['prop_id'].split('.')[0]
+
+            if source != '' and (any(click_open) or click_close):
+                return not is_open
+            else:
+                return is_open
 
 
 

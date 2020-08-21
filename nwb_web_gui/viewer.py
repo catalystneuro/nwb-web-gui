@@ -1,4 +1,4 @@
-from .utils.file_picker import make_file_picker
+from .utils.make_components import make_file_picker
 
 import dash_core_components as dcc
 import dash_html_components as html

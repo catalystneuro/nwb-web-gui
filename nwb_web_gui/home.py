@@ -79,41 +79,6 @@ class Home(html.Div):
             ], fluid=True
         )
 
-        """ File Explorer Example """
-        file_schema = [{'key': 'nwb_files/example_file.nwb', 'modified': datetime.utcnow(), 'size': 1.5 * 1024 * 1024}]
-        explorer = dbc.Container(
-            dbc.Row(
-                dbc.Col(
-                    FileExplorer(
-                        id='explorer',
-                        value=file_schema
-                    ),
-                    lg=8
-                ),
-                style={'justify-content': 'center'}
-            ),
-            fluid=True
-        )
-
-        modal = dbc.Container(
-            dbc.Row(
-                [
-                    dbc.Button("Open File Explorer", id="open"),
-                    dbc.Modal(
-                        [
-                            dbc.ModalHeader("Header"),
-                            dbc.ModalBody(explorer),
-                            dbc.ModalFooter(
-                                dbc.Button("Close", id="close", className="ml-auto")
-                            ),
-                        ],
-                        id="modal",
-                        size="xl"
-                    ),
-                ], style={'justify-content': 'center'}
-            )
-        )
-
         self.children = [
             html.Br(),
             html.H1('NWB Web GUI', style={'text-align': 'center'}),
@@ -121,7 +86,6 @@ class Home(html.Div):
             html.Hr(),
             row_of_cards,
             html.Br(),
-            modal
         ]
 
         @self.parent_app.callback(

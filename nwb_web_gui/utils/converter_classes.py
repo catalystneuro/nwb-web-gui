@@ -10,11 +10,16 @@ from date_time_picker import DateTimePicker
 class FormItem(dbc.FormGroup):
     """Custom form group instance"""
 
-    def __init__(self, label, form_input, parent_app, label_id, input_id):
+    def __init__(self, label, form_input, parent_app, label_id, input_id, add_explorer=False):
         super().__init__([])
 
         self.parent_app = parent_app
         self.className = 'item'
+
+        if add_explorer:
+            explorer = dbc.Button(id={'name': 'source_explorer', 'index': input_id.replace('input', 'explorer')}, children=[html.I(className="far fa-folder")], style={'background-color': 'transparent', 'color': 'black', 'border': 'none'})
+        else:
+            explorer = ''
 
         if 'source_data' in input_id or 'conversion_options' in input_id:
             self.children = dbc.Row([
@@ -22,10 +27,12 @@ class FormItem(dbc.FormGroup):
                     label,
                     width={'size': 4, 'offset': 0}
                 ),
-                dbc.Col(
-                    form_input,
-                    width={'size': 8, 'offset': 0}
-                )
+                dbc.Col([
+                        form_input
+                    ],
+                    width={'size': 6, 'offset': 0}
+                ),
+                dbc.Col([explorer], width={'size': 1})
             ])
         else:
             self.children = dbc.Row([
@@ -76,9 +83,16 @@ class SingleForm(dbc.Form):
                         value=value[schema_k],
                         style={"border": "solid 1px", "border-color": "#ced4da", "border-radius": "5px", "color": '#545057'}
                     )
+                    add_explorer = False
                 elif schema_v['type'] == 'string':
+                    if isinstance(value[schema_k], dict):
+                        default = value[schema_k]['path']
+                        add_explorer = True
+                    else:
+                        default = value[schema_k]
+                        add_explorer = False
                     form_input = dbc.Input(
-                        value=value[schema_k],
+                        value=default,
                         id={'name': f'{prefix}-string-input', 'index': input_id},
                         className='string_input',
                         type='input'
@@ -86,7 +100,8 @@ class SingleForm(dbc.Form):
                 elif schema_v['type'] == 'boolean':
                     form_input = dbc.Checkbox(
                         id={'name': f'{prefix}-boolean-input', 'index':input_id}, className="form-check-input"
-                    ),
+                    )
+                    add_explorer = False
 
                 label = dbc.Label(schema_k, id=label_id)
 
@@ -95,7 +110,8 @@ class SingleForm(dbc.Form):
                     form_input,
                     parent_app=parent_app,
                     label_id=label_id,
-                    input_id=input_id
+                    input_id=input_id,
+                    add_explorer=add_explorer
                 )
                 children.append(form_group)
 

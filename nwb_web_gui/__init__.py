@@ -26,7 +26,8 @@ def create_dash_app():
     )
 
     with server.app_context():
-        external_stylesheets = [dbc.themes.BOOTSTRAP]
+        FONT_AWESOME = "https://use.fontawesome.com/releases/v5.7.2/css/all.css"
+        external_stylesheets = [dbc.themes.BOOTSTRAP, FONT_AWESOME]
         dash_app = dash.Dash(
             __name__,
             external_stylesheets=external_stylesheets,

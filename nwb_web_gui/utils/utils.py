@@ -41,11 +41,12 @@ map_input_form_schema = {
 def get_inputs_additional_properties(value, base_schema, item_name):
 
     for k, v in value.items():
-        if isinstance(v, str):
+        if isinstance(v, dict):
             v_type = 'string'
+            base_schema['properties'][k] = {'type': v_type, 'default': v['path']}
         elif isinstance(v, bool):
             v_type = 'boolean'
-        base_schema['properties'][k] = {'type': v_type, 'default': v}
+            base_schema['properties'][k] = {'type': v_type, 'default': v}
 
     schema = {item_name: base_schema}
     return schema
