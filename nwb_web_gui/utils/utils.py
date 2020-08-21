@@ -112,9 +112,13 @@ def get_form_from_metadata(metadata_json, parent_app):
 def edit_output_form(output_form, data_dict):
 
     for k, v in output_form.items():
-        if isinstance(v, dict):
+        if isinstance(v, dict) and 'path' not in v:
             edit_output_form(v, data_dict)
         else:
-            output_form[k] = data_dict[k]
+            if isinstance(v, dict):
+                v['path'] = data_dict[k]
+            else:
+                output_form[k] = data_dict[k]
+
 
     return output_form

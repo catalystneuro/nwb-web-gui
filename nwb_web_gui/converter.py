@@ -6,7 +6,7 @@ import dash_bootstrap_components as dbc
 import base64
 import json
 import datetime
-from nwb_web_gui.utils.utils import get_form_from_metadata
+from nwb_web_gui.utils.utils import get_form_from_metadata, edit_output_form
 from nwb_web_gui.utils.make_components import make_upload_file, make_json_file_buttons, make_modal
 
 
@@ -115,7 +115,6 @@ class ConverterForms(html.Div):
             else:
                 return '', '', '', ''
 
-
         @self.parent_app.callback(
             Output('modal_explorer', 'is_open'),
             [Input({'name': 'source_explorer', 'index': ALL}, 'n_clicks'), Input('close_explorer_modal', 'n_clicks')],
@@ -130,10 +129,6 @@ class ConverterForms(html.Div):
             else:
                 return is_open
 
-
-
-
-        '''
         @self.parent_app.callback(
             Output('hidden_div', 'children'),
             [Input('save_json_source', 'n_clicks')],
@@ -144,8 +139,7 @@ class ConverterForms(html.Div):
             ]
         )
         def send_source_forms(n_click, string_values, string_id, boolean_values, boolean_id):
-            print(boolean_values, boolean_id)
-            
+
             if len(string_id) > 0 and len(string_values) > 0:
                 index_list = [e['index'].split('input_source_data_')[-1] for e in string_id]
 
@@ -153,12 +147,18 @@ class ConverterForms(html.Div):
                 for idx, value in zip(index_list, string_values):
                     string_dict[idx] = value
 
+                # Value for test
                 string_dict['add_raw'] = True
                 string_dict['add_processed'] = True
                 string_dict['add_behavior'] = True
-                
+
                 output_form = edit_output_form(self.source_json, string_dict)
-        
+
+                self.output_form = output_form
+
+                with open('output_source.json', 'w') as output:
+                    json.dump(self.output_form, output, indent=4)
+
 
         @self.parent_app.callback(
             Output('hidden_div2', 'children'),
@@ -166,7 +166,6 @@ class ConverterForms(html.Div):
         )
         def send_metadata_forms(n_click):
             pass
-        '''
 
     def clean_converter_forms(self):
         self.metadata_forms = ''
