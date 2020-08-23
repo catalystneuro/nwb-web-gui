@@ -1,5 +1,5 @@
-from .dashboards.allen_dash import AllenDashboard
-from .utils.make_components import make_file_picker
+from nwb_web_gui.dashboards.allen_dash import AllenDashboard
+from nwb_web_gui.utils.make_components import make_file_picker
 
 import dash_core_components as dcc
 import dash_html_components as html
