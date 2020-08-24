@@ -33,10 +33,6 @@ class Viewer(html.Div):
 
         self.children = [
             html.Br(),
-            html.H1('NWB File Viewer', style={'text-align': 'center'}),
-            html.Br(),
-            html.Hr(),
-
             filepicker,
             html.Br(),
             html.Div(id='uploaded_voila_nwb', style={'justify-content': 'center', 'text-align': 'center'}),

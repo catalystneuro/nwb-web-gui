@@ -21,6 +21,7 @@ class Dashboard(html.Div):
         dashboard = AllenDashboard(parent_app=self.parent_app, nwb=None)
 
         self.children = html.Div([
+            html.Br(),
             filepicker,
             html.Div(id='uploaded_nwb', style={'justify-content': 'center', 'text-align': 'center'}),
             html.Div(id='dashboard_div', style={'justify-content': 'center', 'text-align': 'center'})
