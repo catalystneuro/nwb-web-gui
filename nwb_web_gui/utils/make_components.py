@@ -4,8 +4,9 @@ import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output, State
 from datetime import datetime
 from file_explorer import FileExplorer
-from functools import reduce
 import os
+from pathlib import Path
+from nwb_web_gui import FILES_PATH
 
 
 def make_file_picker(id_suffix):
@@ -102,22 +103,11 @@ def make_json_file_buttons(id_suffix):
     return json_buttons
 
 
-def make_modal():
+def make_modal(parent_app):
     """ File Explorer Example """
     file_schema = [{'key': 'nwb_files/example_file.nwb', 'modified': datetime.utcnow(), 'size': 1.5 * 1024 * 1024}]
-    explorer = dbc.Container(
-        dbc.Row(
-            dbc.Col(
-                FileExplorer(
-                    id='explorer',
-                    value=file_schema
-                ),
-                lg=8
-            ),
-            style={'justify-content': 'center'}
-        ),
-        fluid=True
-    )
+    explorer = FileBrowserComponent(parent_app, 'modal')
+
     modal = dbc.Container(
         dbc.Row(
             [
@@ -139,10 +129,16 @@ def make_modal():
 
 
 class FileBrowserComponent(html.Div):
-    def __init__(self, parent_app, id_suffix):
+    def __init__(self, parent_app, id_suffix, root_dir=None):
         super().__init__([])
         self.parent_app = parent_app
         self.id_suffix = id_suffix
+        if root_dir is None:
+            self.root_dir = FILES_PATH
+        else:
+            self.root_dir = root_dir
+
+        self.make_dict_from_dir()
 
         # Button part
         input_group = dbc.InputGroup([
@@ -157,13 +153,15 @@ class FileBrowserComponent(html.Div):
         self.container = self.make_file_browser()
 
         self.children = [
-            input_group,
-            dbc.Collapse(
-                dbc.Card(dbc.CardBody(
-                    self.container
-                )),
-                id="collapse_file_browser_" + id_suffix,
-            ),
+            dbc.Container([
+                input_group,
+                dbc.Collapse(
+                    dbc.Card(dbc.CardBody(
+                        self.container
+                    )),
+                    id="collapse_file_browser_" + id_suffix,
+                ),
+            ])
         ]
 
         @self.parent_app.callback(
@@ -177,12 +175,7 @@ class FileBrowserComponent(html.Div):
             return is_open
 
     def make_file_browser(self):
-        dir_schema = [
-            {'key': 'nwb_files/example_file0.nwb', 'modified': datetime.utcnow(), 'size': 1.5 * 1024 * 1024},
-            {'key': 'nwb_files/example_file1.nwb', 'modified': datetime.utcnow(), 'size': 1.5 * 1024 * 1024},
-            {'key': 'other_files/example_file2.png', 'modified': datetime.utcnow(), 'size': 1.5 * 1024 * 1024},
-            {'key': 'other_files/example_file3.jpg', 'modified': datetime.utcnow(), 'size': 1.5 * 1024 * 1024},
-        ]
+        dir_schema = self.paths_tree
         explorer = dbc.Container(
             dbc.Row(
                 dbc.Col(
@@ -196,35 +189,36 @@ class FileBrowserComponent(html.Div):
             fluid=True
         )
 
-        container = dbc.Container(
-            [
-                dbc.Row(
-                    [
-                        dbc.Col(
-                            [
-                                explorer
-                            ],
-                            # className='col-md-4'
-                        ),
-                    ],
-                    # style={'align-items': 'center', 'justify-content': 'center', 'text-align': 'center'}
-                )
-            ]
-        )
+        return explorer
 
-        return container
-
-    def make_dict_from_dir(self, rootdir):
+    def make_dict_from_dir(self):
         """
         Creates a nested dictionary that represents the folder structure of rootdir
         ref: https://code.activestate.com/recipes/577879-create-a-nested-dictionary-from-oswalk/
         """
-        dir = {}
-        rootdir = rootdir.rstrip(os.sep)
-        start = rootdir.rfind(os.sep) + 1
-        for path, dirs, files in os.walk(rootdir):
-            folders = path[start:].split(os.sep)
-            subdir = dict.fromkeys(files)
-            parent = reduce(dict.get, folders[:-1], dir)
-            parent[folders[-1]] = subdir
-        return dir
+        keys_list = []
+
+        for path, dirs, files in os.walk(self.root_dir):
+            aux_dict = {}
+            if len(files) > 0:
+                for file in files:
+                    aux_dict = {}
+                    file_path = Path(path) / file
+
+                    mod_datetime = datetime.fromtimestamp(os.path.getmtime(file_path))
+                    delta = datetime.utcnow() - mod_datetime
+                    size = os.path.getsize(file_path)
+
+                    aux_dict['key'] = str(file_path)
+                    aux_dict['modified'] = delta.days
+                    aux_dict['size'] = size
+
+                    keys_list.append(aux_dict)
+            elif len(files) == 0 and len(dirs) == 0:
+                aux_dict = {}
+                aux_dict['key'] = path + '/'
+                aux_dict['modified'] = None
+                aux_dict['size'] = 0
+                keys_list.append(aux_dict)
+
+        self.paths_tree = keys_list

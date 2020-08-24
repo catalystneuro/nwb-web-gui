@@ -4,16 +4,17 @@ import dash_bootstrap_components as dbc
 import dash_html_components as html
 import dash
 from dash.dependencies import Input, Output, State
+from pathlib import Path
+
+PUBLIC_IP = os.getenv('PUBLIC_IP')
+PUBLIC_IP = '0.0.0.0'
+FILES_PATH = Path.cwd() / 'files'
 
 from nwb_web_gui.converter import ConverterForms
 from nwb_web_gui.viewer import Viewer
 from nwb_web_gui.dashboard import Dashboard
 from nwb_web_gui.home import Home
 from nwb_web_gui.components.main_components import render_home
-
-
-PUBLIC_IP = os.getenv('PUBLIC_IP')
-PUBLIC_IP = '0.0.0.0'
 
 
 def create_dash_app():
@@ -24,6 +25,7 @@ def create_dash_app():
     server.config.update(
         PUBLIC_IP=PUBLIC_IP,
     )
+
 
     with server.app_context():
         FONT_AWESOME = "https://use.fontawesome.com/releases/v5.7.2/css/all.css"

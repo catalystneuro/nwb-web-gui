@@ -22,7 +22,7 @@ class ConverterForms(html.Div):
 
         json_buttons_source = make_json_file_buttons(id_suffix='source')
         json_buttons_metadata = make_json_file_buttons(id_suffix='metadata')
-        modal = make_modal()
+        modal = make_modal(parent_app)
 
         self.children = dbc.Container(
             [
