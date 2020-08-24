@@ -1,4 +1,4 @@
-from .utils.make_components import make_file_picker
+from .utils.make_components import make_file_picker, FileBrowserComponent
 
 import dash_core_components as dcc
 import dash_html_components as html
@@ -29,11 +29,13 @@ class Viewer(html.Div):
         self.nwb_file = None
 
         # Viewer page layout
-        filepicker = make_file_picker(id_suffix='voila')
+        # filepicker = make_file_picker(id_suffix='voila')
+        direxplorer = FileBrowserComponent(parent_app=parent_app, id_suffix='viewer')
 
         self.children = [
             html.Br(),
-            filepicker,
+            # filepicker,
+            direxplorer,
             html.Br(),
             html.Div(id='uploaded_voila_nwb', style={'justify-content': 'center', 'text-align': 'center'}),
             html.Div(id='voila_div', style={'justify-content': 'center', 'text-align': 'center'})
