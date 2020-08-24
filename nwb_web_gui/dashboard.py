@@ -46,6 +46,7 @@ class Dashboard(html.Div):
                     nwbfile = io.read()
                     # Dashboard
                     dashboard = AllenDashboard(parent_app=self.parent_app, nwb=nwbfile)
+                    dashboard.start_dashboard()
                     return 'NWB Loaded', dashboard
                 else:
                     return 'Must be NWB file', ''

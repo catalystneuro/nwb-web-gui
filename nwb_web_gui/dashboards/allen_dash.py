@@ -152,9 +152,9 @@ class TiffImageSeriesComponent(html.Div):
                 path_ext_file = Path(file_path)
 
             # Get Frames dimensions
-            tif = TiffFile(path_ext_file)
-            n_samples = len(tif.pages)
-            page = tif.pages[0]
+            tiff = TiffFile(path_ext_file)
+            n_samples = len(tiff.pages)
+            page = tiff.pages[0]
             n_y, n_x = page.shape
 
             # Read first frame
@@ -259,18 +259,18 @@ class AllenDashboard(html.Div):
                 row=2, col=1
             )
 
-            # Two photon imaging
-            self.photon_series = TiffImageSeriesComponent(
-                parent_app=self.parent_app,
-                imageseries=self.nwb.acquisition['raw_ophys'],
-                pixel_mask=self.nwb.processing['ophys'].data_interfaces['image_segmentation'].plane_segmentations['plane_segmentation'].pixel_mask[:],
-                foreign_time_window_controller=self.controller_time,
-            )
-            self.photon_series.out_fig.update_layout(
-                showlegend=False,
-                margin=dict(l=10, r=30, t=20, b=30),
-                width=300, height=300,
-            )
+            # # Two photon imaging
+            # self.photon_series = TiffImageSeriesComponent(
+            #     parent_app=self.parent_app,
+            #     imageseries=self.nwb.acquisition['raw_ophys'],
+            #     pixel_mask=self.nwb.processing['ophys'].data_interfaces['image_segmentation'].plane_segmentations['plane_segmentation'].pixel_mask[:],
+            #     foreign_time_window_controller=self.controller_time,
+            # )
+            # self.photon_series.out_fig.update_layout(
+            #     showlegend=False,
+            #     margin=dict(l=10, r=30, t=20, b=30),
+            #     width=300, height=300,
+            # )
 
         # Dashboard main layout
         self.children = [
@@ -287,10 +287,10 @@ class AllenDashboard(html.Div):
                         dcc.Graph(id='figure_traces', figure={}),
                         width=6
                     ),
-                    dbc.Col(
-                        self.photon_series,
-                        width=6
-                    )
+                    # dbc.Col(
+                    #     self.photon_series,
+                    #     width=6
+                    # )
                 ])
             ])
         ]

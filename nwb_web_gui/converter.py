@@ -7,7 +7,7 @@ import base64
 import json
 import datetime
 from nwb_web_gui.utils.utils import get_form_from_metadata, edit_output_form
-from nwb_web_gui.utils.make_components import make_upload_file, make_json_file_buttons, make_modal
+from nwb_web_gui.utils.make_components import make_json_file_buttons, make_modal
 
 
 class ConverterForms(html.Div):
@@ -24,33 +24,59 @@ class ConverterForms(html.Div):
         json_buttons_metadata = make_json_file_buttons(id_suffix='metadata')
         modal = make_modal()
 
-        self.children = dbc.Container([
-            html.Br(),
-            dbc.Label(id='warnings', color='danger'),
-            dbc.Row([
-                dbc.Col([
-                    html.H3('Source data'),
-                    json_buttons_source,
-                    html.Hr(),
-                    html.Div(id='source_data_div'),
-                ], lg=4),
-                dbc.Col([
-                    html.H3('Metadata'),
-                    json_buttons_metadata,
-                    html.Hr(),
-                    html.Div(id='metadata_forms_div'),
-                ], lg=8)
-            ]),
-            html.Br(),
-            dbc.Row(
-                dbc.Col(
-                    id='button_row',
-                    lg=12
-                )
-            ),
-            modal,
-            html.Div(style={'display':'none'}, id='hidden_div')
-        ], fluid=True)
+        self.children = dbc.Container(
+            [
+                html.Br(),
+                dbc.Label(id='warnings', color='danger'),
+                dbc.Row([
+                    dbc.Col([
+                        html.H3('Source data'),
+                        json_buttons_source,
+                        html.Hr(),
+                        dbc.Collapse(
+                            dbc.Card(dbc.CardBody(
+                                dcc.Textarea(
+                                    id='textarea_json_source',
+                                    value='The JSON data for source will come here',
+                                    disabled=True,
+                                    style={'width': '100%', 'height': 300},
+                                )
+                            )),
+                            id="collapse_json_source",
+                        ),
+                        html.Div(id='source_data_div'),
+                    ], lg=4),
+                    dbc.Col([
+                        html.H3('Metadata'),
+                        json_buttons_metadata,
+                        html.Hr(),
+                        dbc.Collapse(
+                            dbc.Card(dbc.CardBody(
+                                dcc.Textarea(
+                                    id='textarea_json_metadata',
+                                    value='The JSON data for metadata will come here',
+                                    disabled=True,
+                                    style={'width': '100%', 'height': 300},
+                                )
+                            )),
+                            id="collapse_json_metadata",
+                        ),
+                        html.Div(id='metadata_forms_div'),
+                    ], lg=8)
+                ]),
+                html.Br(),
+                dbc.Row(
+                    dbc.Col(
+                        id='button_row',
+                        lg=12
+                    )
+                ),
+                modal,
+                html.Div(style={'display': 'none'}, id='hidden_div'),
+                html.Br()
+            ],
+            fluid=True
+        )
 
         self.style = {'text-align': 'center', 'justify-content': 'left'}
 
@@ -157,13 +183,32 @@ class ConverterForms(html.Div):
                 with open('output_source.json', 'w') as output:
                     json.dump(self.output_form, output, indent=4)
 
-
         @self.parent_app.callback(
             Output('hidden_div2', 'children'),
             [Input('save_json_metadata', 'n_clicks')]
         )
         def send_metadata_forms(n_click):
             pass
+
+        @self.parent_app.callback(
+            Output("collapse_json_metadata", "is_open"),
+            [Input("show_json_metadata", "n_clicks")],
+            [State("collapse_json_metadata", "is_open")],
+        )
+        def toggle_collapse(n, is_open):
+            if n:
+                return not is_open
+            return is_open
+
+        @self.parent_app.callback(
+            Output("collapse_json_source", "is_open"),
+            [Input("show_json_source", "n_clicks")],
+            [State("collapse_json_source", "is_open")],
+        )
+        def toggle_collapse(n, is_open):
+            if n:
+                return not is_open
+            return is_open
 
     def clean_converter_forms(self):
         self.metadata_forms = ''
