@@ -67,7 +67,7 @@ def make_upload_file(id_suffix):
 
 
 def make_json_file_buttons(id_suffix):
-    """Makes JSON load and save buttons"""
+    """Makes JSON load, save and view buttons"""
     json_buttons = dbc.Container([
         dbc.Row(
             [
@@ -83,6 +83,11 @@ def make_json_file_buttons(id_suffix):
                 ),
                 dbc.Col(
                     children=[dbc.Button('Save JSON', color='dark', id='save_json_' + id_suffix)],
+                    width={'size': '30px'},
+                    style={'margin-left': '10px'}
+                ),
+                dbc.Col(
+                    children=[dbc.Button('Show JSON', color='dark', id='show_json_' + id_suffix)],
                     width={'size': '30px'},
                     style={'margin-left': '10px'}
                 ),
