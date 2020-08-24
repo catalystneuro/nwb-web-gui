@@ -37,7 +37,6 @@ class ConverterForms(html.Div):
                             dbc.Card(dbc.CardBody(
                                 dcc.Textarea(
                                     id='textarea_json_source',
-                                    value='The JSON data for source will come here',
                                     disabled=True,
                                     style={'width': '100%', 'height': 300},
                                 )
@@ -54,7 +53,6 @@ class ConverterForms(html.Div):
                             dbc.Card(dbc.CardBody(
                                 dcc.Textarea(
                                     id='textarea_json_metadata',
-                                    value='The JSON data for metadata will come here',
                                     disabled=True,
                                     style={'width': '100%', 'height': 300},
                                 )
@@ -87,7 +85,10 @@ class ConverterForms(html.Div):
                 Output('metadata_forms_div', 'children'),
                 Output('source_data_div', 'children'),
                 Output('button_row', 'children'),
-                Output('warnings', 'children')
+                Output('warnings', 'children'),
+                Output('textarea_json_metadata', 'value'),
+                Output('textarea_json_source', 'value')
+                
             ],
             [
                 Input("load_json_source", "contents"),
@@ -115,7 +116,7 @@ class ConverterForms(html.Div):
                 form_tabs = get_form_from_metadata(data_json, self.parent_app)
 
                 if form_tabs is None:
-                    return '', '', '', 'Something went wrong'
+                    return '', '', '', 'Something went wrong', '', ''
 
                 layout_children = [
                     form_tabs
@@ -123,7 +124,7 @@ class ConverterForms(html.Div):
                 self.metadata_forms = html.Div(layout_children)
                 self.conversion_button = dbc.Button('Run conversion', id='button_run_conversion')
 
-                return self.metadata_forms, self.input_forms, self.conversion_button, ''
+                return self.metadata_forms, self.input_forms, self.conversion_button, '', json.dumps(self.metadata_json, indent=4), json.dumps(self.source_json, indent=4)
 
             elif source == 'load_json_source':
                 self.source_json = data_json
@@ -134,11 +135,11 @@ class ConverterForms(html.Div):
                     self.input_forms = html.Div(layout_children)
                     self.conversion_button = dbc.Button('Run conversion', id='button_run_conversion')
 
-                    return self.metadata_forms, self.input_forms, self.conversion_button, ''
+                    return self.metadata_forms, self.input_forms, self.conversion_button, '', json.dumps(self.metadata_json, indent=4), json.dumps(self.source_json, indent=4)
                 else:
-                    return '', '', '', 'Something went wrong'
+                    return '', '', '', 'Something went wrong', '', ''
             else:
-                return '', '', '', ''
+                return '', '', '', '', 'The JSON data for metadata will come here', 'The JSON data for source will come here'
 
         @self.parent_app.callback(
             Output('modal_explorer', 'is_open'),
@@ -214,4 +215,6 @@ class ConverterForms(html.Div):
     def clean_converter_forms(self):
         self.metadata_forms = ''
         self.input_forms = ''
+        self.source_json = ''
+        self.metadata_json = ''
         self.conversion_button = ''
