@@ -54,7 +54,7 @@
                     },
                     "value": {
                         "type": "boolean",
-                        "description": "Boolean option",
+                        "description": "Boolean option"
                     }
                 }
             }

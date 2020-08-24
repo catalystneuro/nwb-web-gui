@@ -100,7 +100,7 @@ class ConverterForms(html.Div):
 
             elif source == 'load_json_source':
                 self.source_json = data_json
-                form_tabs = get_form_from_metadata(data_json, self.parent_app)
+                form_tabs = get_form_from_metadata(data_json, self.parent_app, source=True)
                 if isinstance(form_tabs, list):
                     layout_children = []
                     layout_children.extend([f for f in form_tabs])

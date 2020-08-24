@@ -10,10 +10,9 @@ from date_time_picker import DateTimePicker
 class FormItem(dbc.FormGroup):
     """Custom form group instance"""
 
-    def __init__(self, label, form_input, parent_app, label_id, input_id, add_explorer=False):
+    def __init__(self, label, form_input, label_id, input_id, add_explorer=False, source=False):
         super().__init__([])
 
-        self.parent_app = parent_app
         self.className = 'item'
 
         if add_explorer:
@@ -21,7 +20,7 @@ class FormItem(dbc.FormGroup):
         else:
             explorer = ''
 
-        if 'source_data' in input_id or 'conversion_options' in input_id:
+        if source:
             self.children = dbc.Row([
                 dbc.Col(
                     label,
@@ -55,19 +54,68 @@ class FormItem(dbc.FormGroup):
         '''
 
 
+class SourceForm(dbc.Form):
+    def __init__(self, value, base_schema, item_name):
+        super().__init__([])
+
+        required = base_schema['required']
+        children = []
+        prefix = 'source'
+
+        self.id = item_name
+
+        base_properties = base_schema['items']['properties']
+
+        for e in value:
+            for schema_k, schema_v in base_properties.items():
+                if schema_k in e:
+                    if schema_k == 'name':
+                        label_id = f'label_{item_name}_{e[schema_k]}'
+                        label = dbc.Label(e[schema_k], id=label_id)
+                    else:
+                        if schema_v['type'] == 'string' and schema_k != 'type':
+                            input_id = f'input_{item_name}_{e[schema_k]}'
+                            form_input = dbc.Input(
+                                value=e[schema_k],
+                                id={'name': f'{prefix}-string-input', 'index': input_id},
+                                className='string_input',
+                                type='input'
+                            )
+                            add_explorer = True
+
+                        elif schema_v['type'] == 'boolean' and schema_k !='type':
+                            input_id = f'input_{item_name}_{e[schema_k]}'
+                            form_input = dbc.Checkbox(
+                                id={'name': f'{prefix}-boolean-input', 'index':input_id}, className="form-check-input"
+                            )
+                            add_explorer = False
+
+                        if schema_k != 'type':
+                            form_group = FormItem(
+                                label,
+                                form_input,
+                                label_id=label_id,
+                                input_id=input_id,
+                                add_explorer=add_explorer,
+                                source=True
+                            )
+
+                            children.append(form_group)
+
+
+        self.children = html.Div(children, style={'margin-top': '5px'})
+
+
 class SingleForm(dbc.Form):
     """Single form instance"""
 
-    def __init__(self, value, base_schema, parent_app, item_name):
+    def __init__(self, value, base_schema, item_name):
         super().__init__([])
 
         required_fields = base_schema['required']
         children = []
 
-        if 'Source' in item_name or 'Conversion' in item_name:
-            prefix = 'source'
-        else:
-            prefix = 'metadata'
+        prefix = 'metadata'
 
         self.id = item_name
         item_name = item_name.replace(' ', '_').lower()
@@ -108,7 +156,6 @@ class SingleForm(dbc.Form):
                 form_group = FormItem(
                     label,
                     form_input,
-                    parent_app=parent_app,
                     label_id=label_id,
                     input_id=input_id,
                     add_explorer=add_explorer
@@ -121,7 +168,7 @@ class SingleForm(dbc.Form):
 class CompositeForm(html.Div):
     """ Composite form instance """
 
-    def __init__(self, value, key, base_schema, parent_app, parent_name):
+    def __init__(self, value, key, base_schema, parent_name):
         super().__init__([])
 
         self.parent_name = parent_name  # Ecephys, ophys etc
@@ -140,7 +187,7 @@ class CompositeForm(html.Div):
                     if isinstance(v, str) or isinstance(v, float) or isinstance(v, int):
                         form_input = dbc.Input(value=v, id=input_id, className='string_input')
                         label = dbc.Label(k, id=label_id)
-                        form_group = FormItem(label, form_input, parent_app=parent_app, label_id=label_id, input_id=input_id)
+                        form_group = FormItem(label, form_input, label_id=label_id, input_id=input_id)
                         children.append(form_group)
                     elif isinstance(v, dict):
                         label = dbc.Label(k, id=label_id)
@@ -156,7 +203,7 @@ class CompositeForm(html.Div):
                             className='dropdown_input',
                             style={"margin-bottom": '20px'}
                         )
-                        form_group = FormItem(label, form_input, parent_app=parent_app, label_id=label_id, input_id=input_id)
+                        form_group = FormItem(label, form_input, label_id=label_id, input_id=input_id)
                         children.append(form_group)
                     elif isinstance(v, list):
                         optical_tabs = []
@@ -167,7 +214,7 @@ class CompositeForm(html.Div):
                                 label_id = f'label_{parent_name}_{k}_{key_optical}_{index}'
                                 form_input = dbc.Input(value=val, id=input_id, className='string_input')
                                 label = dbc.Label(key_optical, id=label_id)
-                                form_group = FormItem(label, form_input, parent_app=parent_app, label_id=label_id, input_id=input_id)
+                                form_group = FormItem(label, form_input, label_id=label_id, input_id=input_id)
                                 optical_children.append(form_group)
 
                             form = dbc.Form(optical_children, style={'margin-top': '5px'})
