@@ -2,22 +2,20 @@
     "NWBFile": {
         "session_description": "ADDME",
         "identifier": "ADDME",
-        "session_start_time": "1900-01-01 00:00:00",
+        "session_start_time": "1900-01-01T00:00:00",
         "experimenter": "",
         "institution": ""
     },
-
     "Subject": {
         "age": "",
-        "description": "",
+        "description": "some description",
         "genotype": "",
-        "sex": "",
+        "sex": "M",
         "species": "",
-        "subject_id": "",
+        "subject_id": "ID123",
         "weight": "",
-        "date_of_birth": ""
+        "date_of_birth": "1900-01-01T00:00:00"
     },
-
     "Ecephys": {
         "Device": [
             {
@@ -46,7 +44,6 @@
             }
         ]
     },
-
     "Ophys": {
         "Device": [
             {
@@ -83,7 +80,7 @@
                 "optical_channel":[
                     {
                         "name": "OpticalChannel_R",
-                        "description": "2P Optical Channel",
+                        "description": "R Optical Channel",
                         "emission_lambda": 633.0
                     }
                 ]

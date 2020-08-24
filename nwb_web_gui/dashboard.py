@@ -1,5 +1,5 @@
-from .dashboards.allen_dash import AllenDashboard
-from .utils.file_picker import make_file_picker
+from nwb_web_gui.dashboards.allen_dash import AllenDashboard
+from nwb_web_gui.utils.make_components import make_file_picker
 
 import dash_core_components as dcc
 import dash_html_components as html
@@ -18,6 +18,7 @@ class Dashboard(html.Div):
 
         # Dashboard page layout
         filepicker = make_file_picker(id_suffix='dashboard')
+        dashboard = AllenDashboard(parent_app=self.parent_app, nwb=None)
 
         self.children = html.Div([
             filepicker,

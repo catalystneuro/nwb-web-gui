@@ -2,6 +2,8 @@ import pynwb
 import inspect
 from copy import deepcopy
 import numpy as np
+from datetime import datetime
+
 
 base_schema = dict(
     required=[],
@@ -37,6 +39,12 @@ def get_schema_from_hdmf_class(hdmf_class):
             schema_arg['properties'] = {
                 'target': {"type": "string"}
             }
+        # If item is datetime
+        elif any([it == datetime for it in item_types]):
+            schema_arg = dict(type='string', description=docval_arg['doc'], format='date-time')
+        # If item is TimeSeries - skip it
+        elif 'TimeSeries' in item_types:
+            continue
         # If item is a pynwb object
         elif any([getattr(it, '__module__', None).split('.')[0] == pynwb.__name__ for it in item_types]):
             schema_arg = dict(type='object', description=docval_arg['doc'])

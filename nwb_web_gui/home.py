@@ -1,5 +1,9 @@
 import dash_html_components as html
 import dash_bootstrap_components as dbc
+import dash_core_components as dcc
+from file_explorer import FileExplorer
+from dash.dependencies import Input, Output, State
+from datetime import datetime
 
 
 class Home(html.Div):
@@ -9,7 +13,7 @@ class Home(html.Div):
         self.parent_app = parent_app
 
         card_converter = [
-            dbc.CardHeader("NWB Converter Forms"),
+            dcc.Link(href='/converter', children=[dbc.CardHeader("NWB Converter")], className='cardLink'),
             dbc.CardImg(src="/assets/logo_nwb_square.png", top=True),
             dbc.CardBody(
                 children=[
@@ -22,7 +26,7 @@ class Home(html.Div):
         ]
 
         card_viewer = [
-            dbc.CardHeader("NWB File Viewer"),
+            dcc.Link(href='/viewer', children=[dbc.CardHeader("NWB File Viewer")], className='cardLink'),
             dbc.CardImg(src="/assets/logo_nwb_square.png", top=True),
             dbc.CardBody(
                 children=[
@@ -35,12 +39,12 @@ class Home(html.Div):
         ]
 
         card_dashboard = [
-            dbc.CardHeader("NWB Custom Dashboards"),
+            dcc.Link(href='/dashboard', children=[dbc.CardHeader("Custom Dashboards")], className='cardLink'),
             dbc.CardImg(src="/assets/logo_nwb_square.png", top=True),
             dbc.CardBody(
                 children=[
                     html.P(
-                        "Customized Dashboards",
+                        "Customized Dashboards for NWB files",
                         className="card-text",
                     ),
                 ]
@@ -48,7 +52,7 @@ class Home(html.Div):
         ]
 
         card_nwb = [
-            dbc.CardHeader("Learn NWB"),
+            html.A(href='https://www.nwb.org/', target='_blank', children=[dbc.CardHeader("Learn NWB")], className='cardLink'),
             dbc.CardImg(src="/assets/logo_nwb_square.png", top=True),
             dbc.CardBody(
                 children=[
@@ -56,28 +60,40 @@ class Home(html.Div):
                         "Resources to learn more about NWB",
                         className="card-text",
                     ),
-                ]
+                ],
             ),
         ]
 
-        row_of_cards = html.Div(
+        row_of_cards = dbc.Container(
             [
                 dbc.Row(
                     [
-                        dbc.Col(dbc.Card(card_converter, color="secondary", outline=True), width={"size": 2, "offset": 1}),
-                        dbc.Col(dbc.Card(card_viewer, color="secondary", outline=True), width={"size": 2, "offset": 0}),
-                        dbc.Col(dbc.Card(card_dashboard, color="secondary", outline=True), width={"size": 2, "offset": 0}),
-                        dbc.Col(dbc.Card(card_nwb, color="secondary", outline=True), width={"size": 2, "offset": 0}),
+                        dbc.Col(dbc.Card(card_converter, color="secondary", outline=True), lg=2, md=6),
+                        dbc.Col(dbc.Card(card_viewer, color="secondary", outline=True), lg=2, md=6),
+                        dbc.Col(dbc.Card(card_dashboard, color="secondary", outline=True), lg=2, md=6),
+                        dbc.Col(dbc.Card(card_nwb, color="secondary", outline=True), lg=2, md=6),
                     ],
                     className="mb-4",
+                    style={'justify-content': 'center'}
                 ),
-            ]
+            ], fluid=True
         )
 
         self.children = [
             html.Br(),
-            dbc.Col(html.H2('NWB Web GUI', className='header'), width={"offset": 1}),
+            html.H1('NWB Web GUI', style={'text-align': 'center'}),
             html.Br(),
             html.Hr(),
-            row_of_cards
+            row_of_cards,
+            html.Br(),
         ]
+
+        @self.parent_app.callback(
+            Output("modal", "is_open"),
+            [Input("open", "n_clicks"), Input("close", "n_clicks")],
+            [State("modal", "is_open")],
+        )
+        def toggle_modal(n1, n2, is_open):
+            if n1 or n2:
+                return not is_open
+            return is_open

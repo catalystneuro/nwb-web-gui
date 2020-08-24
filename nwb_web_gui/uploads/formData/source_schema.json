@@ -1,15 +1,15 @@
 {
-  	"input_files":{
+  	"source_data":{
   	    "required": [],
-        "type": "object",
+        "type": "array",
   	    "additionalProperties": true,
   	    "title": "Input Files",
         "description": "Source files with data to be converted",
   	    "properties": {}
     },
-    "boolean_options":{
+    "conversion_options":{
   	    "required": [],
-        "type": "object",
+        "type": "array",
   	    "additionalProperties": true,
   	    "title": "Options",
         "description": "Conversion options",

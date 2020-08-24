@@ -1,4 +1,4 @@
-from .utils.file_picker import make_file_picker
+from .utils.make_components import make_file_picker
 
 import dash_core_components as dcc
 import dash_html_components as html
@@ -32,8 +32,11 @@ class Viewer(html.Div):
         filepicker = make_file_picker(id_suffix='voila')
 
         self.children = [
+            html.Br(),
             html.H1('NWB File Viewer', style={'text-align': 'center'}),
             html.Br(),
+            html.Hr(),
+
             filepicker,
             html.Br(),
             html.Div(id='uploaded_voila_nwb', style={'justify-content': 'center', 'text-align': 'center'}),
