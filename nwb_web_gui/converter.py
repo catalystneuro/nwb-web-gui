@@ -113,7 +113,8 @@ class ConverterForms(html.Div):
             if source == 'load_json_metadata':
                 self.metadata_json = data_json
                 form_tabs = get_form_from_metadata(data_json, self.parent_app)
-                if isinstance(form_tabs, list):
+
+                if form_tabs is None:
                     return '', '', '', 'Something went wrong'
 
                 layout_children = [

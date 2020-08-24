@@ -23,6 +23,9 @@ map_name_to_class = {
 
 def iter_metadata(metadata_json, parent_app, parent_name=None, forms=[], inputs_forms=[]):
 
+    if 'source_data' in metadata_json.keys() or 'conversion_options' in metadata_json.keys():
+        return None
+
     for k, v in metadata_json.items():
         if k in map_name_to_class.keys():
             item_schema = get_schema_from_hdmf_class(hdmf_class=map_name_to_class[k])
@@ -44,6 +47,9 @@ def iter_metadata(metadata_json, parent_app, parent_name=None, forms=[], inputs_
 
 def iter_source_metadata(schema, source_json, parent_name=None, source_forms=[]):
 
+    if not 'source_data' in source_json.keys() or not 'conversion_options' in source_json.keys():
+        return None
+
     for k, v in source_json.items():
         if k in schema.keys():
             form = SourceForm(
@@ -60,12 +66,16 @@ def get_form_from_metadata(metadata_json, parent_app, source=False):
     """"""
     if not source:
         forms = iter_metadata(metadata_json, parent_app, forms=[])
+        if forms is None:
+            return forms
     else:
         schema_path = Path.cwd() / 'nwb_web_gui' / 'uploads' / 'formData' / 'source_schema.json'
         with open(schema_path, 'r') as inp:
             schema = json.load(inp)
 
         source_forms = iter_source_metadata(schema['properties'], metadata_json, parent_name=None, source_forms=[])
+        if source_forms is None:
+            return source_forms
         forms = []
 
     if len(forms) > 0:
@@ -100,3 +110,7 @@ def edit_output_form(output_form, data_dict):
                 output_form[k] = data_dict[k]
 
     return output_form
+
+
+def mount_files_json():
+    pass

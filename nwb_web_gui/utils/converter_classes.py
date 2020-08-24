@@ -45,14 +45,6 @@ class FormItem(dbc.FormGroup):
                 )
             ])
 
-        '''
-        @self.parent_app.callback(
-            State(input_id, "value")
-        )
-        def get_form_value(input_value):
-            print(input_value)
-        '''
-
 
 class SourceForm(dbc.Form):
     def __init__(self, value, base_schema, item_name):
@@ -101,7 +93,6 @@ class SourceForm(dbc.Form):
                             )
 
                             children.append(form_group)
-
 
         self.children = html.Div(children, style={'margin-top': '5px'})
 
