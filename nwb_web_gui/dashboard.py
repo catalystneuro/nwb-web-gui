@@ -1,5 +1,5 @@
 from nwb_web_gui.dashboards.allen_dash import AllenDashboard
-from nwb_web_gui.utils.make_components import make_file_picker
+from nwb_web_gui.utils.make_components import make_file_picker,  FileBrowserComponent
 
 import dash_core_components as dcc
 import dash_html_components as html
@@ -17,12 +17,14 @@ class Dashboard(html.Div):
         self.parent_app = parent_app
 
         # Dashboard page layout
-        filepicker = make_file_picker(id_suffix='dashboard')
+        #filepicker = make_file_picker(id_suffix='dashboard')
+        direxplorer = FileBrowserComponent(parent_app=parent_app, id_suffix='dashboard')
+
         dashboard = AllenDashboard(parent_app=self.parent_app, nwb=None)
 
         self.children = html.Div([
             html.Br(),
-            filepicker,
+            direxplorer,
             html.Div(id='uploaded_nwb', style={'justify-content': 'center', 'text-align': 'center'}),
             html.Div(id='dashboard_div', style={'justify-content': 'center', 'text-align': 'center'})
         ])
@@ -31,14 +33,14 @@ class Dashboard(html.Div):
 
         @self.parent_app.callback(
             [Output("uploaded_nwb", "children"), Output('dashboard_div', 'children')],
-            [Input('submit_nwb_dashboard', component_property='n_clicks')],
-            [State('nwb_dashboard', 'value')]
+            [Input('submit_file_browser_dashboard', component_property='n_clicks')],
+            [State('chosen_file_dashboard', 'value')]
         )
         def local_nwb(click, input_value):
             ctx = dash.callback_context
             source = ctx.triggered[0]['prop_id'].split('.')[0]
 
-            if source == 'submit_nwb_dashboard':
+            if source == 'submit_file_browser_dashboard':
                 nwb_path = Path(input_value)
                 if nwb_path.is_file():
                     # NWB file

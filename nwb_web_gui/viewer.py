@@ -12,7 +12,6 @@ import multiprocessing
 from nwbwidgets import nwb2widget
 import nbformat as nbf
 import os
-from nwb_web_gui import FILES_PATH
 
 
 def call_voila(run_cmd):
@@ -31,7 +30,7 @@ class Viewer(html.Div):
 
         # Viewer page layout
         # filepicker = make_file_picker(id_suffix='voila')
-        direxplorer = FileBrowserComponent(parent_app=parent_app, id_suffix='viewer', root_dir=FILES_PATH)
+        direxplorer = FileBrowserComponent(parent_app=parent_app, id_suffix='viewer')
 
         self.children = [
             html.Br(),

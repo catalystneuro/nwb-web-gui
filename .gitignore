@@ -31,6 +31,8 @@ share/python-wheels/
 *.egg
 MANIFEST
 files
+oephys_dataset_original
+temp_voila_notebook.ipynb
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
