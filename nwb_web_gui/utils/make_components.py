@@ -146,7 +146,11 @@ class FileBrowserComponent(html.Div):
                 dbc.Button('Choose NWB file', color='dark', id="button_file_browser_" + id_suffix),
                 addon_type="prepend",
             ),
-            dbc.Input(id="chosen_nwbfile_" + id_suffix, placeholder="")
+            dbc.Input(id="chosen_file_" + id_suffix, placeholder=""),
+            dbc.InputGroupAddon(
+                dbc.Button('Submit', color='dark', id=f'submit_file_browser_{id_suffix}'),
+                addon_type='prepend',
+            )
         ])
 
         # Collapsible part - file browser
@@ -165,7 +169,7 @@ class FileBrowserComponent(html.Div):
         ]
 
         @self.parent_app.callback(
-            [Output("collapse_file_browser_" + id_suffix, "is_open"), Output("chosen_nwbfile_" + id_suffix, 'value')],
+            [Output("collapse_file_browser_" + id_suffix, "is_open"), Output("chosen_file_" + id_suffix, 'value')],
             [Input("button_file_browser_" + id_suffix, "n_clicks"), Input('explorer', 'selectedPath')],
             [State("collapse_file_browser_" + id_suffix, "is_open")],
         )

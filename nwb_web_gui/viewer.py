@@ -47,19 +47,20 @@ class Viewer(html.Div):
                 Output("uploaded_voila_nwb", "children"),
                 Output('voila_div', 'children')
             ],
-            [Input('submit_nwb_voila', component_property='n_clicks')],
-            [State('nwb_voila', 'value')]
+            [Input('submit_file_browser_viewer', component_property='n_clicks')],
+            [State('chosen_file_viewer', 'value')]
         )
         def submit_nwb(click, input_value):
+
             ctx = dash.callback_context
             source = ctx.triggered[0]['prop_id'].split('.')[0]
 
-            if source == 'submit_nwb_voila':
+            if source == 'submit_file_browser_viewer':
                 nwb_path = Path(input_value)
                 if nwb_path.is_file() and str(nwb_path).endswith('.nwb'):
                     self.nwb_path = nwb_path
                     voila_address = self.run_explorer()
-                    iframe = html.Iframe(style={"min-width": "100vw", "min-height": "100vh"}, src=voila_address)
+                    iframe = html.Iframe(style={"min-width": "100vw", 'max-width': '100vw', "min-height": "100vh"}, src=voila_address)
 
                     return 'NWB Loaded', iframe
                 else:

@@ -73,9 +73,11 @@ def create_dash_app():
 
             if pathname == '/':
                 converter_layout.clean_converter_forms()
+                viewer_layout.kill_processes()
                 page = home_layout
                 navlinks_styles = [unselected, unselected, unselected]
             elif pathname == '/converter':
+                viewer_layout.kill_processes()
                 page = converter_layout
                 navlinks_styles = [selected, unselected, unselected]
             elif pathname == '/viewer':
@@ -84,6 +86,7 @@ def create_dash_app():
                 navlinks_styles = [unselected, selected, unselected]
             elif pathname == '/dashboard':
                 converter_layout.clean_converter_forms()
+                viewer_layout.kill_processes()
                 page = dashboard_layout
                 navlinks_styles = [unselected, unselected, selected]
             else:
