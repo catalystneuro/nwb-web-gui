@@ -62,11 +62,12 @@ class SourceForm(dbc.Form):
             for schema_k, schema_v in base_properties.items():
                 if schema_k in e:
                     if schema_k == 'name':
+                        name = e[schema_k]
                         label_id = f'label_{item_name}_{e[schema_k]}'
                         label = dbc.Label(e[schema_k], id=label_id)
                     else:
                         if schema_v['type'] == 'string' and schema_k != 'type':
-                            input_id = f'input_{item_name}_{e[schema_k]}'
+                            input_id = f'input_{item_name}_{name}_{schema_k}'
                             form_input = dbc.Input(
                                 value=e[schema_k],
                                 id={'name': f'{prefix}-string-input', 'index': input_id},
@@ -76,7 +77,7 @@ class SourceForm(dbc.Form):
                             add_explorer = True
 
                         elif schema_v['type'] == 'boolean' and schema_k !='type':
-                            input_id = f'input_{item_name}_{e[schema_k]}'
+                            input_id = f'input_{item_name}_{name}_{schema_k}'
                             form_input = dbc.Checkbox(
                                 id={'name': f'{prefix}-boolean-input', 'index':input_id}, className="form-check-input"
                             )

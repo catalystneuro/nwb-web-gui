@@ -1,7 +1,7 @@
 import dash
 import dash_html_components as html
 import dash_core_components as dcc
-from dash.dependencies import Input, Output, State, ALL
+from dash.dependencies import Input, Output, State, ALL, MATCH
 import dash_bootstrap_components as dbc
 import base64
 import json
@@ -19,6 +19,7 @@ class ConverterForms(html.Div):
         self.conversion_button = ''
         self.source_json = ''
         self.metadata_json = ''
+        self.current_modal_source = ''
 
         json_buttons_source = make_json_file_buttons(id_suffix='source')
         json_buttons_metadata = make_json_file_buttons(id_suffix='metadata')
@@ -71,7 +72,8 @@ class ConverterForms(html.Div):
                 ),
                 modal,
                 html.Div(style={'display': 'none'}, id='hidden_div'),
-                html.Br()
+                html.Br(),
+                html.Div(id='hidden_tests')
             ],
             fluid=True
         )
@@ -81,6 +83,25 @@ class ConverterForms(html.Div):
         self.forms_ids = ['']
 
         @self.parent_app.callback(
+            Output({'name': 'source-string-input', 'index': MATCH}, 'value'),
+            [Input('submit_file_browser_modal', 'n_clicks')],
+            [
+                State('chosen_file_modal', 'value'),
+                State({'name': 'source-string-input', 'index': MATCH}, 'value'),
+                State({'name': 'source-string-input', 'index': MATCH}, 'id'),
+            ]
+        )
+        def change_path_values(click, input_value, values, ids):
+            ctx = dash.callback_context
+            source = ctx.triggered[0]['prop_id'].split('.')[0]
+
+            if self.current_modal_source.replace('explorer', 'input') == ids['index'] and input_value != '':
+                return input_value
+            else:
+                return values
+
+
+        @self.parent_app.callback(
             [
                 Output('metadata_forms_div', 'children'),
                 Output('source_data_div', 'children'),
@@ -88,7 +109,6 @@ class ConverterForms(html.Div):
                 Output('warnings', 'children'),
                 Output('textarea_json_metadata', 'value'),
                 Output('textarea_json_source', 'value')
-                
             ],
             [
                 Input("load_json_source", "contents"),
@@ -149,6 +169,10 @@ class ConverterForms(html.Div):
         def open_explorer(click_open, click_close, is_open):
             ctx = dash.callback_context
             source = ctx.triggered[0]['prop_id'].split('.')[0]
+
+            if 'index' in source:
+                dict_source = json.loads(source)
+                self.current_modal_source = dict_source['index']
 
             if source != '' and (any(click_open) or click_close):
                 return not is_open
