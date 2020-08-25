@@ -4,6 +4,7 @@ from nwbwidgets.utils.timeseries import (get_timeseries_maxt, get_timeseries_min
 from tifffile import imread, TiffFile
 from pathlib import Path, PureWindowsPath
 import numpy as np
+import json
 
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
@@ -11,6 +12,8 @@ import dash_core_components as dcc
 import dash_html_components as html
 import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output
+
+from textwrap import dedent as d
 
 
 class TimeControllerComponent(html.Div):
@@ -111,21 +114,15 @@ class TimeControllerComponent(html.Div):
                     dbc.Col(group_duration, width=3)
                 ],
                 row=True
-            ),
-            dbc.FormGroup(
-                [
-                    dbc.Col(group_frame, width=9),
-                ],
-                row=True
             )
         ])
 
 
-class TiffImageSeriesComponent(html.Div):
+class TiffImageSeriesComponent(dcc.Graph):
     """Component that renders specific frame of a Tiff file"""
     def __init__(self, parent_app, imageseries, pixel_mask=None,
                  foreign_time_window_controller=None, id='tiff_image_series'):
-        super().__init__([])
+        super().__init__(id=id, figure={}, config={'displayModeBar': False})
         self.parent_app = parent_app
         self.imageseries = imageseries
         self.pixel_mask = pixel_mask
@@ -179,8 +176,7 @@ class TiffImageSeriesComponent(html.Div):
                 image = imread(path_ext_file, key=frame_number)
                 self.out_fig.data[0].z = image
 
-        self.graph = dcc.Graph(id=id, figure=self.out_fig)
-        self.children = [self.graph]
+        self.figure = self.out_fig
 
 
 class AllenDashboard(html.Div):
@@ -196,7 +192,7 @@ class AllenDashboard(html.Div):
             # Controllers
             self.controller_time = TimeControllerComponent(
                 parent_app=self.parent_app,
-                start=True, duration=True, frame=True,
+                start=True, duration=True, frame=False,
                 tmin=0, tmax=100, tstart=0, tduration=10
             )
 
@@ -229,9 +225,22 @@ class AllenDashboard(html.Div):
 
             # Layout
             self.traces.update_layout(
-                height=400, width=800, showlegend=False, title=None,
+                height=400, showlegend=False, title=None,
                 paper_bgcolor='rgba(0, 0, 0, 0)', plot_bgcolor='rgba(0, 0, 0, 0)',
-                margin=dict(l=60, r=20, t=8, b=20)
+                margin=dict(l=60, r=20, t=8, b=20),
+                shapes=[{
+                    'type': 'line',
+                    'x0': 10,
+                    'x1': 10,
+                    'xref': 'x',
+                    'y0': -1000,
+                    'y1': 1000,
+                    'yref': 'paper',
+                    'line': {
+                        'width': 4,
+                        'color': 'rgb(30, 30, 30)'
+                    }
+                }]
             )
             self.traces.update_xaxes(patch={
                 'showgrid': False,
@@ -259,18 +268,19 @@ class AllenDashboard(html.Div):
                 row=2, col=1
             )
 
-            # # Two photon imaging
-            # self.photon_series = TiffImageSeriesComponent(
-            #     parent_app=self.parent_app,
-            #     imageseries=self.nwb.acquisition['raw_ophys'],
-            #     pixel_mask=self.nwb.processing['ophys'].data_interfaces['image_segmentation'].plane_segmentations['plane_segmentation'].pixel_mask[:],
-            #     foreign_time_window_controller=self.controller_time,
-            # )
-            # self.photon_series.out_fig.update_layout(
-            #     showlegend=False,
-            #     margin=dict(l=10, r=30, t=20, b=30),
-            #     width=300, height=300,
-            # )
+            # Two photon imaging
+            self.photon_series = TiffImageSeriesComponent(
+                id='figure_photon_series',
+                parent_app=self.parent_app,
+                imageseries=self.nwb.acquisition['raw_ophys'],
+                pixel_mask=self.nwb.processing['ophys'].data_interfaces['image_segmentation'].plane_segmentations['plane_segmentation'].pixel_mask[:],
+                foreign_time_window_controller=self.controller_time,
+            )
+            self.photon_series.out_fig.update_layout(
+                showlegend=False,
+                margin=dict(l=10, r=10, t=70, b=70),
+                # width=300, height=300,
+            )
 
         # Dashboard main layout
         self.children = [
@@ -281,24 +291,34 @@ class AllenDashboard(html.Div):
                 ),
                 html.Hr(),
                 self.controller_time,
-                html.Br(),
-                dbc.Col([
-                    dbc.Col(
-                        dcc.Graph(id='figure_traces', figure={}),
-                        width=6
+                html.Div([
+                    html.Div(
+                        dcc.Graph(
+                            id='figure_traces',
+                            figure={},
+                            config={
+                                'displayModeBar': False,
+                                'edits': {
+                                    'shapePosition': True
+                                }
+                            }
+                        ),
+                        style={'width': '69%', 'display': 'inline-block'}
                     ),
-                    # dbc.Col(
-                    #     self.photon_series,
-                    #     width=6
-                    # )
+                    html.Div(
+                        self.photon_series,
+                        style={'width': '29%', 'display': 'inline-block'}
+                    )
                 ])
             ])
         ]
 
         @self.parent_app.callback(
             [Output(component_id='figure_traces', component_property='figure')],
-            [Input(component_id='slider_start_time', component_property='value'),
-             Input(component_id='input_duration', component_property='value')]
+            [
+                Input(component_id='slider_start_time', component_property='value'),
+                Input(component_id='input_duration', component_property='value')
+            ]
         )
         def update_traces(select_start_time, select_duration):
             time_window = [select_start_time, select_start_time + select_duration]
@@ -336,7 +356,43 @@ class AllenDashboard(html.Div):
                 xaxis2={"range": [xrange0, xrange1], "autorange": False}
             )
 
+            # Update frame trace
+            self.traces.update_layout(
+                shapes=[{
+                    'type': 'line',
+                    'x0': (xrange1 + xrange0) / 2,
+                    'x1': (xrange1 + xrange0) / 2,
+                    'xref': 'x',
+                    'y0': -1000,
+                    'y1': 1000,
+                    'yref': 'paper',
+                    'line': {
+                        'width': 4,
+                        'color': 'rgb(30, 30, 30)'
+                    }
+                }]
+            )
             return [self.traces]
+
+        @self.parent_app.callback(
+            [Output(component_id='figure_photon_series', component_property='figure')],
+            [Input(component_id='figure_traces', component_property='relayoutData')])
+        def change_frame(relayoutData):
+            if relayoutData is not None and "shapes[0].x0" in relayoutData:
+                pos = relayoutData["shapes[0].x0"]
+
+                # Update image frame
+                frame_number = int(pos * self.nwb.acquisition['raw_ophys'].rate)
+                file_path = self.nwb.acquisition['raw_ophys'].external_file[0]
+                if "\\" in file_path:
+                    win_path = PureWindowsPath(file_path)
+                    path_ext_file = Path(win_path)
+                else:
+                    path_ext_file = Path(file_path)
+                image = imread(path_ext_file, key=frame_number)
+                self.photon_series.out_fig.data[0].z = image
+
+                return [self.photon_series.out_fig]
 
     def update_spike_traces(self, time_window):
         """Updates list of go.Scatter objects at spike times"""
