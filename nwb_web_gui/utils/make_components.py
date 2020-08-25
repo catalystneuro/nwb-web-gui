@@ -165,14 +165,16 @@ class FileBrowserComponent(html.Div):
         ]
 
         @self.parent_app.callback(
-            Output("collapse_file_browser_" + id_suffix, "is_open"),
-            [Input("button_file_browser_" + id_suffix, "n_clicks")],
+            [Output("collapse_file_browser_" + id_suffix, "is_open"), Output("chosen_nwbfile_" + id_suffix, 'value')],
+            [Input("button_file_browser_" + id_suffix, "n_clicks"), Input('explorer', 'selectedPath')],
             [State("collapse_file_browser_" + id_suffix, "is_open")],
         )
-        def toggle_collapse(n, is_open):
+        def toggle_collapse(n, path, is_open):
+            if path is None:
+                path = ''
             if n:
-                return not is_open
-            return is_open
+                return not is_open, path
+            return is_open, path
 
     def make_file_browser(self):
         dir_schema = self.paths_tree
@@ -199,7 +201,6 @@ class FileBrowserComponent(html.Div):
         keys_list = []
 
         for path, dirs, files in os.walk(self.root_dir):
-            aux_dict = {}
             if len(files) > 0:
                 for file in files:
                     aux_dict = {}
