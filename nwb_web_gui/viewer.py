@@ -12,6 +12,7 @@ import multiprocessing
 from nwbwidgets import nwb2widget
 import nbformat as nbf
 import os
+import time
 
 
 def call_voila(run_cmd):
@@ -59,6 +60,7 @@ class Viewer(html.Div):
                 if nwb_path.is_file() and str(nwb_path).endswith('.nwb'):
                     self.nwb_path = nwb_path
                     voila_address = self.run_explorer()
+                    time.sleep(5)
                     iframe = html.Iframe(style={"min-width": "100vw", 'max-width': '100vw', "min-height": "100vh"}, src=voila_address)
 
                     return 'NWB Loaded', iframe
