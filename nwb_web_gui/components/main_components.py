@@ -35,9 +35,18 @@ def render_navbar():
             dbc.Nav(
                 [
                     dbc.Container([
-                        dbc.NavItem(dbc.NavLink(id="nav_nwb_converter", children="NWB Converter", href="converter")),
-                        dbc.NavItem(dbc.NavLink(id="nav_nwb_viewer", children="NWB Viewer", href="viewer")),
-                        dbc.NavItem(dbc.NavLink(id="nav_nwb_dashboard", children="Dashboard", href="dashboard")),
+                        dbc.NavItem(dbc.NavLink(
+                            id="nav_nwb_converter", children="NWB Converter", href="converter",
+                            style={"font-size": "120%", "font-weight": "normal"}
+                        )),
+                        dbc.NavItem(dbc.NavLink(
+                            id="nav_nwb_viewer", children="NWB Viewer", href="viewer",
+                            style={"font-size": "120%", "font-weight": "normal"}
+                        )),
+                        dbc.NavItem(dbc.NavLink(
+                            id="nav_nwb_dashboard", children="Dashboard", href="dashboard",
+                            style={"font-size": "120%", "font-weight": "normal"}
+                        )),
                         # dbc.NavItem(
                         #     dbc.DropdownMenu(
                         #         children=[

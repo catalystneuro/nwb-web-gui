@@ -1,4 +1,4 @@
-from .utils.make_components import make_file_picker
+from .utils.make_components import make_file_picker, FileBrowserComponent
 
 import dash_core_components as dcc
 import dash_html_components as html
@@ -12,6 +12,7 @@ import multiprocessing
 from nwbwidgets import nwb2widget
 import nbformat as nbf
 import os
+import time
 
 
 def call_voila(run_cmd):
@@ -29,44 +30,53 @@ class Viewer(html.Div):
         self.nwb_file = None
 
         # Viewer page layout
-        filepicker = make_file_picker(id_suffix='voila')
+        direxplorer = FileBrowserComponent(parent_app=parent_app, id_suffix='viewer')
 
         self.children = [
+            dbc.Toast(
+                id="toast_loadedfile_viewer",
+                is_open=False,
+                dismissable=False,
+                duration=5000
+            ),
             html.Br(),
-            html.H1('NWB File Viewer', style={'text-align': 'center'}),
+            direxplorer,
             html.Br(),
-            html.Hr(),
-
-            filepicker,
-            html.Br(),
-            html.Div(id='uploaded_voila_nwb', style={'justify-content': 'center', 'text-align': 'center'}),
-            html.Div(id='voila_div', style={'justify-content': 'center', 'text-align': 'center'})
+            html.Div(id='voila_div', style={'justify-content': 'center', 'text-align': 'center'}),
         ]
 
         @self.parent_app.callback(
             [
-                Output("uploaded_voila_nwb", "children"),
+                Output("toast_loadedfile_viewer", "is_open"),
+                Output("toast_loadedfile_viewer", "style"),
+                Output("toast_loadedfile_viewer", "children"),
                 Output('voila_div', 'children')
             ],
-            [Input('submit_nwb_voila', component_property='n_clicks')],
-            [State('nwb_voila', 'value')]
+            [Input('submit_file_browser_viewer', component_property='n_clicks')],
+            [State('chosen_file_viewer', 'value')]
         )
         def submit_nwb(click, input_value):
+
+            style = {
+                "position": "fixed", "top": 180, "left": 10, "width": 350,
+                "background-color": "#955", "color": "#ffffff", "solid": True
+            }
             ctx = dash.callback_context
             source = ctx.triggered[0]['prop_id'].split('.')[0]
 
-            if source == 'submit_nwb_voila':
+            if source == 'submit_file_browser_viewer':
                 nwb_path = Path(input_value)
                 if nwb_path.is_file() and str(nwb_path).endswith('.nwb'):
                     self.nwb_path = nwb_path
                     voila_address = self.run_explorer()
-                    iframe = html.Iframe(style={"min-width": "100vw", "min-height": "100vh"}, src=voila_address)
-
-                    return 'NWB Loaded', iframe
+                    time.sleep(5)
+                    iframe = html.Iframe(style={"min-width": "100vw", 'max-width': '100vw', "min-height": "100vh"}, src=voila_address)
+                    style.update({"background-color": "#287836"})
+                    return True, style, 'NWB file loaded, widgets started', iframe
                 else:
-                    return 'Must be NWB file', ''
-
-            return '', ''
+                    style.update({"background-color": "#955"})
+                    return True, style, 'Must be a NWB file', ''
+            return False, '', '', ''
 
     def kill_processes(self):
         """"""
