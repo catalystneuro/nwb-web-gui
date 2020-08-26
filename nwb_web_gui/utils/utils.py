@@ -98,8 +98,10 @@ def get_form_from_metadata(metadata_json, parent_app, source=False):
     return form_tabs
 
 
-def edit_output_form(output_form, data_dict):
+def edit_output_form(output_form, source_data_output, conversion_data_output):
+    pass
 
+    '''
     for k, v in output_form.items():
         if isinstance(v, dict) and 'path' not in v:
             edit_output_form(v, data_dict)
@@ -110,6 +112,7 @@ def edit_output_form(output_form, data_dict):
                 output_form[k] = data_dict[k]
 
     return output_form
+    '''
 
 
 def mount_files_json():

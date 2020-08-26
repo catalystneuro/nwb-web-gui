@@ -15,7 +15,7 @@ class ConverterForms(html.Div):
         super().__init__([])
         self.parent_app = parent_app
         self.metadata_forms = ''
-        self.input_forms = ''
+        self.source_forms = ''
         self.conversion_button = ''
         self.source_json = ''
         self.metadata_json = ''
@@ -144,7 +144,7 @@ class ConverterForms(html.Div):
                 self.metadata_forms = html.Div(layout_children)
                 self.conversion_button = dbc.Button('Run conversion', id='button_run_conversion')
 
-                return self.metadata_forms, self.input_forms, self.conversion_button, '', json.dumps(self.metadata_json, indent=4), json.dumps(self.source_json, indent=4)
+                return self.metadata_forms, self.source_forms, self.conversion_button, '', json.dumps(self.metadata_json, indent=4), json.dumps(self.source_json, indent=4)
 
             elif source == 'load_json_source':
                 self.source_json = data_json
@@ -152,10 +152,10 @@ class ConverterForms(html.Div):
                 if isinstance(form_tabs, list):
                     layout_children = []
                     layout_children.extend([f for f in form_tabs])
-                    self.input_forms = html.Div(layout_children)
+                    self.source_forms = html.Div(layout_children)
                     self.conversion_button = dbc.Button('Run conversion', id='button_run_conversion')
 
-                    return self.metadata_forms, self.input_forms, self.conversion_button, '', json.dumps(self.metadata_json, indent=4), json.dumps(self.source_json, indent=4)
+                    return self.metadata_forms, self.source_forms, self.conversion_button, '', json.dumps(self.metadata_json, indent=4), json.dumps(self.source_json, indent=4)
                 else:
                     return '', '', '', 'Something went wrong', '', ''
             else:
@@ -191,23 +191,27 @@ class ConverterForms(html.Div):
         def send_source_forms(n_click, string_values, string_id, boolean_values, boolean_id):
 
             if len(string_id) > 0 and len(string_values) > 0:
-                index_list = [e['index'].split('input_source_data_')[-1] for e in string_id]
+                name_list = [e['index'].split('input_source_data_')[-1].split('_path')[0] for e in string_id]
 
-                string_dict = {}
-                for idx, value in zip(index_list, string_values):
-                    string_dict[idx] = value
+                source_data_output = []
+                for name, value in zip(name_list, string_values):
+                    aux_dict = {}
+                    aux_dict['name'] = name
+                    aux_dict['path'] = value
+                    source_data_output.append(aux_dict)
 
-                # Value for test
-                string_dict['add_raw'] = True
-                string_dict['add_processed'] = True
-                string_dict['add_behavior'] = True
+                # Test data
+                conversion_data_output = [
+                    {"name": "add_raw", "value": True}, {"name": "add_processed", "value": True}, {"name": "add_behavior", "value": True}
+                ]
 
-                output_form = edit_output_form(self.source_json, string_dict)
+                output_form = {'source_data': source_data_output, 'conversion_options': conversion_data_output}
 
-                self.output_form = output_form
+                self.source_output_form = output_form
 
                 with open('output_source.json', 'w') as output:
                     json.dump(self.output_form, output, indent=4)
+
 
         @self.parent_app.callback(
             Output('hidden_div2', 'children'),
@@ -238,7 +242,7 @@ class ConverterForms(html.Div):
 
     def clean_converter_forms(self):
         self.metadata_forms = ''
-        self.input_forms = ''
+        self.source_forms = ''
         self.source_json = ''
         self.metadata_json = ''
         self.conversion_button = ''
