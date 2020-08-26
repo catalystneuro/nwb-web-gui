@@ -25,7 +25,7 @@ class Home(html.Div):
 
         card_viewer = [
             dcc.Link(href='/viewer', children=[dbc.CardHeader("NWB File Viewer")], className='cardLink'),
-            dbc.CardImg(src="/assets/logo_nwb_square.png", top=True),
+            dbc.CardImg(src="/logo_nwb_square.png", top=True),
             dbc.CardBody(
                 children=[
                     html.P(
@@ -35,7 +35,7 @@ class Home(html.Div):
                 ]
             ),
         ]
-
+        
         card_dashboard = [
             dcc.Link(href='/dashboard', children=[dbc.CardHeader("Custom Dashboards")], className='cardLink'),
             dbc.CardImg(src="/assets/logo_nwb_square.png", top=True),

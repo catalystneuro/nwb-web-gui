@@ -73,7 +73,7 @@ def get_form_from_metadata(metadata_json, parent_app, source=False):
         if forms is None:
             return forms
     else:
-        schema_path = Path.cwd() / 'nwb_web_gui' / 'uploads' / 'formData' / 'source_schema.json'
+        schema_path = Path.cwd() / 'nwb_web_gui' / 'static' / 'uploads' / 'formData' / 'source_schema.json'
         with open(schema_path, 'r') as inp:
             schema = json.load(inp)
 
