@@ -214,7 +214,7 @@ class FileBrowserComponent(html.Div):
                     delta = datetime.utcnow() - mod_datetime
                     size = os.path.getsize(file_path)
 
-                    aux_dict['key'] = str(file_path)
+                    aux_dict['key'] = str(file_path).replace("\\", "/")
                     aux_dict['modified'] = delta.days
                     aux_dict['size'] = size
 

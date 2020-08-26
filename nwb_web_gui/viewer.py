@@ -30,21 +30,26 @@ class Viewer(html.Div):
         self.nwb_file = None
 
         # Viewer page layout
-        # filepicker = make_file_picker(id_suffix='voila')
         direxplorer = FileBrowserComponent(parent_app=parent_app, id_suffix='viewer')
 
         self.children = [
+            dbc.Toast(
+                id="toast_loadedfile_viewer",
+                is_open=False,
+                dismissable=False,
+                duration=5000
+            ),
             html.Br(),
-            # filepicker,
             direxplorer,
             html.Br(),
-            html.Div(id='uploaded_voila_nwb', style={'justify-content': 'center', 'text-align': 'center'}),
-            html.Div(id='voila_div', style={'justify-content': 'center', 'text-align': 'center'})
+            html.Div(id='voila_div', style={'justify-content': 'center', 'text-align': 'center'}),
         ]
 
         @self.parent_app.callback(
             [
-                Output("uploaded_voila_nwb", "children"),
+                Output("toast_loadedfile_viewer", "is_open"),
+                Output("toast_loadedfile_viewer", "style"),
+                Output("toast_loadedfile_viewer", "children"),
                 Output('voila_div', 'children')
             ],
             [Input('submit_file_browser_viewer', component_property='n_clicks')],
@@ -52,6 +57,10 @@ class Viewer(html.Div):
         )
         def submit_nwb(click, input_value):
 
+            style = {
+                "position": "fixed", "top": 180, "left": 10, "width": 350,
+                "background-color": "#955", "color": "#ffffff", "solid": True
+            }
             ctx = dash.callback_context
             source = ctx.triggered[0]['prop_id'].split('.')[0]
 
@@ -62,12 +71,12 @@ class Viewer(html.Div):
                     voila_address = self.run_explorer()
                     time.sleep(5)
                     iframe = html.Iframe(style={"min-width": "100vw", 'max-width': '100vw', "min-height": "100vh"}, src=voila_address)
-
-                    return 'NWB Loaded', iframe
+                    style.update({"background-color": "#287836"})
+                    return True, style, 'NWB file loaded, widgets started', iframe
                 else:
-                    return 'Must be NWB file', ''
-
-            return '', ''
+                    style.update({"background-color": "#955"})
+                    return True, style, 'Must be a NWB file', ''
+            return False, '', '', ''
 
     def kill_processes(self):
         """"""
