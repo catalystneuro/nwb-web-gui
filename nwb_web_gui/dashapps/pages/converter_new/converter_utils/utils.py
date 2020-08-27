@@ -16,14 +16,20 @@ def iter_source_schema(schema, parent_name=None, forms=[]):
     return forms
 
 
-def iter_metadata_schema(schema):
-    pass
+def iter_metadata_schema(schema, parent_name=None, forms=[]):
+
+    for k, v in schema.items():
+        if isinstance(v, dict) and 'type' in v.keys() and v['type'] == 'object':
+            iter_metadata_schema(v['properties'])
+        else:
+            pass
+    
 
 
 def get_forms_from_schema(schema, source=False):
     if source:
         forms = iter_source_schema(schema['properties'])
     else:
-        iter_metadata_schema(schema)
+        forms = iter_metadata_schema(schema['properties'])
 
     return forms

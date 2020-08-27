@@ -13,13 +13,19 @@ class ConverterForms(html.Div):
     def __init__(self, parent_app):
         super().__init__([])
         self.parent_app = parent_app
+        self.current_modal_source = ''
         modal = make_modal(parent_app)
 
         source_schema_path = Path('/home/vinicius/Área de Trabalho/Trabalhos/nwb-web-gui/nwb_web_gui/static/uploads/formData/source_schema.json')
         with open(source_schema_path, 'r') as inp:
             self.source_json_schema = json.load(inp)
 
+        metadata_schema_path = Path('/home/vinicius/Área de Trabalho/Trabalhos/nwb-web-gui/nwb_web_gui/static/uploads/formData/metadata_schema.json')
+        with open(metadata_schema_path, 'r') as inp:
+            self.metadata_json_schema = json.load(inp)
+
         source_forms = get_forms_from_schema(self.source_json_schema, source=True)
+        metadata_forms = get_forms_from_schema(self.metadata_json_schema, source=False)
 
         self.children = [
             dbc.Container([
@@ -27,7 +33,8 @@ class ConverterForms(html.Div):
                 dbc.Row([
                     dbc.Col(source_forms, width={'size': 4})
                 ]),
-                dbc.Row(modal)
+                dbc.Row(modal),
+                html.Div(id='hidden')
             ],fluid=True)
         ]
 
@@ -43,9 +50,29 @@ class ConverterForms(html.Div):
 
             if 'index' in source:
                 dict_source = json.loads(source)
+
                 self.current_modal_source = dict_source['index']
 
             if source != '' and (any(click_open) or click_close):
                 return not is_open
             else:
                 return is_open
+
+        @self.parent_app.callback(
+            Output({'name': 'source_string_input', 'index': MATCH}, 'value'),
+            [Input('submit_file_browser_modal', 'n_clicks')],
+            [
+                State('chosen_file_modal', 'value'),
+                State({'name': 'source_string_input', 'index': MATCH}, 'value'),
+                State({'name': 'source_string_input', 'index': MATCH}, 'id'),
+            ]
+        )
+        def change_path_values(click, input_value, values, ids):
+            ctx = dash.callback_context
+            source = ctx.triggered[0]['prop_id'].split('.')[0]
+
+            if self.current_modal_source.replace('explorer', 'input') == ids['index'] and input_value != '':
+                return input_value
+            else:
+                return values
+
