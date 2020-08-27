@@ -1,7 +1,8 @@
 import dash
 import dash_html_components as html
-from nwb_web_gui.dashapps.converter.converter import ConverterForms
+from nwb_web_gui.dashapps.pages.converter.converter import ConverterForms
 import dash_bootstrap_components as dbc
+from nwb_web_gui.dashapps.components.navbar import render_navbar
 
 
 def init_converter(server):
@@ -14,7 +15,8 @@ def init_converter(server):
         routes_pathname_prefix='/converter/',
     )
 
+    navbar = render_navbar()
     # Create Dash Layout
-    dash_app.layout = ConverterForms(parent_app=dash_app)
+    dash_app.layout = html.Div([navbar, ConverterForms(parent_app=dash_app)])
 
     return dash_app.server
