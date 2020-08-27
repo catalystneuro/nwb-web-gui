@@ -170,6 +170,8 @@ class ConverterForms(html.Div):
             ctx = dash.callback_context
             source = ctx.triggered[0]['prop_id'].split('.')[0]
 
+            print('testeee')
+
             if 'index' in source:
                 dict_source = json.loads(source)
                 self.current_modal_source = dict_source['index']
