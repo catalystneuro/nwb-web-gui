@@ -31,7 +31,8 @@ class ConverterForms(html.Div):
             dbc.Container([
                 dbc.Row(html.H1('NWB Converter'), style={'justify-content': 'center'}),
                 dbc.Row([
-                    dbc.Col(source_forms, width={'size': 4})
+                    dbc.Col(source_forms, width={'size': 4}),
+                    dbc.Col(metadata_forms, width={'size': 8})
                 ]),
                 dbc.Row(modal),
                 html.Div(id='hidden')

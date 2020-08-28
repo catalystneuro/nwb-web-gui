@@ -1,10 +1,10 @@
 import dash_html_components as html
 import dash_core_components as dcc
 import dash_bootstrap_components as dbc
-from dash_cool_components import FileExplorer
+from dash_cool_components import FileExplorer, Keywords
 
 
-class FormItem(dbc.FormGroup):
+class SourceFormItem(dbc.FormGroup):
     """Custom form group instance"""
     def __init__(self, label, form_input, key_name):
         super().__init__([])
@@ -33,30 +33,25 @@ class SourceForm(dbc.Card):
         all_inputs = []
 
         for k, v in fields.items():
-            input_id = f'input_{parent_name}_{k}'
-            label = dbc.Label(k)
-            if k == 'type':
-                options = [{'label': e, 'value': e} for e in v['enum']]
-                form_input = dcc.Dropdown(
-                    options=options,
-                    id={'name': 'source_dropdown_input', 'index': input_id},
-                    clearable=False,
-                )
-            elif v['type'] == 'string':
-                form_input = dbc.Input(
-                    placeholder=v['description'],
-                    className='string_input',
-                    type='input',
-                    id={'name': 'source_string_input', 'index': input_id},
-                )
-            elif v['type'] == 'boolean':
-                form_input = dbc.Checkbox(
-                    className="form-check-input",
-                    id={'name': 'source_boolean_input', 'index': input_id},
-                )
-
-            form_item = FormItem(label=label, form_input=form_input, key_name=k)
-            all_inputs.append(form_item)
+            if k == 'name':
+                label_name = k
+                label = dbc.Label(label_name)
+            else:
+                input_id = f'input_{parent_name}_{label_name}_{k}'
+                if v['type'] == 'string' and k != 'type':
+                    form_input = dbc.Input(
+                        placeholder=v['description'],
+                        id={'name': f'source_string_input', 'index': input_id},
+                        className='string_input',
+                        type='input'
+                    )
+                elif v['type'] == 'boolean' and k != 'type':
+                    form_input = dbc.Checkbox(
+                        id={'name': 'source_boolean_input', 'index': input_id}
+                    )
+                if k != 'type':
+                    form_item = SourceFormItem(label=label, form_input=form_input, key_name=k)
+                    all_inputs.append(form_item)
 
         form = dbc.Form(all_inputs)
         self.children = [
@@ -64,7 +59,53 @@ class SourceForm(dbc.Card):
             dbc.CardBody(form)
         ]
 
+class MetadataFormItem(dbc.FormGroup):
+    def __init__(self, label, form_input):
+        super().__init__([])
+
+        self.children = [
+            dbc.Row([
+                dbc.Col(label, width={'size':2}),
+                dbc.Col(form_input, width={'size':8})
+            ])
+        ]
+
+
 
 class MetadataForms(dbc.Form):
-    def __init__(self, required, fields, parent_name):
+    def __init__(self, fields, parent_name):
         super().__init__([])
+
+        self.fields = fields
+        self.parent_name = parent_name
+
+        if self.fields['type'] == 'object':
+            children = self.create_object_form()
+        elif self.fields['type'] == 'array':
+            children = self.create_array_form()
+
+        self.children = children
+
+    def create_object_form(self):
+        children = []
+        for k, v in self.fields['properties'].items():
+            input_id = f'input_{self.parent_name}_{k}'
+            label = dbc.Label(k)
+            if v['type'] == 'string':
+                if 'description' in v:
+                    description = v['description']
+                else:
+                    description = ''
+                form_input = dbc.Input(
+                    id={'name': 'metadata_string_input', 'index': input_id},
+                    placeholder=description
+                )
+                form_item = MetadataFormItem(label, form_input)
+                children.append(form_item)
+            elif v['type'] == 'array':
+                pass
+        
+        return children
+
+    def create_array_form(self):
+        pass

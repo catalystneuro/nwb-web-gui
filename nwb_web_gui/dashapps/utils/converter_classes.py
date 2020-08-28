@@ -184,7 +184,7 @@ class CompositeForm(html.Div):
                         label = dbc.Label(k, id=label_id)
                         form_group = FormItem(label, form_input, label_id=label_id, input_id=input_id)
                         children.append(form_group)
-                    elif isinstance(v, dict):
+                    elif isinstance(v, dict): 
                         label = dbc.Label(k, id=label_id)
                         form_input = dcc.Dropdown(
                             id=input_id,
