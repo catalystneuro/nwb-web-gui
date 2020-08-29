@@ -6,9 +6,10 @@ from dash_cool_components import FileExplorer, Keywords
 
 class SourceFormItem(dbc.FormGroup):
     """Custom form group instance"""
-    def __init__(self, label, form_input, key_name):
+    def __init__(self, label, form_input, key_name, label_name):
         super().__init__([])
 
+        print(label_name)
 
         if key_name != 'path':
             self.children = dbc.Row([
@@ -16,7 +17,7 @@ class SourceFormItem(dbc.FormGroup):
                 dbc.Col(form_input, width={'size':10}, style={'justify-content': 'center', 'text-align': 'center'})
             ])
         else:
-            explorer_btn = dbc.Button(id={'name': 'source_explorer', 'index': f'explorer_source_data_{key_name}'}, children=[html.I(className="far fa-folder")], style={'background-color': 'transparent', 'color': 'black', 'border': 'none'})
+            explorer_btn = dbc.Button(id={'name': 'source_explorer', 'index': f'explorer_source_data_{label_name}_{key_name}'}, children=[html.I(className="far fa-folder")], style={'background-color': 'transparent', 'color': 'black', 'border': 'none'})
             self.children = dbc.Row([
                 dbc.Col(label, width={'size':2}),
                 dbc.Col(form_input, width={'size':8}, style={'justify-content': 'center', 'text-align': 'center'}),
@@ -31,7 +32,6 @@ class SourceForm(dbc.Card):
         self.required_fields = required
 
         all_inputs = []
-
         for k, v in fields.items():
             if k == 'name':
                 label_name = k
@@ -50,7 +50,7 @@ class SourceForm(dbc.Card):
                         id={'name': 'source_boolean_input', 'index': input_id}
                     )
                 if k != 'type':
-                    form_item = SourceFormItem(label=label, form_input=form_input, key_name=k)
+                    form_item = SourceFormItem(label=label, form_input=form_input, key_name=k, label_name=label_name)
                     all_inputs.append(form_item)
 
         form = dbc.Form(all_inputs)
@@ -58,6 +58,7 @@ class SourceForm(dbc.Card):
             dbc.CardHeader(parent_name.replace('_', ' ').title(), style={'text-align': 'center'}),
             dbc.CardBody(form)
         ]
+
 
 class MetadataFormItem(dbc.FormGroup):
     def __init__(self, label, form_input):
@@ -71,8 +72,7 @@ class MetadataFormItem(dbc.FormGroup):
         ]
 
 
-
-class MetadataForms(dbc.Form):
+class MetadataForms(dbc.Card):
     def __init__(self, fields, parent_name):
         super().__init__([])
 
@@ -82,9 +82,11 @@ class MetadataForms(dbc.Form):
         if self.fields['type'] == 'object':
             children = self.create_object_form()
         elif self.fields['type'] == 'array':
-            children = self.create_array_form()
+            self.fields = self.fields['items']
+            children = self.create_object_form()
 
-        self.children = children
+        self.children = [dbc.Container(dbc.Form(children), fluid=True)]
+        self.style = {'padding-top': '1%'}
 
     def create_object_form(self):
         children = []
@@ -98,13 +100,18 @@ class MetadataForms(dbc.Form):
                     description = ''
                 form_input = dbc.Input(
                     id={'name': 'metadata_string_input', 'index': input_id},
-                    placeholder=description
+                    placeholder=description,
+                    className='string_input',
                 )
-                form_item = MetadataFormItem(label, form_input)
-                children.append(form_item)
             elif v['type'] == 'array':
-                pass
-        
+                form_input = Keywords(
+                    id=input_id,
+                    wrapperStyle={'box-shadow': 'none', 'border-radius': '2px', 'line-height': '5px'},
+                    inputStyle={'line-height': '15px', 'height': '15px'}
+                )
+            form_item = MetadataFormItem(label, form_input)
+            children.append(form_item)
+
         return children
 
     def create_array_form(self):

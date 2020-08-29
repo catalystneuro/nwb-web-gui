@@ -1,13 +1,14 @@
 from .forms import SourceForm
 from .forms import MetadataForms
 import pynwb
+import dash_bootstrap_components as dbc
 
 map_name_to_class = {
     "NWBFile": pynwb.file.NWBFile,
     "Subject": pynwb.file.Subject,
     "Device": pynwb.device.Device,
     # Ecephys
-    "ElectrodeGroup": pynwb.ecephys.ElectrodeGroup,
+    "ElectrodeGroups": pynwb.ecephys.ElectrodeGroup,
     "ElectricalSeries": pynwb.ecephys.ElectricalSeries,
     # Ophys
     "OpticalChannel": pynwb.ophys.OpticalChannel,
@@ -29,7 +30,7 @@ def iter_source_schema(schema, parent_name=None, forms=[]):
                 form = SourceForm(required, fields, parent_name)
                 forms.append(form)
 
-    return forms
+    return forms, 'source'
 
 
 def iter_metadata_schema(schema, parent_name=None, forms=[]):
@@ -44,13 +45,19 @@ def iter_metadata_schema(schema, parent_name=None, forms=[]):
             else:
                 pass
 
-    return forms
+    return forms, 'metadata'
 
 
 def get_forms_from_schema(schema, source=False):
     if source:
-        forms = iter_source_schema(schema['properties'])
+        forms, name = iter_source_schema(schema['properties'])
     else:
-        forms = iter_metadata_schema(schema['properties'])
+        forms, name = iter_metadata_schema(schema['properties'])
 
-    return forms
+    if name == 'source':
+        output_form = forms
+    else:
+        tabs = [dbc.Tab(f, label=f.parent_name) for f in forms]
+        output_form = dbc.Tabs(tabs)
+
+    return output_form
