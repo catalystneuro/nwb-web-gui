@@ -1,4 +1,4 @@
-from .utils.make_components import make_file_picker, FileBrowserComponent
+from nwb_web_gui.dashapps.utils.make_components import make_file_picker, FileBrowserComponent
 
 import dash_core_components as dcc
 import dash_html_components as html
@@ -94,7 +94,7 @@ class Viewer(html.Div):
         self.aux_notebook = self.create_notebook()
 
         settings_voila = {'allow_origin': '*', 'headers': {
-            'Content-Security-Policy': 'frame-ancestors http://localhost:8050'}}
+            'Content-Security-Policy': 'frame-ancestors http://localhost:5000'}}
 
         run_cmd = ' '.join([
             "voila",

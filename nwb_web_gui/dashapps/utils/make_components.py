@@ -6,7 +6,7 @@ from datetime import datetime
 from file_explorer import FileExplorer
 import os
 from pathlib import Path
-from nwb_web_gui import FILES_PATH
+#from nwb_web_gui import FILES_PATH
 
 
 def make_file_picker(id_suffix):
@@ -134,7 +134,7 @@ class FileBrowserComponent(html.Div):
         self.parent_app = parent_app
         self.id_suffix = id_suffix
         if root_dir is None:
-            self.root_dir = FILES_PATH
+            self.root_dir = '/home/vinicius/Área de Trabalho/Trabalhos/nwb-web-gui/files'
         else:
             self.root_dir = root_dir
 

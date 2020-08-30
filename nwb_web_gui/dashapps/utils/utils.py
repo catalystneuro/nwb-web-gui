@@ -37,7 +37,11 @@ def iter_metadata(metadata_json, parent_app, parent_name=None, forms=[], inputs_
                 )
                 forms.append(form)
             else:
-                form = CompositeForm(v, k, item_schema, parent_name)
+                if k == 'ImagingPlane' or k=='ElectrodeGroup':
+                    devices_list = form.devices_list
+                else:
+                    devices_list = []
+                form = CompositeForm(v, k, item_schema, parent_name, devices_list)
                 forms.append(form)
         else:
             iter_metadata(v, parent_app, parent_name=k, forms=forms)
@@ -69,7 +73,7 @@ def get_form_from_metadata(metadata_json, parent_app, source=False):
         if forms is None:
             return forms
     else:
-        schema_path = Path.cwd() / 'nwb_web_gui' / 'uploads' / 'formData' / 'source_schema.json'
+        schema_path = Path.cwd() / 'nwb_web_gui' / 'static' / 'uploads' / 'formData' / 'source_schema.json'
         with open(schema_path, 'r') as inp:
             schema = json.load(inp)
 
@@ -92,7 +96,7 @@ def get_form_from_metadata(metadata_json, parent_app, source=False):
         tabs = [dbc.Tab(v, label=k, tab_style={'background-color': '#f7f7f7', 'border':'solid', 'border-color': '#f7f7f7', 'border-width': '1px'}) for k, v in tabs_dict.items()]
         form_tabs = dbc.Tabs(tabs)
     else:
-        cards = [dbc.Card([dbc.CardHeader(f.id), dbc.CardBody(f)]) for f in source_forms]
+        cards = [dbc.Card([dbc.CardHeader(f.id.replace('_',' ').title()), dbc.CardBody(f)]) for f in source_forms]
         form_tabs = cards
 
     return form_tabs
