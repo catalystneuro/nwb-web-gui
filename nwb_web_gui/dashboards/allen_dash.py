@@ -60,52 +60,6 @@ class TimeControllerComponent(html.Div):
                 ],
             )
 
-        # Frame controller
-        if frame:
-            slider_frame = dcc.Slider(
-                id="slider_frame",
-                min=tmin, max=tmax, value=tstart, step=0.05,
-            )
-            group_frame = dbc.FormGroup(
-                [
-                    dbc.Label('frame (s): ', id='slider_frame_label'),
-                    dbc.Col(slider_frame)
-                ],
-            )
-
-            @self.parent_app.callback(
-                [
-                    Output(component_id='slider_frame', component_property='min'),
-                    Output(component_id='slider_frame', component_property='max'),
-                    Output(component_id='slider_frame', component_property='value')
-                ],
-                [
-                    Input(component_id='slider_start_time', component_property='value'),
-                    Input(component_id='input_duration', component_property='value')
-                ]
-            )
-            def update_slider_frame_value(select_start_time, select_duration):
-                """Updates Frame slider controller value"""
-                tmin = select_start_time
-                tmax = select_start_time + select_duration
-                tframe = (2 * select_start_time + select_duration) / 2
-
-                return (
-                    tmin,
-                    tmax,
-                    tframe,
-                )
-
-            @self.parent_app.callback(
-                Output(component_id='slider_frame_label', component_property='children'),
-                [Input(component_id='slider_frame', component_property='value')]
-            )
-            def update_slider_frame_label(select_frame):
-                """Updates Frame slider controller label"""
-                return 'frame (s): ' + str(select_frame)
-        else:
-            group_frame = []
-
         # Controllers main layout
         self.children = dbc.Col([
             dbc.FormGroup(
@@ -117,10 +71,56 @@ class TimeControllerComponent(html.Div):
             )
         ])
 
+        # # Frame controller
+        # if frame:
+        #     slider_frame = dcc.Slider(
+        #         id="slider_frame",
+        #         min=tmin, max=tmax, value=tstart, step=0.05,
+        #     )
+        #     group_frame = dbc.FormGroup(
+        #         [
+        #             dbc.Label('frame (s): ', id='slider_frame_label'),
+        #             dbc.Col(slider_frame)
+        #         ],
+        #     )
+        #
+        #     @self.parent_app.callback(
+        #         [
+        #             Output(component_id='slider_frame', component_property='min'),
+        #             Output(component_id='slider_frame', component_property='max'),
+        #             Output(component_id='slider_frame', component_property='value')
+        #         ],
+        #         [
+        #             Input(component_id='slider_start_time', component_property='value'),
+        #             Input(component_id='input_duration', component_property='value')
+        #         ]
+        #     )
+        #     def update_slider_frame_value(select_start_time, select_duration):
+        #         """Updates Frame slider controller value"""
+        #         tmin = select_start_time
+        #         tmax = select_start_time + select_duration
+        #         tframe = (2 * select_start_time + select_duration) / 2
+        #
+        #         return (
+        #             tmin,
+        #             tmax,
+        #             tframe,
+        #         )
+        #
+        #     @self.parent_app.callback(
+        #         Output(component_id='slider_frame_label', component_property='children'),
+        #         [Input(component_id='slider_frame', component_property='value')]
+        #     )
+        #     def update_slider_frame_label(select_frame):
+        #         """Updates Frame slider controller label"""
+        #         return 'frame (s): ' + str(select_frame)
+        # else:
+        #     group_frame = []
+
 
 class TiffImageSeriesComponent(dcc.Graph):
     """Component that renders specific frame of a Tiff file"""
-    def __init__(self, parent_app, imageseries, pixel_mask=None,
+    def __init__(self, parent_app, imageseries, path_external_file=None, pixel_mask=None,
                  foreign_time_window_controller=None, id='tiff_image_series'):
         super().__init__(id=id, figure={}, config={'displayModeBar': False})
         self.parent_app = parent_app
@@ -140,22 +140,22 @@ class TiffImageSeriesComponent(dcc.Graph):
             self.time_window_controller = foreign_time_window_controller
 
         # Make figure component
-        if imageseries.external_file is not None:
-            file_path = imageseries.external_file[0]
-            if "\\" in file_path:
-                win_path = PureWindowsPath(file_path)
-                path_ext_file = Path(win_path)
-            else:
-                path_ext_file = Path(file_path)
+        if path_external_file is not None:
+            # file_path = imageseries.external_file[0]
+            # if "\\" in file_path:
+            #     win_path = PureWindowsPath(file_path)
+            #     path_ext_file = Path(win_path)
+            # else:
+            #     path_ext_file = Path(file_path)
 
             # Get Frames dimensions
-            tiff = TiffFile(path_ext_file)
+            tiff = TiffFile(path_external_file)
             n_samples = len(tiff.pages)
             page = tiff.pages[0]
             n_y, n_x = page.shape
 
             # Read first frame
-            image = imread(path_ext_file, key=0)
+            image = imread(path_external_file, key=0)
 
             self.out_fig = go.Figure(
                 data=go.Heatmap(
@@ -169,13 +169,6 @@ class TiffImageSeriesComponent(dcc.Graph):
                 yaxis=go.layout.YAxis(showticklabels=False, ticks=""),
             )
 
-            def on_change(change):
-                # Read frame
-                mid_timestamp = (change['new'][1] + change['new'][0]) / 2
-                frame_number = int(mid_timestamp * imageseries.rate)
-                image = imread(path_ext_file, key=frame_number)
-                self.out_fig.data[0].z = image
-
         self.figure = self.out_fig
 
 
@@ -187,7 +180,7 @@ class AllenDashboard(html.Div):
         self.nwb = nwb
         self.controller_time = []
 
-    def start_dashboard(self):
+    # def start_dashboard(self):
         if self.nwb is not None:
             # Controllers
             self.controller_time = TimeControllerComponent(
@@ -273,6 +266,7 @@ class AllenDashboard(html.Div):
                 id='figure_photon_series',
                 parent_app=self.parent_app,
                 imageseries=self.nwb.acquisition['raw_ophys'],
+                path_external_file=r"C:\Users\Luiz\Desktop\data_app\oephys_dataset_original\raw_data\Emx1-s_highzoom\102086_2.tif",
                 pixel_mask=self.nwb.processing['ophys'].data_interfaces['image_segmentation'].plane_segmentations['plane_segmentation'].pixel_mask[:],
                 foreign_time_window_controller=self.controller_time,
             )
@@ -372,6 +366,11 @@ class AllenDashboard(html.Div):
                     }
                 }]
             )
+
+            print('here')
+            print()
+            print(self.traces)
+
             return [self.traces]
 
         @self.parent_app.callback(
@@ -383,16 +382,20 @@ class AllenDashboard(html.Div):
 
                 # Update image frame
                 frame_number = int(pos * self.nwb.acquisition['raw_ophys'].rate)
-                file_path = self.nwb.acquisition['raw_ophys'].external_file[0]
-                if "\\" in file_path:
-                    win_path = PureWindowsPath(file_path)
-                    path_ext_file = Path(win_path)
-                else:
-                    path_ext_file = Path(file_path)
-                image = imread(path_ext_file, key=frame_number)
+                # file_path = self.nwb.acquisition['raw_ophys'].external_file[0]
+                # if "\\" in file_path:
+                #     win_path = PureWindowsPath(file_path)
+                #     path_ext_file = Path(win_path)
+                # else:
+                #     path_ext_file = Path(file_path)
+
+                path_external_file = r"C:\Users\Luiz\Desktop\data_app\oephys_dataset_original\raw_data\Emx1-s_highzoom\102086_2.tif"
+
+                image = imread(path_external_file, key=frame_number)
                 self.photon_series.out_fig.data[0].z = image
 
                 return [self.photon_series.out_fig]
+            return [{}]
 
     def update_spike_traces(self, time_window):
         """Updates list of go.Scatter objects at spike times"""
