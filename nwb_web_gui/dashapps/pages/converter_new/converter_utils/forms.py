@@ -6,22 +6,20 @@ from dash_cool_components import FileExplorer, Keywords
 
 class SourceFormItem(dbc.FormGroup):
     """Custom form group instance"""
-    def __init__(self, label, form_input, key_name, label_name):
+    def __init__(self, label, form_input, add_explorer, explorer_id):
         super().__init__([])
 
-        print(label_name)
-
-        if key_name != 'path':
-            self.children = dbc.Row([
-                dbc.Col(label, width={'size':2}),
-                dbc.Col(form_input, width={'size':10}, style={'justify-content': 'center', 'text-align': 'center'})
-            ])
-        else:
-            explorer_btn = dbc.Button(id={'name': 'source_explorer', 'index': f'explorer_source_data_{label_name}_{key_name}'}, children=[html.I(className="far fa-folder")], style={'background-color': 'transparent', 'color': 'black', 'border': 'none'})
+        if add_explorer:
+            explorer_btn = dbc.Button(id={'name': 'source_explorer', 'index': explorer_id}, children=[html.I(className="far fa-folder")], style={'background-color': 'transparent', 'color': 'black', 'border': 'none'})
             self.children = dbc.Row([
                 dbc.Col(label, width={'size':2}),
                 dbc.Col(form_input, width={'size':8}, style={'justify-content': 'center', 'text-align': 'center'}),
                 dbc.Col(explorer_btn, width={'size': 2})
+            ])
+        else:
+            self.children = dbc.Row([
+                dbc.Col(label, width={'size':2}),
+                dbc.Col(form_input, width={'size':10}, style={'justify-content': 'center', 'text-align': 'center'})
             ])
 
 
@@ -30,32 +28,41 @@ class SourceForm(dbc.Card):
         super().__init__([])
 
         self.required_fields = required
+        self.parent_name = parent_name
+
+        parent = self.parent_name.replace(' ', '_')
 
         all_inputs = []
         for k, v in fields.items():
-            if k == 'name':
-                label_name = k
-                label = dbc.Label(label_name)
+            label = dbc.Label(k)
+            input_id = f'input_{parent}_{k}'
+            if v['type'] == 'string':
+                form_input = dbc.Input(
+                    id={'name': 'source_string_input', 'index': input_id},
+                    className='string_input',
+                    type='input'
+                )
+            elif v['type'] == 'boolean':
+                form_input = dbc.Checkbox(
+                    id={'name': 'source_boolean_input', 'index': input_id}
+                )
+            if 'format' in v.keys():
+                if v['format'] == 'file' or v['format'] == 'directory':
+                    add_explorer = True
+                    explorer_id = input_id.replace('input', 'explorer')
+                else:
+                    add_explorer = False
+                    explorer_id = ''
             else:
-                input_id = f'input_{parent_name}_{label_name}_{k}'
-                if v['type'] == 'string' and k != 'type':
-                    form_input = dbc.Input(
-                        placeholder=v['description'],
-                        id={'name': f'source_string_input', 'index': input_id},
-                        className='string_input',
-                        type='input'
-                    )
-                elif v['type'] == 'boolean' and k != 'type':
-                    form_input = dbc.Checkbox(
-                        id={'name': 'source_boolean_input', 'index': input_id}
-                    )
-                if k != 'type':
-                    form_item = SourceFormItem(label=label, form_input=form_input, key_name=k, label_name=label_name)
-                    all_inputs.append(form_item)
+                add_explorer = False
+                explorer_id = ''
+
+            form_item = SourceFormItem(label, form_input, add_explorer, explorer_id)
+            all_inputs.append(form_item)
 
         form = dbc.Form(all_inputs)
         self.children = [
-            dbc.CardHeader(parent_name.replace('_', ' ').title(), style={'text-align': 'center'}),
+            dbc.CardHeader(self.parent_name.title(), style={'text-align': 'center'}),
             dbc.CardBody(form)
         ]
 
