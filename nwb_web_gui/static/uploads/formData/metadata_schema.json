@@ -185,7 +185,7 @@
     "Ecephys": {
       "type": "object",
       "properties": {
-        "Devices": {"$ref": "#/definitions/Devices"},
+        "Device": {"$ref": "#/definitions/Devices"},
         "ElectricalSeries": {
           "type": "array",
           "items": {
@@ -270,7 +270,7 @@
             }
           }
         },
-        "ImagingPlanes": {
+        "ImagingPlane": {
           "type": "array",
           "items": {
             "title": "ImagingPlane",
@@ -279,7 +279,10 @@
             "properties": {
               "name": {"type": "string", "default": "ImagingPlane"},
               "description": {"type": "string", "description": "An area in the brain where imaging was done"},
-              "device": {"type": "string"},
+              "device": {
+                "type": "string",
+                "enum": []
+              },
               "excitation_lambda": {"type": "number"},
               "imaging_rate": {"type": "number"},
               "indicator": {"type": "string"},
