@@ -6,8 +6,8 @@ import dash_bootstrap_components as dbc
 import base64
 import json
 import datetime
-from nwb_web_gui.utils.utils import get_form_from_metadata, edit_output_form
-from nwb_web_gui.utils.make_components import make_json_file_buttons, make_modal
+from nwb_web_gui.dashapps.utils.utils import get_form_from_metadata, edit_output_form
+from nwb_web_gui.dashapps.utils.make_components import make_json_file_buttons, make_modal
 
 
 class ConverterForms(html.Div):

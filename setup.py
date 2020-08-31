@@ -18,14 +18,14 @@ setup(
     long_description_content_type='text/markdown',
     author='Luiz Tauffer and Vinicius Camozzato Vaz',
     author_email='luiz@taufferconsulting.com',
-    url='https://github.com/catalystneuro/nwb-qt-gui',
+    url='https://github.com/catalystneuro/nwb-web-gui',
     keywords='nwb',
     packages=find_packages(),
     package_data={'': ['']},
     include_package_data=True,
     install_requires=[
         'pynwb', 'numpy', 'nwbwidgets', 'dash', 'dash_daq', 'dash_bootstrap_components',
-        'psutil', 'voila', 'pandas', 'jupyter', 'matplotlib', 'h5py',
+        'dash-cool-components', 'psutil', 'voila', 'pandas', 'jupyter', 'matplotlib', 'h5py',
         'jupyter-client'
     ]
 )
