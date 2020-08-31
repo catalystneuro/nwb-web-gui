@@ -22,13 +22,13 @@ def iter_source_schema(schema, parent_name=None, forms=[]):
 
     for k, v in schema.items():
         if isinstance(v, dict):
-            if 'items' in v.keys():
-                iter_source_schema(v['items'], parent_name=k, forms=forms)
+            if 'required' in v.keys():
+                required = v['required']
             else:
-                required = schema['required']
-                fields = schema['properties']
-                form = SourceForm(required, fields, parent_name)
-                forms.append(form)
+                required = []
+            fields = v['properties']
+            form = SourceForm(required, fields, k)
+            forms.append(form)
 
     return forms, 'source'
 
