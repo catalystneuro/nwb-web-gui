@@ -18,7 +18,7 @@ setup(
     long_description_content_type='text/markdown',
     author='Luiz Tauffer and Vinicius Camozzato Vaz',
     author_email='luiz@taufferconsulting.com',
-    url='https://github.com/catalystneuro/nwb-qt-gui',
+    url='https://github.com/catalystneuro/nwb-web-gui',
     keywords='nwb',
     packages=find_packages(),
     package_data={'': ['']},
