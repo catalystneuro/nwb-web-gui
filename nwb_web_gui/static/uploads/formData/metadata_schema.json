@@ -8,29 +8,47 @@
   "required": ["NWBFile"],
   "additionalProperties": false,
   "properties": {
+
     "NWBFile": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["session_start_time", "keywords"],
+      "title": "pynwb.file.NWBFile",
+      "required": ["session_description", "identifier", "session_start_time"],
       "properties": {
-        "keywords": {
-          "description": "Terms to search over",
-          "type": "array",
-          "items": {"title": "keyword", "type": "string"}
+        "session_description": {
+          "type": "string",
+          "description": "a description of the session where this data was generated"
         },
-        "experiment_description": {"type": "string", "description": "general description of the experiment"},
-        "session_id": {"type": "string", "description": "lab-specific ID for the session"},
+        "identifier": {
+          "type": "string",
+          "description": "a unique text identifier for the file"
+        },
+        "session_start_time": {
+          "type": "string",
+          "description": "the start date and time of the recording session",
+          "format": "date-time"
+        },
         "experimenter": {
-          "description": "Name of person/people who performed experiment",
           "type": "array",
-          "items": {"type": "string", "title": "experimenter"}
+          "items": {"type": "string", "title": "experimenter"},
+          "description": "name of person who performed experiment"
         },
-        "identifier": {"type":  "string", "description": "A unique text identifier for the file. If one is not provided it will be randomly assigned"},
-        "institution": {"type":  "string", "description": "Institution(s) where experiment is performed"},
-        "lab": {"type":  "string", "description": "Lab where experiment was performed"},
-        "session_description": {"type": "string", "description": "A description of the session where this data was generated"},
-        "session_start_time": {"type": "string", "format": "date-time", "description": "The start date and time of the recording session"},
-        "surgery": {"type": "string", "description": "Narrative description about surgery/surgeries, including date(s) and who performed surgery."},
+        "experiment_description": {
+          "type": "string",
+          "description": "general description of the experiment"
+        },
+        "session_id": {
+          "type": "string",
+          "description": "lab-specific ID for the session"
+        },
+        "institution": {
+          "type": "string",
+          "description": "institution(s) where experiment is performed"
+        },
+        "notes": {
+          "type": "string",
+          "description": "Notes about the experiment."
+        },
         "pharmacology": {
           "type": "string",
           "description": "Description of drugs used, including how and when they were administered. Anesthesia(s), painkiller(s), etc., plus dosage, concentration, etc."
@@ -40,33 +58,92 @@
           "description": "Experimental protocol, if applicable. E.g., include IACUC protocol"
         },
         "related_publications": {
-          "type": "array",
-          "items": {"title": "related publication", "type": "string"}
+          "type": "string",
+          "description": "Publication information.PMID, DOI, URL, etc. If multiple, concatenate together and describe which is which. such as PMID, DOI, URL, etc"
         },
-        "notes": {"type": "string", "description": "Notes about the experiment."},
-        "virus": {"type": "string", "description": "Narrative description about surgery/surgeries, including date(s) and who performed surgery."}
+        "slices": {
+          "type": "string",
+          "description": "Description of slices, including information about preparation thickness, orientation, temperature and bath solution"
+        },
+        "source_script": {
+          "type": "string",
+          "description": "Script file used to create this NWB file."
+        },
+        "source_script_file_name": {
+          "type": "string",
+          "description": "Name of the source_script file"
+        },
+        "data_collection": {
+          "type": "string",
+          "description": "Notes about data collection and analysis."
+        },
+        "surgery": {
+          "type": "string",
+          "description": "Narrative description about surgery/surgeries, including date(s) and who performed surgery."
+        },
+        "virus": {
+          "type": "string",
+          "description": "Information about virus(es) used in experiments, including virus ID, source, date made, injection location, volume, etc."
+        },
+        "stimulus_notes": {
+          "type": "string",
+          "description": "Notes about stimuli, such as how and where presented."
+        },
+        "lab": {
+          "type": "string",
+          "description": "lab where experiment was performed"
+        }
       }
     },
+
     "Subject": {
       "type": "object",
       "required": ["subject_id"],
       "properties": {
-        "description": {"type": "string", "default": "no description", "description": "Description of subject and where subject came from (e.g., breeder, if animal)."},
-        "genotype": {"type": "string", "description": "Genetic strain. If absent, assume Wild Type (WT)"},
-        "sex": {"type": "string", "enum": ["M", "F", "U", "O"], "default": "U"},
-        "species": {"type": "string", "description": "Species of subject. Use latin name."},
-        "subject_id": {"type": "string", "description": "ID of animal/person used/participating in experiment (lab convention)"},
-        "weight": {"type": "string", "description": "Weight at time of experiment, at time of surgery and at other important times."},
-        "date_of_birth": {"type": "string", "format": "date-time", "description": "Date of birth of subject. Can be supplied instead of 'age'."}
+        "description": {
+          "type": "string",
+          "description": "Description of subject and where subject came from (e.g., breeder, if animal)."
+        },
+        "genotype": {
+          "type": "string",
+          "description": "Genetic strain. If absent, assume Wild Type (WT)"
+        },
+        "sex": {
+          "type": "string",
+          "enum": ["M", "F", "U", "O"],
+          "default": "U"
+        },
+        "species": {
+          "type": "string",
+          "description": "Species of subject. Use latin name."
+        },
+        "subject_id": {
+          "type": "string",
+          "description": "ID of animal/person used/participating in experiment (lab convention)"
+        },
+        "weight": {
+          "type": "string",
+          "description": "Weight at time of experiment, at time of surgery and at other important times."
+        },
+        "date_of_birth": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Date of birth of subject. Can be supplied instead of age."
+        }
       }
     },
+
     "Behavior": {
       "type": "object",
       "properties": {
+
         "Position": {
           "type": "object",
           "properties": {
-            "name": {"type": "string", "default": "Position"},
+            "name": {
+              "type": "string",
+              "default": "Position"
+            },
             "spatial_series": {
               "type": "array",
               "items": {
@@ -82,6 +159,7 @@
             }
           }
         },
+
         "BehavioralEvents": {
           "type": "object",
           "properties": {
@@ -103,6 +181,7 @@
           }
         }
       },
+
     "Ecephys": {
       "type": "object",
       "properties": {
@@ -114,11 +193,15 @@
             "type": "object",
             "required": ["name", "description"],
             "properties": {
-              "name": {"type": "string", "default": "ElectricalSeries"},
+              "name": {
+                "type": "string",
+                "default": "ElectricalSeries"
+              },
               "description": {"type": "string"}
             }
           }
         },
+
         "ElectrodeGroups": {
           "type": "array",
           "items": {
@@ -136,6 +219,7 @@
         }
       }
     },
+
     "Ophys": {
       "type": "object",
       "required": ["Devices"],
