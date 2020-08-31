@@ -25,7 +25,7 @@ setup(
     include_package_data=True,
     install_requires=[
         'pynwb', 'numpy', 'nwbwidgets', 'dash', 'dash_daq', 'dash_bootstrap_components',
-        'psutil', 'voila', 'pandas', 'jupyter', 'matplotlib', 'h5py',
+        'dash-cool-components', 'psutil', 'voila', 'pandas', 'jupyter', 'matplotlib', 'h5py',
         'jupyter-client'
     ]
 )
