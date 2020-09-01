@@ -103,7 +103,8 @@ class MetadataForms(dbc.Card):
         if form_style == 'composite':
             self.composite_childrens = [
                                     'OpticalChannel', 'ImagingPlane', 'ElectricalSeries', 'ElectrodeGroups',
-                                    'TwoPhotonSeries', 'PlaneSegmentation', 'Position', 'Device'
+                                    'TwoPhotonSeries', 'PlaneSegmentation', 'Position', 'Device', 'ImageSegmentation',
+                                    'ImagingPlane', 'BehavioralEvents'
                                     ]
 
             children = self.iter_composite_form(self.fields['properties'], forms=[])
@@ -133,7 +134,7 @@ class MetadataForms(dbc.Card):
                     element = dbc.Form(dbc.Row([
                         dbc.Col(html.H4(k), width={'size':12}),
                         dbc.Col(children, width={'size':12})
-                    ]))
+                    ], style={'margin': '3px'}))
                 elif 'type' in v and v['type'] == 'array':
                     children = self.create_object_form(v['items'], composite_key=k)
                     element = dbc.Form(dbc.Row([
@@ -143,7 +144,8 @@ class MetadataForms(dbc.Card):
                     
                 elif 'type' not in v and '$ref' in v:
                     ref_key = v['$ref'].split('/')[-1]
-                    def_form = self.get_definitions_items(ref_key)
+                    extra_key = f'{k}_{ref_key}'
+                    def_form = self.get_definitions_items(ref_key, extra_key)
                     element = dbc.Row([
                         dbc.Col(html.H4(ref_key), className="card-title", width={'size':12}),
                         dbc.Col(def_form, width={'size':12})
@@ -199,7 +201,8 @@ class MetadataForms(dbc.Card):
                             if isinstance(item, dict):
                                 if '$ref' in item.keys():
                                     ref_key = item['$ref'].split('/')[-1]
-                                    definition_form = dbc.Card(dbc.CardBody(self.get_definitions_items(ref_key, sublist=True)), style={'margin-top': '1%'})
+                                    extra_key = f'{composite_key}_{ref_key}'
+                                    definition_form = dbc.Card(dbc.CardBody(self.get_definitions_items(ref_key, extra_key, sublist=True)), style={'margin-top': '1%'})
                                     definitions_layout = dbc.Row([
                                         dbc.Col(
                                             dbc.Label(ref_key), width={'size':2}
@@ -216,10 +219,10 @@ class MetadataForms(dbc.Card):
 
         return children
 
-    def get_definitions_items(self, ref_key, sublist=False):
+    def get_definitions_items(self, ref_key, extra_key, sublist=False):
         ref = self.definitions[ref_key]
         if ref['type'] == 'object':
-            form = dbc.Form(self.create_object_form(ref, sublist=sublist))
+            form = dbc.Form(self.create_object_form(ref, composite_key=extra_key, sublist=sublist))
         elif ref['type'] == 'array':
             form = dbc.Form(self.create_object_form(ref['items'], sublist=sublist))
 

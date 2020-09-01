@@ -43,7 +43,7 @@ class ConverterForms(html.Div):
                 ]),
                 dbc.Row([
                     dbc.Col(html.H4('Metadata'), width={'size': 12}, style={'text-align': 'left'}),
-                    dbc.Col(metadata_forms, width={'size': 12}), #style={'overflow': 'scroll', 'height': '50vh'}, className='v-scroll')
+                    dbc.Col(metadata_forms, width={'size': 12}, style={'overflow': 'scroll', 'height': '50vh'}, className='v-scroll')
                 ]),
                 dbc.Row(modal),
                 html.Div(id='hidden')
