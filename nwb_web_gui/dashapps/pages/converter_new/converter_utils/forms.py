@@ -71,30 +71,41 @@ class SourceForm(dbc.Card):
 
 
 class MetadataFormItem(dbc.FormGroup):
-    def __init__(self, label, form_input):
+    def __init__(self, label, form_input, sublist=False):
         super().__init__([])
 
-        self.children = [
-            dbc.Row([
-                dbc.Col(label, width={'size':2}),
-                dbc.Col(form_input, width={'size':8})
-            ])
-        ]
+        if not sublist:
+            self.children = [
+                dbc.Row([
+                    dbc.Col(label, width={'size':2}),
+                    dbc.Col(form_input, width={'size':8})
+                ])
+            ]
+        else:
+            self.children = [
+                dbc.Row([
+                    dbc.Col(label, width={'size': 4}),
+                    dbc.Col(form_input, width={'size': 8})
+                ])
+            ]
 
 
 class MetadataForms(dbc.Card):
-    def __init__(self, fields, key_name, form_style):
+    def __init__(self, fields, key_name, form_style, definitions=None):
         super().__init__([])
 
         self.fields = fields
         self.key_name = key_name
 
+        if definitions is not None:
+            self.definitions = definitions
+
         if form_style == 'composite':
             self.composite_childrens = [
-                                    'OpticalChannel', 'ImagingPlane', 'ElectricalSeries',
-                                    'TwoPhotonSeries', 'PlaneSegmentation'
+                                    'OpticalChannel', 'ImagingPlane', 'ElectricalSeries', 'ElectrodeGroups',
+                                    'TwoPhotonSeries', 'PlaneSegmentation', 'Position', 'Device'
                                     ]
-            
+
             children = self.iter_composite_form(self.fields['properties'], forms=[])
             self.children = [
                 dbc.CardHeader(key_name),
@@ -117,18 +128,26 @@ class MetadataForms(dbc.Card):
 
         for k, v in fields.items():
             if k in self.composite_childrens:
-                if v['type'] == 'object':
+                if 'type' in v and v['type'] == 'object':
                     children = self.create_object_form(v, composite_key=k)
                     element = dbc.Form(dbc.Row([
                         dbc.Col(html.H4(k), width={'size':12}),
                         dbc.Col(children, width={'size':12})
                     ]))
-                elif v['type'] == 'array':
+                elif 'type' in v and v['type'] == 'array':
                     children = self.create_object_form(v['items'], composite_key=k)
                     element = dbc.Form(dbc.Row([
                         dbc.Col(html.H4(k, className="card-title"), width={'size':12}),
                         dbc.Col(children, width={'size':12})
                     ], style={'margin': '3px'}))
+                    
+                elif 'type' not in v and '$ref' in v:
+                    ref_key = v['$ref'].split('/')[-1]
+                    def_form = self.get_definitions_items(ref_key)
+                    element = dbc.Row([
+                        dbc.Col(html.H4(ref_key), className="card-title", width={'size':12}),
+                        dbc.Col(def_form, width={'size':12})
+                    ], style={'margin': '3px'})
                 forms.append(element)
             else:
                 if isinstance(v, dict):
@@ -136,9 +155,10 @@ class MetadataForms(dbc.Card):
 
         return forms
 
-    def create_object_form(self, fields, composite_key=None):
+    def create_object_form(self, fields, composite_key=None, sublist=False):
         children = []
         sublist_children = []
+        definitions_children = []
 
         for k, v in fields['properties'].items():
             if composite_key is None:
@@ -162,7 +182,7 @@ class MetadataForms(dbc.Card):
                             input_id_aux = f'{input_id}_{lbl}'
                             label = dbc.Label(lbl)
                             form_input = self.get_string_field_input(value, input_id_aux)
-                            form_item = MetadataFormItem(label, form_input)
+                            form_item = MetadataFormItem(label, form_input, sublist=True)
                             sublist_children.append(form_item)
 
                         sublist_form = dbc.Card(dbc.CardBody(dbc.Form(sublist_children)))
@@ -174,14 +194,36 @@ class MetadataForms(dbc.Card):
                                 sublist_form, width={'size': 8}
                             )
                         ])
+                    if 'allOf' in v['items']:
+                        for item in v['items']['allOf']:
+                            if isinstance(item, dict):
+                                if '$ref' in item.keys():
+                                    ref_key = item['$ref'].split('/')[-1]
+                                    definition_form = dbc.Card(dbc.CardBody(self.get_definitions_items(ref_key, sublist=True)), style={'margin-top': '1%'})
+                                    definitions_layout = dbc.Row([
+                                        dbc.Col(
+                                            dbc.Label(ref_key), width={'size':2}
+                                        ),
+                                        dbc.Col(definition_form, width={'size':8})
+                                    ])
+                                    subform_layout.children.append(dbc.Col(definitions_layout, width={'size':12}))
 
             if len(sublist_children) == 0:
-                form_item = MetadataFormItem(label, form_input)
+                form_item = MetadataFormItem(label, form_input, sublist)
                 children.append(form_item)
             else:
                 children.append(subform_layout)
 
         return children
+
+    def get_definitions_items(self, ref_key, sublist=False):
+        ref = self.definitions[ref_key]
+        if ref['type'] == 'object':
+            form = dbc.Form(self.create_object_form(ref, sublist=sublist))
+        elif ref['type'] == 'array':
+            form = dbc.Form(self.create_object_form(ref['items'], sublist=sublist))
+
+        return form
 
     def get_string_field_input(self, value, input_id):
 

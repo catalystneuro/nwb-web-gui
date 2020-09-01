@@ -24,8 +24,10 @@ class ConverterForms(html.Div):
         with open(metadata_schema_path, 'r') as inp:
             self.metadata_json_schema = json.load(inp)
 
+        metadata_definitions = self.metadata_json_schema['definitions']
+
         source_forms = get_forms_from_schema(self.source_json_schema, source=True)
-        metadata_forms = get_forms_from_schema(self.metadata_json_schema, source=False)
+        metadata_forms = get_forms_from_schema(self.metadata_json_schema, definitions=metadata_definitions, source=False)
 
         self.children = [
             dbc.Container([
@@ -41,7 +43,7 @@ class ConverterForms(html.Div):
                 ]),
                 dbc.Row([
                     dbc.Col(html.H4('Metadata'), width={'size': 12}, style={'text-align': 'left'}),
-                    dbc.Col(metadata_forms, width={'size': 12}, style={'overflow': 'scroll', 'height': '50vh'}, className='v-scroll')
+                    dbc.Col(metadata_forms, width={'size': 12}), #style={'overflow': 'scroll', 'height': '50vh'}, className='v-scroll')
                 ]),
                 dbc.Row(modal),
                 html.Div(id='hidden')
