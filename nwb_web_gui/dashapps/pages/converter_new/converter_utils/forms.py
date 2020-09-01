@@ -104,7 +104,7 @@ class MetadataForms(dbc.Card):
             self.composite_childrens = [
                                     'OpticalChannel', 'ImagingPlane', 'ElectricalSeries', 'ElectrodeGroups',
                                     'TwoPhotonSeries', 'PlaneSegmentation', 'Position', 'Device', 'ImageSegmentation',
-                                    'ImagingPlane', 'BehavioralEvents'
+                                    'ImagingPlane', 'BehavioralEvents', 'DFOverF', 'Fluorescence'
                                     ]
 
             children = self.iter_composite_form(self.fields['properties'], forms=[])
@@ -159,8 +159,7 @@ class MetadataForms(dbc.Card):
 
     def create_object_form(self, fields, composite_key=None, sublist=False):
         children = []
-        sublist_children = []
-        definitions_children = []
+        subform_layout = None
 
         for k, v in fields['properties'].items():
             if composite_key is None:
@@ -180,6 +179,7 @@ class MetadataForms(dbc.Card):
                     )
                 else:
                     if 'properties' in v['items']:
+                        sublist_children = []
                         for lbl, value in v['items']['properties'].items():
                             input_id_aux = f'{input_id}_{lbl}'
                             label = dbc.Label(lbl)
@@ -209,9 +209,12 @@ class MetadataForms(dbc.Card):
                                         ),
                                         dbc.Col(definition_form, width={'size':8})
                                     ])
-                                    subform_layout.children.append(dbc.Col(definitions_layout, width={'size':12}))
+                                    if subform_layout is not None:
+                                        subform_layout.children.append(dbc.Col(definitions_layout, width={'size':12}))
+                                    else:
+                                        subform_layout = definitions_layout
 
-            if len(sublist_children) == 0:
+            if subform_layout is None:
                 form_item = MetadataFormItem(label, form_input, sublist)
                 children.append(form_item)
             else:
@@ -221,10 +224,27 @@ class MetadataForms(dbc.Card):
 
     def get_definitions_items(self, ref_key, extra_key, sublist=False):
         ref = self.definitions[ref_key]
+
         if ref['type'] == 'object':
             form = dbc.Form(self.create_object_form(ref, composite_key=extra_key, sublist=sublist))
         elif ref['type'] == 'array':
             form = dbc.Form(self.create_object_form(ref['items'], sublist=sublist))
+
+        if 'allOf' in ref:
+            subforms = [form]
+            for item in ref['allOf']:
+                if '$ref' in item:
+                    ref_key = item['$ref'].split('/')[-1]
+                    key = f'{extra_key}_{ref_key}'
+                    subform = self.get_definitions_items(ref_key, key, sublist=True)
+                    subform_layout = dbc.Row([
+                        #dbc.Col(dbc.Label(ref_key), width={'size': 12}),
+                        dbc.Col(subform, width={'size':12})
+                    ])
+                    subforms.append(subform_layout)
+
+            output_form = dbc.Container(subforms)
+            return output_form
 
         return form
 
