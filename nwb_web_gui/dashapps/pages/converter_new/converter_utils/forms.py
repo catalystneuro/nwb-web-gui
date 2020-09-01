@@ -1,7 +1,7 @@
 import dash_html_components as html
 import dash_core_components as dcc
 import dash_bootstrap_components as dbc
-from dash_cool_components import FileExplorer, Keywords, DateTimePicker
+from dash_cool_components import KeyedFileBrowser, TagInput, DateTimePicker
 
 
 class SourceFormItem(dbc.FormGroup):
@@ -172,7 +172,7 @@ class MetadataForms(dbc.Card):
                 form_input = self.get_string_field_input(v, input_id)
             elif v['type'] == 'array':
                 if 'format' in v and v['format'] == 'keywords':
-                    form_input = Keywords(
+                    form_input = TagInput(
                         id=input_id,
                         wrapperStyle={'box-shadow': 'none', 'border-radius': '2px', 'line-height': '5px'},
                         inputStyle={'line-height': '15px', 'height': '15px'}

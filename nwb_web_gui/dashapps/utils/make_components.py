@@ -3,7 +3,8 @@ import dash_html_components as html
 import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output, State
 from datetime import datetime
-from file_explorer import FileExplorer
+#from file_explorer import FileExplorer
+from dash_cool_components import KeyedFileBrowser
 import os
 from pathlib import Path
 #from nwb_web_gui import FILES_PATH
@@ -185,7 +186,7 @@ class FileBrowserComponent(html.Div):
         explorer = dbc.Container(
             dbc.Row(
                 dbc.Col(
-                    FileExplorer(
+                    KeyedFileBrowser(
                         id='explorer',
                         value=dir_schema
                     ),
