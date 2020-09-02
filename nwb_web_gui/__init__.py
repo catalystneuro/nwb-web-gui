@@ -16,7 +16,7 @@ def init_app():
         # from .dashapps.pages.converter.init_converter import init_converter
         from .dashapps.pages.viewer.init_viewer import init_viewer
         # from .dashapps.pages.dashboard.init_dashboard import init_dashboard
-        from .dashapps.pages.converter_new.init_coverter import init_converter_new
+        from .dashapps.pages.converter.init_coverter import init_converter_new
 
         # init_converter(app)
         init_viewer(app)

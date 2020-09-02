@@ -3,21 +3,15 @@ from .forms import MetadataForms
 import pynwb
 import dash_bootstrap_components as dbc
 
-map_name_to_class = {
-    "NWBFile": pynwb.file.NWBFile,
-    "Subject": pynwb.file.Subject,
-    #"Device": pynwb.device.Device,
-    # Ecephys
-    "ElectrodeGroups": pynwb.ecephys.ElectrodeGroup,
-    "ElectricalSeries": pynwb.ecephys.ElectricalSeries,
-    # Ophys
-    "OpticalChannel": pynwb.ophys.OpticalChannel,
-    "ImagingPlane": pynwb.ophys.ImagingPlane,
-    "TwoPhotonSeries": pynwb.ophys.TwoPhotonSeries,
-    "PlaneSegmentation": pynwb.ophys.PlaneSegmentation
-}
 
-nwb_composite_forms = ['Ophys', 'Ecephys', 'Behavior']
+nwb_forms = {
+    "NWBFile": 'single',
+    "Subject": 'single',
+    "Ophys": ["Device", "DFOverF", "Fluorescence", "ImageSegmentation", "ImagingPlane", "TwoPhotonSeries"], 
+    "Ecephys": ["Device", "ElectricalSeries", "ElectrodeGroups"], 
+    "Behavior": ["Position", "BehavioralEvents"]
+    }
+
 nwb_single_forms = ['NWBFile', 'Subject']
 
 
@@ -39,11 +33,11 @@ def iter_source_schema(schema, parent_name=None, forms=[]):
 def iter_metadata_schema(schema, definitions, parent_name=None, forms=[]):
 
     for k, v in schema.items():
-        if k in nwb_single_forms:
+        if k in nwb_forms and isinstance(nwb_forms[k], str):
             form = MetadataForms(v, k, form_style='single')
             forms.append(form)
-        elif k in nwb_composite_forms:
-            form = MetadataForms(v, k, form_style='composite', definitions=definitions)
+        elif k in nwb_forms.keys() and isinstance(nwb_forms[k], list):
+            form = MetadataForms(v, k, form_style='composite', definitions=definitions, composite_children=nwb_forms[k])
             forms.append(form)
         else:
             if isinstance(v, dict):

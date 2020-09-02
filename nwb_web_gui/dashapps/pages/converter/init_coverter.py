@@ -5,7 +5,7 @@ import dash_bootstrap_components as dbc
 from nwb_web_gui.dashapps.components.navbar import render_navbar
 
 
-def init_converter(server):
+def init_converter_new(server):
     FONT_AWESOME = "https://use.fontawesome.com/releases/v5.7.2/css/all.css"
     external_stylesheets = [dbc.themes.BOOTSTRAP, FONT_AWESOME]
     dash_app = dash.Dash(

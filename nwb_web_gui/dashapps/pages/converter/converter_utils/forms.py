@@ -91,7 +91,7 @@ class MetadataFormItem(dbc.FormGroup):
 
 
 class MetadataForms(dbc.Card):
-    def __init__(self, fields, key_name, form_style, definitions=None):
+    def __init__(self, fields, key_name, form_style, definitions=None, composite_children=None):
         super().__init__([])
 
         self.fields = fields
@@ -101,11 +101,7 @@ class MetadataForms(dbc.Card):
             self.definitions = definitions
 
         if form_style == 'composite':
-            self.composite_children = [
-                'OpticalChannel', 'ImagingPlane', 'ElectricalSeries', 'ElectrodeGroups',
-                'TwoPhotonSeries', 'PlaneSegmentation', 'Position', 'Device', 'ImageSegmentation',
-                'ImagingPlane', 'BehavioralEvents', 'DFOverF', 'Fluorescence'
-            ]
+            self.composite_children = composite_children
 
             children = self.iter_composite_form(self.fields['properties'], forms=[])
             self.children = [
@@ -141,7 +137,6 @@ class MetadataForms(dbc.Card):
                         dbc.Col(html.H4(k, className="card-title"), width={'size': 12}),
                         dbc.Col(children, width={'size': 12})
                     ], style={'margin': '3px'}))
-
                 elif 'type' not in v and '$ref' in v:
                     ref_key = v['$ref'].split('/')[-1]
                     extra_key = f'{k}_{ref_key}'
@@ -297,5 +292,3 @@ class MetadataForms(dbc.Card):
 
         return form_input
 
-    def create_array_form(self):
-        pass
