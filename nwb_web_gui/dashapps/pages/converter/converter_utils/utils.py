@@ -12,8 +12,6 @@ nwb_forms = {
     "Behavior": ["Position", "BehavioralEvents"]
     }
 
-nwb_single_forms = ['NWBFile', 'Subject']
-
 
 def iter_source_schema(schema, parent_name=None, forms=[]):
 

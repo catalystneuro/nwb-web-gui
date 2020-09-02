@@ -48,7 +48,11 @@ class ConverterForms(html.Div):
                     dbc.Col(metadata_forms, width={'size': 12}, style={'overflow': 'scroll', 'height': '50vh'}, className='v-scroll')
                 ]),
                 dbc.Row(modal),
-                html.Div(id='hidden')
+                dbc.Row(
+                    dbc.Col(
+                        dbc.Button('Run Conversion',id='run_conversion_button') ,width={'size':11}
+                    ), style={'text-align':'right', 'margin-top': '1%'}
+                ),
             ], style={'min-height': '110vh'})
         ]
 

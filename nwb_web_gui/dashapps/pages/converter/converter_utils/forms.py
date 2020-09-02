@@ -6,21 +6,34 @@ from dash_cool_components import KeyedFileBrowser, TagInput, DateTimePicker
 
 class SourceFormItem(dbc.FormGroup):
     """Custom form group instance"""
-    def __init__(self, label, form_input, add_explorer, explorer_id):
+    def __init__(self, label, form_input, add_explorer, explorer_id, add_required):
         super().__init__([])
 
         if add_explorer:
             explorer_btn = dbc.Button(id={'name': 'source_explorer', 'index': explorer_id}, children=[html.I(className="far fa-folder")], style={'background-color': 'transparent', 'color': 'black', 'border': 'none'})
-            self.children = dbc.Row([
-                dbc.Col(label, width={'size':2}),
-                dbc.Col(form_input, width={'size':8}, style={'justify-content': 'center', 'text-align': 'center'}),
-                dbc.Col(explorer_btn, width={'size': 2})
-            ])
+            if add_required:
+                self.children = dbc.Row([
+                    dbc.Col([label, html.Span('*', style={'color':'red'})], width={'size':2}),
+                    dbc.Col(form_input, width={'size':8}, style={'justify-content': 'center', 'text-align': 'center'}),
+                    dbc.Col(explorer_btn, width={'size': 2}, style={'text-align': 'left'})
+                ])
+            else:
+                self.children = dbc.Row([
+                    dbc.Col(label, width={'size':2}),
+                    dbc.Col(form_input, width={'size':8}, style={'justify-content': 'center', 'text-align': 'center'}),
+                    dbc.Col(explorer_btn, width={'size': 2}, style={'text-align': 'left'})
+                ])
         else:
-            self.children = dbc.Row([
-                dbc.Col(label, width={'size':2}),
-                dbc.Col(form_input, width={'size':10}, style={'justify-content': 'left', 'text-align': 'left'})
-            ])
+            if add_required:
+                self.children = dbc.Row([
+                    dbc.Col([label, html.Span('*', style={'color':'red'})], width={'size':2}),
+                    dbc.Col(form_input, width={'size':10}, style={'justify-content': 'left', 'text-align': 'left'})
+                ])
+            else:
+                self.children = dbc.Row([
+                    dbc.Col(label, width={'size':2}),
+                    dbc.Col(form_input, width={'size':10}, style={'justify-content': 'left', 'text-align': 'left'})
+                ])
 
 
 class SourceForm(dbc.Card):
@@ -37,6 +50,10 @@ class SourceForm(dbc.Card):
             label = dbc.Label(k)
             input_id = f'input_{parent}_{k}'
             explorer_id = input_id.replace('input', 'explorer')
+            if k in self.required_fields:
+                add_required = True
+            else:
+                add_required = False
             if v['type'] == 'string':
                 form_input = dbc.Input(
                     id={'name': 'source_string_input', 'index': input_id},
@@ -58,7 +75,7 @@ class SourceForm(dbc.Card):
                 add_explorer = False
                 explorer_id = ''
 
-            form_item = SourceFormItem(label, form_input, add_explorer, explorer_id)
+            form_item = SourceFormItem(label, form_input, add_explorer, explorer_id, add_required)
             all_inputs.append(form_item)
 
         form = dbc.Form(all_inputs)
@@ -71,23 +88,39 @@ class SourceForm(dbc.Card):
 
 
 class MetadataFormItem(dbc.FormGroup):
-    def __init__(self, label, form_input, sublist=False):
+    def __init__(self, label, form_input, sublist=False, add_required=False):
         super().__init__([])
 
         if not sublist:
-            self.children = [
-                dbc.Row([
-                    dbc.Col(label, width={'size':2}),
-                    dbc.Col(form_input, width={'size':8})
-                ])
-            ]
+            if add_required:
+                self.children = [
+                    dbc.Row([
+                        dbc.Col([label, html.Span('*', style={'color':'red'})], width={'size':2}),
+                        dbc.Col(form_input, width={'size':8})
+                    ])
+                ]
+            else:
+                self.children = [
+                    dbc.Row([
+                        dbc.Col(label, width={'size':2}),
+                        dbc.Col(form_input, width={'size':8})
+                    ])
+                ]
         else:
-            self.children = [
-                dbc.Row([
-                    dbc.Col(label, width={'size': 4}),
-                    dbc.Col(form_input, width={'size': 8})
-                ])
-            ]
+            if add_required:
+                self.children = [
+                    dbc.Row([
+                        dbc.Col([label, html.Span('*', style={'color':'red'})], width={'size': 4}),
+                        dbc.Col(form_input, width={'size': 8})
+                    ])
+                ]
+            else:
+                self.children = [
+                    dbc.Row([
+                        dbc.Col(label, width={'size': 4}),
+                        dbc.Col(form_input, width={'size': 8})
+                    ])
+                ]
 
 
 class MetadataForms(dbc.Card):
@@ -96,6 +129,7 @@ class MetadataForms(dbc.Card):
 
         self.fields = fields
         self.key_name = key_name
+        self.required_fields = []
 
         if definitions is not None:
             self.definitions = definitions
@@ -109,6 +143,8 @@ class MetadataForms(dbc.Card):
                 dbc.CardBody([f for f in children])
             ]
         else:
+            self.required_fields = self.fields['required']
+
             if self.fields['type'] == 'object':
                 children = self.create_object_form(self.fields)
             elif self.fields['type'] == 'array':
@@ -126,12 +162,18 @@ class MetadataForms(dbc.Card):
         for k, v in fields.items():
             if k in self.composite_children:
                 if 'type' in v and v['type'] == 'object':
+                    if 'required' in v:
+                        self.required_fields = v['required']
+                    else:
+                        self.required_fields = []
                     children = self.create_object_form(v, composite_key=k)
                     element = dbc.Form(dbc.Row([
                         dbc.Col(html.H4(k), width={'size': 12}),
                         dbc.Col(children, width={'size': 12})
                     ], style={'margin': '3px'}))
                 elif 'type' in v and v['type'] == 'array':
+                    if 'required' in v['items']:
+                        self.required_fields = v['items']['required']
                     children = self.create_object_form(v['items'], composite_key=k)
                     element = dbc.Form(dbc.Row([
                         dbc.Col(html.H4(k, className="card-title"), width={'size': 12}),
@@ -163,6 +205,10 @@ class MetadataForms(dbc.Card):
                 input_id = f'input_{self.key_name}_{composite_key}_{k}'
 
             label = dbc.Label(k)
+            if k in self.required_fields:
+                add_required = True
+            else:
+                add_required = False
             if v['type'] == 'string' or v['type'] == 'number':
                 form_input = self.get_string_field_input(v, input_id)
             elif v['type'] == 'array':
@@ -175,11 +221,19 @@ class MetadataForms(dbc.Card):
                 else:
                     if 'properties' in v['items']:
                         sublist_children = []
+                        if 'required' in v['items']:
+                            self.required_fields = v['items']['required']
+                        else:
+                            self.required_fields = []
                         for lbl, value in v['items']['properties'].items():
+                            if lbl in self.required_fields:
+                                add_required = True
+                            else:
+                                add_required = False
                             input_id_aux = f'{input_id}_{lbl}'
                             label = dbc.Label(lbl)
                             form_input = self.get_string_field_input(value, input_id_aux)
-                            form_item = MetadataFormItem(label, form_input, sublist=True)
+                            form_item = MetadataFormItem(label, form_input, sublist=True, add_required=add_required)
                             sublist_children.append(form_item)
 
                         sublist_form = dbc.Card(dbc.CardBody(dbc.Form(sublist_children)))
@@ -210,7 +264,7 @@ class MetadataForms(dbc.Card):
                                         subform_layout = definitions_layout
 
             if subform_layout is None:
-                form_item = MetadataFormItem(label, form_input, sublist)
+                form_item = MetadataFormItem(label, form_input, sublist, add_required)
                 children.append(form_item)
             else:
                 children.append(subform_layout)
@@ -221,8 +275,12 @@ class MetadataForms(dbc.Card):
         ref = self.definitions[ref_key]
 
         if ref['type'] == 'object':
+            if 'required' in ref:
+                self.required_fields = ref['required']
             form = dbc.Form(self.create_object_form(ref, composite_key=extra_key, sublist=sublist))
         elif ref['type'] == 'array':
+            if 'required' in ref['items']:
+                self.required_fields = ref['items']['required']
             form = dbc.Form(self.create_object_form(ref['items'], sublist=sublist))
 
         if 'allOf' in ref:
@@ -291,4 +349,3 @@ class MetadataForms(dbc.Card):
                 )
 
         return form_input
-
