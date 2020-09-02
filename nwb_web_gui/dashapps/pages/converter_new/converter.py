@@ -4,9 +4,9 @@ import dash_core_components as dcc
 from dash.dependencies import Input, Output, State, ALL, MATCH
 import dash_bootstrap_components as dbc
 import json
-from pathlib import Path
 from .converter_utils.utils import get_forms_from_schema
 from nwb_web_gui.dashapps.utils.make_components import make_modal
+from pathlib import Path
 
 
 class ConverterForms(html.Div):
@@ -16,27 +16,40 @@ class ConverterForms(html.Div):
         self.current_modal_source = ''
         modal = make_modal(parent_app)
 
-        source_schema_path = Path('/home/vinicius/Área de Trabalho/Trabalhos/nwb-web-gui/nwb_web_gui/static/uploads/formData/source_schema.json')
+        examples_path = Path(__file__).parent.absolute() / 'example_schemas'
+
+        source_schema_path = examples_path / 'source_schema.json'
         with open(source_schema_path, 'r') as inp:
             self.source_json_schema = json.load(inp)
 
-        metadata_schema_path = Path('/home/vinicius/Área de Trabalho/Trabalhos/nwb-web-gui/nwb_web_gui/static/uploads/formData/metadata_schema.json')
+        metadata_schema_path = examples_path / 'metada_schema_2.json'
         with open(metadata_schema_path, 'r') as inp:
             self.metadata_json_schema = json.load(inp)
 
+        metadata_definitions = self.metadata_json_schema['definitions']
+
         source_forms = get_forms_from_schema(self.source_json_schema, source=True)
-        metadata_forms = get_forms_from_schema(self.metadata_json_schema, source=False)
+        metadata_forms = get_forms_from_schema(self.metadata_json_schema, definitions=metadata_definitions, source=False)
 
         self.children = [
             dbc.Container([
                 dbc.Row(html.H1('NWB Converter'), style={'justify-content': 'center'}),
                 dbc.Row([
-                    dbc.Col(source_forms, width={'size': 4}),
-                    dbc.Col(metadata_forms, width={'size': 8})
+                    dbc.Col(html.H4('Input Files'), width={'size': 12}, style={'text-align': 'left'}),
+                    dbc.Col(source_forms, width={'size': 12}, style={'overflow': 'scroll', 'height': '30vh'}, className='v-scroll'),
+                    dbc.Col(
+                        dbc.Button('Get Metadata Form', id='get_metadata_btn'),
+                        style={'justify-content': 'right', 'text-align': 'right', 'margin-top': '1%'},
+                        width={'size': '11'}
+                    )
+                ]),
+                dbc.Row([
+                    dbc.Col(html.H4('Metadata'), width={'size': 12}, style={'text-align': 'left'}),
+                    dbc.Col(metadata_forms, width={'size': 12}, style={'overflow': 'scroll', 'height': '50vh'}, className='v-scroll')
                 ]),
                 dbc.Row(modal),
                 html.Div(id='hidden')
-            ],fluid=True)
+            ], style={'min-height': '110vh'})
         ]
 
         @self.parent_app.callback(
@@ -76,4 +89,3 @@ class ConverterForms(html.Div):
                 return input_value
             else:
                 return values
-
