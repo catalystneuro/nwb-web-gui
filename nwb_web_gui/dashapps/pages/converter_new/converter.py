@@ -4,9 +4,9 @@ import dash_core_components as dcc
 from dash.dependencies import Input, Output, State, ALL, MATCH
 import dash_bootstrap_components as dbc
 import json
-from pathlib import Path
 from .converter_utils.utils import get_forms_from_schema
 from nwb_web_gui.dashapps.utils.make_components import make_modal
+from pathlib import Path
 
 
 class ConverterForms(html.Div):
@@ -16,11 +16,13 @@ class ConverterForms(html.Div):
         self.current_modal_source = ''
         modal = make_modal(parent_app)
 
-        source_schema_path = Path('/home/vinicius/Área de Trabalho/Trabalhos/nwb-web-gui/nwb_web_gui/static/uploads/formData/source_schema.json')
+        examples_path = Path(__file__).parent.absolute() / 'example_schemas'
+
+        source_schema_path = examples_path / 'source_schema.json'
         with open(source_schema_path, 'r') as inp:
             self.source_json_schema = json.load(inp)
 
-        metadata_schema_path = Path('/home/vinicius/Área de Trabalho/Trabalhos/nwb-web-gui/nwb_web_gui/static/uploads/formData/metada_schema_2.json')
+        metadata_schema_path = examples_path / 'metada_schema_2.json'
         with open(metadata_schema_path, 'r') as inp:
             self.metadata_json_schema = json.load(inp)
 
@@ -49,7 +51,7 @@ class ConverterForms(html.Div):
                 html.Div(id='hidden')
             ], style={'min-height': '110vh'})
         ]
-        
+
         @self.parent_app.callback(
             Output('modal_explorer', 'is_open'),
             [Input({'name': 'source_explorer', 'index': ALL}, 'n_clicks'), Input('close_explorer_modal', 'n_clicks')],
@@ -87,4 +89,3 @@ class ConverterForms(html.Div):
                 return input_value
             else:
                 return values
-
