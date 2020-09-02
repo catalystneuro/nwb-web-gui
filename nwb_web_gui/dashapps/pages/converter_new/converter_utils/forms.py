@@ -101,11 +101,11 @@ class MetadataForms(dbc.Card):
             self.definitions = definitions
 
         if form_style == 'composite':
-            self.composite_childrens = [
-                                    'OpticalChannel', 'ImagingPlane', 'ElectricalSeries', 'ElectrodeGroups',
-                                    'TwoPhotonSeries', 'PlaneSegmentation', 'Position', 'Device', 'ImageSegmentation',
-                                    'ImagingPlane', 'BehavioralEvents', 'DFOverF', 'Fluorescence'
-                                    ]
+            self.composite_children = [
+                'OpticalChannel', 'ImagingPlane', 'ElectricalSeries', 'ElectrodeGroups',
+                'TwoPhotonSeries', 'PlaneSegmentation', 'Position', 'Device', 'ImageSegmentation',
+                'ImagingPlane', 'BehavioralEvents', 'DFOverF', 'Fluorescence'
+            ]
 
             children = self.iter_composite_form(self.fields['properties'], forms=[])
             self.children = [
@@ -128,27 +128,27 @@ class MetadataForms(dbc.Card):
     def iter_composite_form(self, fields, forms=[]):
 
         for k, v in fields.items():
-            if k in self.composite_childrens:
+            if k in self.composite_children:
                 if 'type' in v and v['type'] == 'object':
                     children = self.create_object_form(v, composite_key=k)
                     element = dbc.Form(dbc.Row([
-                        dbc.Col(html.H4(k), width={'size':12}),
-                        dbc.Col(children, width={'size':12})
+                        dbc.Col(html.H4(k), width={'size': 12}),
+                        dbc.Col(children, width={'size': 12})
                     ], style={'margin': '3px'}))
                 elif 'type' in v and v['type'] == 'array':
                     children = self.create_object_form(v['items'], composite_key=k)
                     element = dbc.Form(dbc.Row([
-                        dbc.Col(html.H4(k, className="card-title"), width={'size':12}),
-                        dbc.Col(children, width={'size':12})
+                        dbc.Col(html.H4(k, className="card-title"), width={'size': 12}),
+                        dbc.Col(children, width={'size': 12})
                     ], style={'margin': '3px'}))
-                    
+
                 elif 'type' not in v and '$ref' in v:
                     ref_key = v['$ref'].split('/')[-1]
                     extra_key = f'{k}_{ref_key}'
                     def_form = self.get_definitions_items(ref_key, extra_key)
                     element = dbc.Row([
-                        dbc.Col(html.H4(ref_key), className="card-title", width={'size':12}),
-                        dbc.Col(def_form, width={'size':12})
+                        dbc.Col(html.H4(ref_key), className="card-title", width={'size': 12}),
+                        dbc.Col(def_form, width={'size': 12})
                     ], style={'margin': '3px'})
                 forms.append(element)
             else:
@@ -205,12 +205,12 @@ class MetadataForms(dbc.Card):
                                     definition_form = dbc.Card(dbc.CardBody(self.get_definitions_items(ref_key, extra_key, sublist=True)), style={'margin-top': '1%'})
                                     definitions_layout = dbc.Row([
                                         dbc.Col(
-                                            dbc.Label(ref_key), width={'size':2}
+                                            dbc.Label(ref_key), width={'size': 2}
                                         ),
-                                        dbc.Col(definition_form, width={'size':8})
+                                        dbc.Col(definition_form, width={'size': 8})
                                     ])
                                     if subform_layout is not None:
-                                        subform_layout.children.append(dbc.Col(definitions_layout, width={'size':12}))
+                                        subform_layout.children.append(dbc.Col(definitions_layout, width={'size': 12}))
                                     else:
                                         subform_layout = definitions_layout
 
@@ -238,8 +238,8 @@ class MetadataForms(dbc.Card):
                     key = f'{extra_key}_{ref_key}'
                     subform = self.get_definitions_items(ref_key, key, sublist=True)
                     subform_layout = dbc.Row([
-                        #dbc.Col(dbc.Label(ref_key), width={'size': 12}),
-                        dbc.Col(subform, width={'size':12})
+                        # dbc.Col(dbc.Label(ref_key), width={'size': 12}),
+                        dbc.Col(subform, width={'size': 12})
                     ])
                     subforms.append(subform_layout)
 
