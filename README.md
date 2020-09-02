@@ -3,13 +3,11 @@
 Web graphical user interface for NWB conversion and visualization.
 
 ## 1. Installation
-Install requirements:
 ```
-pip install -r requirements.txt
+pip install -e .
 ```
 
 ## 2. Running
-
 ```
 python wsgi.py
 ```
