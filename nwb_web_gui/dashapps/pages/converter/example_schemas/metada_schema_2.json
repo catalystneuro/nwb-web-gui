@@ -226,7 +226,7 @@
       "type": "object",
       "required": ["Devices"],
       "properties": {
-        "Devices": {"$ref": "#/definitions/Devices"},
+        "Device": {"$ref": "#/definitions/Devices"},
         "DFOverF": {
           "type": "object",
           "required": ["name"],
