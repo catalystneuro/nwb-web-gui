@@ -134,7 +134,6 @@
         }
       }
     },
-
     "Ecephys": {
       "type": "object",
       "properties": {
@@ -174,19 +173,11 @@
         }
       }
     },
-
     "Ophys": {
       "type": "object",
-      "required": ["Device"],
+      "required": ["Devices"],
       "properties": {
-        "Devices": {
-          "type": "array",
-          "items": [
-            {"$ref": "#/definitions/Device"},
-            {"$ref": "#/definitions/Device"}
-          ],
-          "additionalItems": false
-        },
+        "Device": {"$ref": "#/definitions/Devices"},
         "DFOverF": {
           "type": "object",
           "required": ["name"],

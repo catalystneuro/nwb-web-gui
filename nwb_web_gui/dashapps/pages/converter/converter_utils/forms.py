@@ -50,10 +50,8 @@ class SourceForm(dbc.Card):
             label = dbc.Label(k)
             input_id = f'input_{parent}_{k}'
             explorer_id = input_id.replace('input', 'explorer')
-            if k in self.required_fields:
-                add_required = True
-            else:
-                add_required = False
+            add_required = k in self.required_fields
+
             if v['type'] == 'string':
                 form_input = dbc.Input(
                     id={'name': 'source_string_input', 'index': input_id},
@@ -123,32 +121,155 @@ class MetadataFormItem(dbc.FormGroup):
                 ]
 
 
+last_child = None
+id_counter = 0
 
-class MetadataForm(dbc.Card):
+
+class MetadataForm(html.Div):
     def __init__(self, schema, definitions=None, parent=None):
         super().__init__([])
 
-        if definitions is None:
+        self.schema = schema
+        self.parent = parent
+        self.children = []
+
+        if definitions is None and parent is None:
             self.definitions = schema['definitions']
+        else:
+            self.definitions = parent.definitions
 
-        self.make_form(properties=schema['properties'])
+        if 'required' in self.schema:
+            self.required_fields = schema['required']
 
-        self.
+        if 'properties' in schema:
+            self.make_form(properties=schema['properties'], forms=None)
 
+    def make_form(self, properties, forms=None):
+        global id_counter
 
-    def make_form(self, properties):
-        """Isso aqui faz isso"""
+        if forms is None:
+            forms = []
+        for k, v in properties.items():
+            if 'type' in v and v['type'] == 'object':
+                self.key_name = k
+                item_form = MetadataForm(v, parent=self)
+                self.children.append(item_form)
+            elif 'type' in v and (v['type'] == 'array' and not 'format' in v):
+                self.key_name = k
+                item_form = MetadataForm(v['items'], parent=self)
+                self.children.append(item_form)
+            elif 'type' in v and (v['type'] == 'string' or v['type'] == 'number'):
+                # input_id = f'input_{self.parent.key_name}_{k}'
+                input_id = str(id_counter)
+                id_counter += 1
+                form_input = self.get_string_field_input(v, input_id)
+                label = dbc.Label(k)
+                form_item = MetadataFormItem(label, form_input)
+                forms.append(form_item)
 
-        if type[''] == object:
-            itemform = MetadataForm(schema=behavior, parent=self)
+        # How to create subforms inside an existing card body?
+        if len(forms) > 0:
+            aux_parent = self.parent
+            self.curr_child = None
+            if aux_parent is not None:
+                while aux_parent.parent is not None:
+                    self.curr_child = aux_parent
+                    aux_parent = aux_parent.parent
 
-        if type == string:
-            itemform =
+            if self.curr_child is not None:
+                global last_child
+                if last_child != self.curr_child.parent.key_name:
+                    children = dbc.Card([
+                        dbc.CardHeader(self.curr_child.parent.key_name),
+                        dbc.CardBody([
+                            dbc.Row(
+                                dbc.Col(
+                                    html.H4(self.curr_child.key_name),
+                                    width={'size':12}
+                                )
+                            ),
+                            dbc.Row(
+                                dbc.Col(
+                                    forms,
+                                    width={'size':12}
+                                )
+                            )
+                        ])
+                    ], style={'margin-top': '1%'})
+                    last_child = self.curr_child.parent.key_name
+                else:
+                    children = dbc.Card(
+                        dbc.CardBody(
+                            dbc.Row([
+                                dbc.Col(
+                                    html.H4(self.curr_child.key_name),
+                                    width={'size':12}
+                                ),
+                                dbc.Col(
+                                    forms,
+                                    width={'size':12}
+                                )
+                            ])
+                        )
+                    )
+                    last_child = self.curr_child.parent.key_name
+            else:
+                children = dbc.Card([
+                    dbc.CardHeader(self.parent.key_name),
+                    dbc.CardBody(forms)
+                ], style={'margin-top': '1%'})
 
-    def
+            self.children = children
 
-    def
+    @staticmethod
+    def get_string_field_input(value, input_id):
+        if 'description' in value:
+            description = value['description']
+        else:
+            description = ''
 
+        if 'enum' in value:
+            input_values = [{'label': e, 'value': e} for e in value['enum']]
+            if 'default' in value:
+                default = value['default']
+            else:
+                default = ''
+            form_input = dcc.Dropdown(
+                id={'name': 'metadata_string_input', 'index': input_id},
+                options=input_values,
+                value=default,
+                className='dropdown_input'
+            )
+            return form_input
+
+        if 'format' in value and value['format'] == 'date-time':
+            form_input = DateTimePicker(
+                id={'name': 'metadata_date_input', 'index': input_id},
+                style={"border": "solid 1px", "border-color": "#ced4da", "border-radius": "5px", "color": '#545057'}
+            )
+        elif 'format' in value and value['format'] == 'long':
+            form_input = dbc.Textarea(
+                id={'name': 'metadata_string_input', 'index': input_id},
+                placeholder=description,
+                className='string_input',
+                bs_size="lg",
+                style={'font-size': '16px'}
+            )
+        else:
+            input_type = value['type']
+            if input_type == 'number':
+                step = 0.01
+            else:
+                step = ''
+            form_input = dbc.Input(
+                id={'name': 'metadata_string_input', 'index': input_id},
+                placeholder=description,
+                className='string_input',
+                type=input_type,
+                step=step
+            )
+
+        return form_input
 
 
 class MetadataForms(dbc.Card):

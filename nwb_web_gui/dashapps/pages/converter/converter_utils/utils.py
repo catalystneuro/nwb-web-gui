@@ -1,5 +1,5 @@
 from .forms import SourceForm
-from .forms import MetadataForms
+from .forms import MetadataForms, MetadataForm
 
 
 def iter_source_schema(schema, parent_name=None, forms=[]):
@@ -22,6 +22,6 @@ def get_forms_from_schema(schema, definitions=None, source=False):
         forms = iter_source_schema(schema['properties'])
     else:
         # forms, name = iter_metadata_schema(schema['properties'], definitions)
-        form = MetadataForms(schema=schema)
+        forms = MetadataForm(schema=schema)
 
-    return form
+    return forms
