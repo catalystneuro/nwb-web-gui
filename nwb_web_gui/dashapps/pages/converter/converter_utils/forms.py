@@ -13,26 +13,26 @@ class SourceFormItem(dbc.FormGroup):
             explorer_btn = dbc.Button(id={'name': 'source_explorer', 'index': explorer_id}, children=[html.I(className="far fa-folder")], style={'background-color': 'transparent', 'color': 'black', 'border': 'none'})
             if add_required:
                 self.children = dbc.Row([
-                    dbc.Col([label, html.Span('*', style={'color':'red'})], width={'size':2}),
-                    dbc.Col(form_input, width={'size':8}, style={'justify-content': 'center', 'text-align': 'center'}),
+                    dbc.Col([label, html.Span('*', style={'color': 'red'})], width={'size': 2}),
+                    dbc.Col(form_input, width={'size': 8}, style={'justify-content': 'center', 'text-align': 'center'}),
                     dbc.Col(explorer_btn, width={'size': 2}, style={'text-align': 'left'})
                 ])
             else:
                 self.children = dbc.Row([
-                    dbc.Col(label, width={'size':2}),
-                    dbc.Col(form_input, width={'size':8}, style={'justify-content': 'center', 'text-align': 'center'}),
+                    dbc.Col(label, width={'size': 2}),
+                    dbc.Col(form_input, width={'size': 8}, style={'justify-content': 'center', 'text-align': 'center'}),
                     dbc.Col(explorer_btn, width={'size': 2}, style={'text-align': 'left'})
                 ])
         else:
             if add_required:
                 self.children = dbc.Row([
-                    dbc.Col([label, html.Span('*', style={'color':'red'})], width={'size':2}),
-                    dbc.Col(form_input, width={'size':10}, style={'justify-content': 'left', 'text-align': 'left'})
+                    dbc.Col([label, html.Span('*', style={'color': 'red'})], width={'size': 2}),
+                    dbc.Col(form_input, width={'size': 10}, style={'justify-content': 'left', 'text-align': 'left'})
                 ])
             else:
                 self.children = dbc.Row([
-                    dbc.Col(label, width={'size':2}),
-                    dbc.Col(form_input, width={'size':10}, style={'justify-content': 'left', 'text-align': 'left'})
+                    dbc.Col(label, width={'size': 2}),
+                    dbc.Col(form_input, width={'size': 10}, style={'justify-content': 'left', 'text-align': 'left'})
                 ])
 
 
@@ -95,22 +95,22 @@ class MetadataFormItem(dbc.FormGroup):
             if add_required:
                 self.children = [
                     dbc.Row([
-                        dbc.Col([label, html.Span('*', style={'color':'red'})], width={'size':2}),
-                        dbc.Col(form_input, width={'size':8})
+                        dbc.Col([label, html.Span('*', style={'color': 'red'})], width={'size': 2}),
+                        dbc.Col(form_input, width={'size': 8})
                     ])
                 ]
             else:
                 self.children = [
                     dbc.Row([
-                        dbc.Col(label, width={'size':2}),
-                        dbc.Col(form_input, width={'size':8})
+                        dbc.Col(label, width={'size': 2}),
+                        dbc.Col(form_input, width={'size': 8})
                     ])
                 ]
         else:
             if add_required:
                 self.children = [
                     dbc.Row([
-                        dbc.Col([label, html.Span('*', style={'color':'red'})], width={'size': 4}),
+                        dbc.Col([label, html.Span('*', style={'color': 'red'})], width={'size': 4}),
                         dbc.Col(form_input, width={'size': 8})
                     ])
                 ]

@@ -7,10 +7,10 @@ import dash_bootstrap_components as dbc
 nwb_forms = {
     "NWBFile": 'single',
     "Subject": 'single',
-    "Ophys": ["Device", "DFOverF", "Fluorescence", "ImageSegmentation", "ImagingPlane", "TwoPhotonSeries"], 
-    "Ecephys": ["Device", "ElectricalSeries", "ElectrodeGroups"], 
+    "Ophys": ["Device", "DFOverF", "Fluorescence", "ImageSegmentation", "ImagingPlane", "TwoPhotonSeries"],
+    "Ecephys": ["Device", "ElectricalSeries", "ElectrodeGroups"],
     "Behavior": ["Position", "BehavioralEvents"]
-    }
+}
 
 
 def iter_source_schema(schema, parent_name=None, forms=[]):

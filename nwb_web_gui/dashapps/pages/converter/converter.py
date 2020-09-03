@@ -22,7 +22,7 @@ class ConverterForms(html.Div):
         with open(source_schema_path, 'r') as inp:
             self.source_json_schema = json.load(inp)
 
-        metadata_schema_path = examples_path / 'metada_schema_2.json'
+        metadata_schema_path = examples_path / 'metadata_schema_3.json'
         with open(metadata_schema_path, 'r') as inp:
             self.metadata_json_schema = json.load(inp)
 
