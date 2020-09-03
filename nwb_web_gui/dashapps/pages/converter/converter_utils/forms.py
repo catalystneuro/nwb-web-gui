@@ -157,15 +157,14 @@ class MetadataForms(dbc.Card):
 
         self.style = {'margin-top': '1%'}
 
-    def iter_composite_form(self, fields, forms=[]):
+    def iter_composite_form(self, fields, forms=None):
 
+        if forms is None:
+            forms = []
         for k, v in fields.items():
             if k in self.composite_children:
                 if 'type' in v and v['type'] == 'object':
-                    if 'required' in v:
-                        self.required_fields = v['required']
-                    else:
-                        self.required_fields = []
+                    self.required_fields = getattr(v, 'required', [])
                     children = self.create_object_form(v, composite_key=k)
                     element = dbc.Form(dbc.Row([
                         dbc.Col(html.H4(k), width={'size': 12}),
@@ -209,7 +208,7 @@ class MetadataForms(dbc.Card):
                 add_required = True
             else:
                 add_required = False
-            if v['type'] == 'string' or v['type'] == 'number':
+            if v['type'] in ('string', 'number'):
                 form_input = self.get_string_field_input(v, input_id)
             elif v['type'] == 'array':
                 if 'format' in v and v['format'] == 'keywords':
@@ -301,51 +300,44 @@ class MetadataForms(dbc.Card):
 
         return form
 
-    def get_string_field_input(self, value, input_id):
+    @staticmethod
+    def get_string_field_input(value, input_id):
 
-        if 'description' in value:
-            description = value['description']
-        else:
-            description = ''
+        description = getattr(value, 'description', '')
 
         if 'enum' in value:
             input_values = [{'label': e, 'value': e} for e in value['enum']]
-            if 'default' in value:
-                default = value['default']
-            else:
-                default = ''
-            form_input = dcc.Dropdown(
+            default = getattr(value, 'default', '')
+            return dcc.Dropdown(
                 id={'name': 'metadata_string_input', 'index': input_id},
                 options=input_values,
                 value=default,
                 className='dropdown_input'
             )
-        else:
-            if 'format' in value and value['format'] == 'date-time':
-                form_input = DateTimePicker(
-                    id={'name': 'metadata_date_input', 'index': input_id},
-                    style={"border": "solid 1px", "border-color": "#ced4da", "border-radius": "5px", "color": '#545057'}
-                )
-            elif 'format' in value and value['format'] == 'long':
-                form_input = dbc.Textarea(
-                    id={'name': 'metadata_string_input', 'index': input_id},
-                    placeholder=description,
-                    className='string_input',
-                    bs_size="lg",
-                    style={'font-size': '16px'}
-                )
-            else:
-                input_type = value['type']
-                if input_type == 'number':
-                    step = 0.01
-                else:
-                    step = ''
-                form_input = dbc.Input(
-                    id={'name': 'metadata_string_input', 'index': input_id},
-                    placeholder=description,
-                    className='string_input',
-                    type=input_type,
-                    step=step
-                )
+        if 'format' in value and value['format'] == 'date-time':
+            return DateTimePicker(
+                id={'name': 'metadata_date_input', 'index': input_id},
+                style={"border": "solid 1px", "border-color": "#ced4da", "border-radius": "5px", "color": '#545057'}
+            )
+        if 'format' in value and value['format'] == 'long':
+            return dbc.Textarea(
+                id={'name': 'metadata_string_input', 'index': input_id},
+                placeholder=description,
+                className='string_input',
+                bs_size="lg",
+                style={'font-size': '16px'}
+            )
 
-        return form_input
+        input_type = value['type']
+        if input_type == 'number':
+            step = 0.01
+        else:
+            step = ''
+
+        return dbc.Input(
+            id={'name': 'metadata_string_input', 'index': input_id},
+            placeholder=description,
+            className='string_input',
+            type=input_type,
+            step=step
+        )
