@@ -1,12 +1,13 @@
-import dash
-import dash_html_components as html
-import dash_core_components as dcc
-from dash.dependencies import Input, Output, State, ALL, MATCH
-import dash_bootstrap_components as dbc
 import json
-from .converter_utils.utils import get_forms_from_schema
-from nwb_web_gui.dashapps.utils.make_components import make_modal
 from pathlib import Path
+
+import dash
+import dash_bootstrap_components as dbc
+import dash_html_components as html
+from dash.dependencies import Input, Output, State, ALL, MATCH
+
+from ....dashapps.utils.make_components import make_modal
+from .converter_utils.utils import get_forms_from_schema
 
 
 class ConverterForms(html.Div):

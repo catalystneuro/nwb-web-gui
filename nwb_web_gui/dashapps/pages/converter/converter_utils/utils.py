@@ -1,7 +1,5 @@
 from .forms import SourceForm
 from .forms import MetadataForms
-import pynwb
-import dash_bootstrap_components as dbc
 
 
 nwb_forms = {
