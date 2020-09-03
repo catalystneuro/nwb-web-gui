@@ -50,10 +50,7 @@ class SourceForm(dbc.Card):
             label = dbc.Label(k)
             input_id = f'input_{parent}_{k}'
             explorer_id = input_id.replace('input', 'explorer')
-            if k in self.required_fields:
-                add_required = True
-            else:
-                add_required = False
+            add_required = k in self.required_fields
             if v['type'] == 'string':
                 form_input = dbc.Input(
                     id={'name': 'source_string_input', 'index': input_id},
@@ -204,10 +201,7 @@ class MetadataForms(dbc.Card):
                 input_id = f'input_{self.key_name}_{composite_key}_{k}'
 
             label = dbc.Label(k)
-            if k in self.required_fields:
-                add_required = True
-            else:
-                add_required = False
+            add_required = k in self.required_fields
             if v['type'] in ('string', 'number'):
                 form_input = self.get_string_field_input(v, input_id)
             elif v['type'] == 'array':
@@ -225,10 +219,7 @@ class MetadataForms(dbc.Card):
                         else:
                             self.required_fields = []
                         for lbl, value in v['items']['properties'].items():
-                            if lbl in self.required_fields:
-                                add_required = True
-                            else:
-                                add_required = False
+                            add_required = lbl in self.required_fields
                             input_id_aux = f'{input_id}_{lbl}'
                             label = dbc.Label(lbl)
                             form_input = self.get_string_field_input(value, input_id_aux)
