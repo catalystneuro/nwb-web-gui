@@ -123,6 +123,34 @@ class MetadataFormItem(dbc.FormGroup):
                 ]
 
 
+
+class MetadataForm(dbc.Card):
+    def __init__(self, schema, definitions=None, parent=None):
+        super().__init__([])
+
+        if definitions is None:
+            self.definitions = schema['definitions']
+
+        self.make_form(properties=schema['properties'])
+
+        self.
+
+
+    def make_form(self, properties):
+        """Isso aqui faz isso"""
+
+        if type[''] == object:
+            itemform = MetadataForm(schema=behavior, parent=self)
+
+        if type == string:
+            itemform =
+
+    def
+
+    def
+
+
+
 class MetadataForms(dbc.Card):
     def __init__(self, fields, key_name, form_style, definitions=None, composite_children=None):
         super().__init__([])
