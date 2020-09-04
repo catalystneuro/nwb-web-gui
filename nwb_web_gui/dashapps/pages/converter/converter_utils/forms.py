@@ -155,7 +155,7 @@ class MetadataForm(dbc.Card):
                     for i, iv in enumerate(v["items"]):
                         template_name = iv["$ref"].split('/')[-1]
                         schema = self.definitions[template_name]
-                        iform = MetadataForm(schema=schema, key=k + f'_{i}', parent=self)
+                        iform = MetadataForm(schema=schema, key=k + f'-{i}', parent=self)
                         form_input.children.append(iform)
                     label = dbc.Label(k)
                     item = MetadataFormItem(label=label, form_input=form_input, add_required=required)

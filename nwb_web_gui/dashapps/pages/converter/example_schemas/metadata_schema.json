@@ -13,9 +13,9 @@
       "type": "object",
       "additionalProperties": false,
       "title": "pynwb.file.NWBFile",
-      "required": ["session_description", "identifier", "session_start_time"],
+      "required": ["sessiond-description", "identifier", "sessiond-startd-time"],
       "properties": {
-        "session_description": {
+        "sessiond-description": {
           "type": "string",
           "format": "long",
           "description": "a description of the session where this data was generated"
@@ -24,7 +24,7 @@
           "type": "string",
           "description": "a unique text identifier for the file"
         },
-        "session_start_time": {
+        "sessiond-startd-time": {
           "type": "string",
           "description": "the start date and time of the recording session",
           "format": "date-time"
@@ -34,11 +34,11 @@
           "items": {"type": "string", "title": "experimenter"},
           "description": "name of person who performed experiment"
         },
-        "experiment_description": {
+        "experimentd-description": {
           "type": "string",
           "description": "general description of the experiment"
         },
-        "session_id": {
+        "sessiond-id": {
           "type": "string",
           "description": "lab-specific ID for the session"
         },
@@ -58,7 +58,7 @@
           "type": "string",
           "description": "Experimental protocol, if applicable. E.g., include IACUC protocol"
         },
-        "related_publications": {
+        "relatedd-publications": {
           "type": "string",
           "description": "Publication information.PMID, DOI, URL, etc. If multiple, concatenate together and describe which is which. such as PMID, DOI, URL, etc"
         },
@@ -66,15 +66,15 @@
           "type": "string",
           "description": "Description of slices, including information about preparation thickness, orientation, temperature and bath solution"
         },
-        "source_script": {
+        "sourced-script": {
           "type": "string",
           "description": "Script file used to create this NWB file."
         },
-        "source_script_file_name": {
+        "sourced-scriptd-filed-name": {
           "type": "string",
-          "description": "Name of the source_script file"
+          "description": "Name of the sourced-script file"
         },
-        "data_collection": {
+        "datad-collection": {
           "type": "string",
           "description": "Notes about data collection and analysis."
         },
@@ -86,7 +86,7 @@
           "type": "string",
           "description": "Information about virus(es) used in experiments, including virus ID, source, date made, injection location, volume, etc."
         },
-        "stimulus_notes": {
+        "stimulusd-notes": {
           "type": "string",
           "description": "Notes about stimuli, such as how and where presented."
         },
@@ -100,9 +100,9 @@
     "Subject": {
       "type": "object",
       "title": "pynwb.file.Subject",
-      "required": ["subject_id"],
+      "required": ["subjectd-id"],
       "properties": {
-        "subject_id": {
+        "subjectd-id": {
           "type": "string",
           "description": "ID of animal/person used/participating in experiment (lab convention)"
         },
@@ -127,7 +127,7 @@
           "type": "string",
           "description": "Weight at time of experiment, at time of surgery and at other important times."
         },
-        "date_of_birth": {
+        "dated-ofd-birth": {
           "type": "string",
           "format": "date-time",
           "description": "Date of birth of subject. Can be supplied instead of age."
@@ -183,7 +183,7 @@
           "required": ["name"],
           "properties": {
             "name": {"type": "string"},
-            "roi_response_series": {
+            "roid-responsed-series": {
               "type": "array",
               "items": [
                 {"$ref":  "#/definitions/RoiResponseSeries"},
@@ -198,7 +198,7 @@
           "required": ["name"],
           "properties": {
             "name": {"type": "string"},
-            "roi_response_series": {
+            "roid-responsed-series": {
               "type": "array",
               "items": [
                 {"$ref":  "#/definitions/RoiResponseSeries"},
@@ -210,7 +210,7 @@
         "ImagingPlane": {
           "title": "pynwb.ophys.ImagingPlane",
           "type": "object",
-          "required": ["name", "optical_channel", "description", "device", "excitation_lambda", "indicator", "location"],
+          "required": ["name", "opticald-channel", "description", "device", "excitationd-lambda", "indicator", "location"],
           "properties": {
             "name": {
               "type": "string",
@@ -224,7 +224,7 @@
               "type": "string",
               "enum": []
             },
-            "excitation_lambda": {
+            "excitationd-lambda": {
               "type": "number",
               "description": "Excitation wavelength in nm"
             },
@@ -236,11 +236,11 @@
               "type": "string",
               "description": "Location of image plane"
             },
-            "imaging_rate": {
+            "imagingd-rate": {
               "type": "number",
               "description": "Rate images are acquired, in Hz. If the corresponding TimeSeries is present, the rate should be stored there instead"
             },
-            "optical_channels": {
+            "opticald-channels": {
               "type": "array",
               "items": [
                 {"$ref":  "#/definitions/OpticalChannel"},
@@ -340,7 +340,7 @@
     "OpticalChannel": {
       "title": "pynwb.ophys.OpticalChannel",
       "type": "object",
-      "required": ["name", "description", "emission_lambda"],
+      "required": ["name", "description", "emissiond-lambda"],
       "properties": {
         "name": {
           "type": "string",
@@ -350,7 +350,7 @@
           "type": "string",
           "description": "Any notes or comments about the channel"
         },
-        "emission_lambda": {
+        "emissiond-lambda": {
           "type": "number",
           "description": "Emission wavelength for channel, in nm"
         }
@@ -403,7 +403,7 @@
           "type": "string",
           "description": "Description of this TimeSeries dataset"
         },
-        "imaging_plane": {
+        "imagingd-plane": {
           "type": "string",
           "description": "Imaging plane class/pointer",
           "enum": []
