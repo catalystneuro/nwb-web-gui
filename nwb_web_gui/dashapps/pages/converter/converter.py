@@ -44,14 +44,14 @@ class ConverterForms(html.Div):
                     )
                 ]),
                 dbc.Row([
-                    dbc.Col(html.H4('Metadata'), width={'size': 12}, style={'text-align': 'left'}),
+                    # dbc.Col(html.H4('Metadata'), width={'size': 12}, style={'text-align': 'left'}),
                     dbc.Col(metadata_forms, width={'size': 12})
                 ]),
                 dbc.Row(modal),
                 dbc.Row(
                     dbc.Col(
-                        dbc.Button('Run Conversion',id='run_conversion_button') ,width={'size':11}
-                    ), style={'text-align':'right', 'margin-top': '1%'}
+                        dbc.Button('Run Conversion', id='run_conversion_button') ,width={'size':11}
+                    ), style={'text-align': 'right', 'margin-top': '1%'}
                 ),
             ], style={'min-height': '110vh'})
         ]

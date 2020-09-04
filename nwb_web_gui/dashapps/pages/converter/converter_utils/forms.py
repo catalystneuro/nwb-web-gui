@@ -121,17 +121,23 @@ class MetadataFormItem(dbc.FormGroup):
                 ]
 
 
-last_child = None
-id_counter = 0
-
-
-class MetadataForm(html.Div):
-    def __init__(self, schema, definitions=None, parent=None):
+class MetadataForm(dbc.Card):
+    def __init__(self, schema, key, definitions=None, parent=None):
         super().__init__([])
 
         self.schema = schema
         self.parent = parent
-        self.children = []
+
+        # Unique Card IDs are composed by parent id + key from json schema
+        if parent is not None:
+            self.id = parent.id + '_' + key
+        else:
+            self.id = key
+
+        header_text = self.id.split('_')[-1]
+        self.header = dbc.CardHeader([html.H4(header_text, className="title_" + key)])
+        self.body = dbc.CardBody([])
+        self.children = [self.header, self.body]
 
         if definitions is None and parent is None:
             self.definitions = schema['definitions']
@@ -142,87 +148,53 @@ class MetadataForm(html.Div):
             self.required_fields = schema['required']
 
         if 'properties' in schema:
-            self.make_form(properties=schema['properties'], forms=None)
+            self.make_form(properties=schema['properties'])
 
-    def make_form(self, properties, forms=None):
-        global id_counter
-
-        if forms is None:
-            forms = []
+    def make_form(self, properties):
+        """Iterates over properties of schema and assembles form items"""
         for k, v in properties.items():
+            # If item is an object, e.g. NWBFile
             if 'type' in v and v['type'] == 'object':
-                self.key_name = k
-                item_form = MetadataForm(v, parent=self)
-                self.children.append(item_form)
-            elif 'type' in v and (v['type'] == 'array' and not 'format' in v):
-                self.key_name = k
-                item_form = MetadataForm(v['items'], parent=self)
-                self.children.append(item_form)
+                item = MetadataForm(schema=v, key=k, parent=self)
+
+            # If item references an object on definitions, e.g. Device
+            elif "$ref" in v:
+                template_name = v["$ref"].split('/')[-1]
+                schema = self.definitions[template_name]
+                item = MetadataForm(schema=schema, key=k, parent=self)
+
+            # If item is an array of subforms, e.g. ImagingPlane.optical_channels
+            elif 'type' in v and (v['type'] == 'array' and 'format' not in v):
+                form_input = html.Div([])
+                for i, iv in enumerate(v["items"]):
+                    template_name = iv["$ref"].split('/')[-1]
+                    schema = self.definitions[template_name]
+                    iform = MetadataForm(schema=schema, key=k + f'_{i}', parent=self)
+                    form_input.children.append(iform)
+                item = MetadataFormItem(label=k, form_input=form_input)
+
+            # If item is an input field, e.g. description
             elif 'type' in v and (v['type'] == 'string' or v['type'] == 'number'):
-                # input_id = f'input_{self.parent.key_name}_{k}'
-                input_id = str(id_counter)
-                id_counter += 1
-                form_input = self.get_string_field_input(v, input_id)
+                input_id = f'input_{self.id}_{k}'
+                form_input = self.get_string_field_input(value=v, input_id=input_id)
                 label = dbc.Label(k)
-                form_item = MetadataFormItem(label, form_input)
-                forms.append(form_item)
+                item = MetadataFormItem(label, form_input)
 
-        # How to create subforms inside an existing card body?
-        if len(forms) > 0:
-            aux_parent = self.parent
-            self.curr_child = None
-            if aux_parent is not None:
-                while aux_parent.parent is not None:
-                    self.curr_child = aux_parent
-                    aux_parent = aux_parent.parent
-
-            if self.curr_child is not None:
-                global last_child
-                if last_child != self.curr_child.parent.key_name:
-                    children = dbc.Card([
-                        dbc.CardHeader(self.curr_child.parent.key_name),
-                        dbc.CardBody([
-                            dbc.Row(
-                                dbc.Col(
-                                    html.H4(self.curr_child.key_name),
-                                    width={'size':12}
-                                )
-                            ),
-                            dbc.Row(
-                                dbc.Col(
-                                    forms,
-                                    width={'size':12}
-                                )
-                            )
-                        ])
-                    ], style={'margin-top': '1%'})
-                    last_child = self.curr_child.parent.key_name
-                else:
-                    children = dbc.Card(
-                        dbc.CardBody(
-                            dbc.Row([
-                                dbc.Col(
-                                    html.H4(self.curr_child.key_name),
-                                    width={'size':12}
-                                ),
-                                dbc.Col(
-                                    forms,
-                                    width={'size':12}
-                                )
-                            ])
-                        )
-                    )
-                    last_child = self.curr_child.parent.key_name
             else:
-                children = dbc.Card([
-                    dbc.CardHeader(self.parent.key_name),
-                    dbc.CardBody(forms)
-                ], style={'margin-top': '1%'})
+                continue
 
-            self.children = children
+            self.body.children.append(item)
 
     @staticmethod
     def get_string_field_input(value, input_id):
+        """
+        Get component for user interaction. Types:
+        - text
+        - number
+        - tag input
+        - dropdown
+        - datetime
+        """
         if 'description' in value:
             description = value['description']
         else:
