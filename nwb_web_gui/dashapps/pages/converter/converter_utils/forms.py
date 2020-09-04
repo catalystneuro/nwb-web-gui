@@ -208,23 +208,25 @@ class MetadataForm(dbc.Card):
                 default = value['default']
             else:
                 default = ''
+            form_input_id = {'name': 'metadata_string_input', 'index': input_id}
             form_input = dcc.Dropdown(
-                id={'name': 'metadata_string_input', 'index': input_id},
+                id=form_input_id,
                 options=input_values,
                 value=default,
                 className='dropdown_input'
             )
-            return form_input
 
-        if 'format' in value and value['format'] == 'date-time':
+        elif 'format' in value and value['format'] == 'date-time':
+            form_input_id = {'name': 'metadata_date_input', 'index': input_id}
             form_input = DateTimePicker(
-                id={'name': 'metadata_date_input', 'index': input_id},
+                id=form_input_id,
                 style={"border": "solid 1px", "border-color": "#ced4da", "border-radius": "5px", "color": '#545057'}
             )
+
         elif 'format' in value and value['format'] == 'long':
+            form_input_id = {'name': 'metadata_string_input', 'index': input_id}
             form_input = dbc.Textarea(
-                id={'name': 'metadata_string_input', 'index': input_id},
-                placeholder=description,
+                id=form_input_id,
                 className='string_input',
                 bs_size="lg",
                 style={'font-size': '16px'}
@@ -232,18 +234,29 @@ class MetadataForm(dbc.Card):
         else:
             input_type = value['type']
             if input_type == 'number':
-                step = 0.01
+                step = 1
             else:
                 step = ''
+            form_input_id = {'name': 'metadata_string_input', 'index': input_id}
             form_input = dbc.Input(
-                id={'name': 'metadata_string_input', 'index': input_id},
-                placeholder=description,
+                id=form_input_id,
                 className='string_input',
                 type=input_type,
                 step=step
             )
 
-        return form_input
+        input_and_tooltip = html.Div([
+            html.Div(
+                form_input,
+                id=form_input_id['index'] + '_' + form_input_id['name']
+            ),
+            dbc.Tooltip(
+                description,
+                target=form_input_id['index'] + '_' + form_input_id['name']
+            ),
+        ])
+
+        return input_and_tooltip
 
 
 class MetadataForms(dbc.Card):

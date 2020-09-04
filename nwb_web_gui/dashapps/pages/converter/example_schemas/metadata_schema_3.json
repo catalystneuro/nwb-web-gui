@@ -221,9 +221,21 @@
       "title": "pynwb.device.Device",
       "required": ["name"],
       "properties": {
-        "name": {"type": "string", "default": "Device"}
+        "name": {
+          "type": "string",
+          "description": "the name of this device"
+        },
+        "description": {
+          "type": "string",
+          "description": " Description of the device (e.g., model, firmware version, processing software version, etc.)"
+        },
+        "manufacturer": {
+          "type": "string",
+          "description": "the name of the manufacturer of this device"
+        }
       }
     },
+
     "TimeSeries": {
       "type": "object",
       "required": ["name", "description"],
@@ -234,6 +246,7 @@
         "tag": {"type": "string"}
       }
     },
+
     "ElectricalSeries": {
       "title": "pynwb.ecephys.ElectricalSeries",
       "type": "object",
@@ -243,24 +256,44 @@
         "description": {"type": "string"}
       }
     },
+
     "OpticalChannel": {
       "title": "pynwb.ophys.OpticalChannel",
       "type": "object",
       "required": ["name", "description", "emission_lambda"],
       "properties": {
-        "name": {"type": "string"},
-        "description": {"type": "string"},
-        "emission_lambda": {"type": "number"}
+        "name": {
+          "type": "string",
+          "description": "the name of this optical channel"
+        },
+        "description": {
+          "type": "string",
+          "description": "Any notes or comments about the channel"
+        },
+        "emission_lambda": {
+          "type": "number",
+          "description": "Emission wavelength for channel, in nm"
+        }
       }
     },
+
     "RoiResponseSeries": {
       "title": "pynwb.ophys.RoiResponseSeries",
       "type": "object",
       "required": ["name"],
       "properties": {
-        "name": {"type": "string"},
-        "description": {"type": "string"},
-        "rois": {"type": "string"}
+        "name": {
+          "type": "string",
+          "description": ""
+        },
+        "description": {
+          "type": "string",
+          "description": ""
+        },
+        "rois": {
+          "type": "string",
+          "description": ""
+        }
       }
     }
   }
