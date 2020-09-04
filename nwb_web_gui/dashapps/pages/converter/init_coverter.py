@@ -17,6 +17,10 @@ def init_converter(server):
 
     navbar = render_navbar()
     # Create Dash Layout
-    dash_app.layout = html.Div([navbar, ConverterForms(parent_app=dash_app)])
+    dash_app.layout = html.Div([
+        navbar,
+        ConverterForms(parent_app=dash_app)
+    ])
+    dash_app.enable_dev_tools(debug=True)
 
     return dash_app.server
