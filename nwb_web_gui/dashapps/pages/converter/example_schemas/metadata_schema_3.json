@@ -237,13 +237,31 @@
     },
 
     "TimeSeries": {
+      "title": "pynwb.base.TimeSeries",
       "type": "object",
       "required": ["name", "description"],
       "properties": {
-        "name": {"type": "string"},
-        "description": {"type": "string"},
-        "conversion": {"type": "number", "default": 1.0},
-        "tag": {"type": "string"}
+        "name": {
+          "type": "string",
+          "description": "The name of this TimeSeries dataset"
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of this TimeSeries dataset"
+        },
+        "unit":{
+          "type": "string",
+          "description": "The base unit of measurement (should be SI unit)"
+        },
+        "resolution": {
+          "type": "number",
+          "description": "The smallest meaningful difference (in specified unit) between values in data"
+        },
+        "conversion": {
+          "type": "number",
+          "description": "Scalar to multiply each element in data to convert it to the specified unit",
+          "default": 1.0
+        }
       }
     },
 
@@ -252,8 +270,31 @@
       "type": "object",
       "required": ["name", "description"],
       "properties": {
-        "name": {"type": "string"},
-        "description": {"type": "string"}
+        "name": {
+          "type": "string",
+          "description": "The name of this TimeSeries dataset"
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of this TimeSeries dataset"
+        },
+        "unit":{
+          "type": "string",
+          "description": "The base unit of measurement (should be SI unit)"
+        },
+        "resolution": {
+          "type": "number",
+          "description": "The smallest meaningful difference (in specified unit) between values in data"
+        },
+        "conversion": {
+          "type": "number",
+          "description": "Scalar to multiply each element in data to convert it to the specified unit",
+          "default": 1.0
+        },
+        "electrodes": {
+          "type": "string",
+          "description": "the table region corresponding to the electrodes from which this series was recorded"
+        }
       }
     },
 
