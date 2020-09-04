@@ -31,7 +31,6 @@
         },
         "experimenter": {
           "type": "array",
-          "format": "keywords",
           "items": {"type": "string", "title": "experimenter"},
           "description": "name of person who performed experiment"
         },

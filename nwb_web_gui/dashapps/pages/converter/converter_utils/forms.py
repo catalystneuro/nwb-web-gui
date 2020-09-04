@@ -149,18 +149,23 @@ class MetadataForm(dbc.Card):
                 item = MetadataForm(schema=schema, key=k, parent=self)
 
             # If item is an array of subforms, e.g. ImagingPlane.optical_channels
-            elif 'type' in v and (v['type'] == 'array' and 'format' not in v):
-                form_input = html.Div([])
-                for i, iv in enumerate(v["items"]):
-                    template_name = iv["$ref"].split('/')[-1]
-                    schema = self.definitions[template_name]
-                    iform = MetadataForm(schema=schema, key=k + f'_{i}', parent=self)
-                    form_input.children.append(iform)
-                label = dbc.Label(k)
-                item = MetadataFormItem(label=label, form_input=form_input, add_required=required)
-
+            elif 'type' in v and (v['type'] == 'array'):
+                if isinstance(v['items'], list):
+                    form_input = html.Div([])
+                    for i, iv in enumerate(v["items"]):
+                        template_name = iv["$ref"].split('/')[-1]
+                        schema = self.definitions[template_name]
+                        iform = MetadataForm(schema=schema, key=k + f'_{i}', parent=self)
+                        form_input.children.append(iform)
+                    label = dbc.Label(k)
+                    item = MetadataFormItem(label=label, form_input=form_input, add_required=required)
+                elif isinstance(v['items'], dict):
+                    input_id = f'input_{self.id}_{k}'
+                    form_input = self.get_string_field_input(value=v, input_id=input_id)
+                    label = dbc.Label(k)
+                    item = MetadataFormItem(label, form_input, add_required=required)
             # If item is an input field, e.g. description
-            elif 'type' in v and ((v['type'] == 'string' or v['type'] == 'number') or (v['type'] == 'array' and 'format' in v)):
+            elif 'type' in v and (v['type'] == 'string' or v['type'] == 'number'):
                 input_id = f'input_{self.id}_{k}'
                 form_input = self.get_string_field_input(value=v, input_id=input_id)
                 label = dbc.Label(k)
@@ -200,7 +205,7 @@ class MetadataForm(dbc.Card):
                 className='dropdown_input'
             )
 
-        elif 'format' in value and value['format'] == 'keywords':
+        elif 'type' in value and value['type'] == 'array':
             form_input_id = {'name': 'metadata_keywords_input', 'index': input_id}
             form_input = TagInput(
                 id=form_input_id,

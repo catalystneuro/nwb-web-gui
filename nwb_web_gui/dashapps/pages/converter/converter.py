@@ -46,8 +46,9 @@ class ConverterForms(html.Div):
                 dbc.Row([
                     # dbc.Col(html.H4('Metadata'), width={'size': 12}, style={'text-align': 'left'}),
                     dbc.Col(metadata_forms, width={'size': 12})
-                ]),
+                ], style={'margin-top': '1%'}),
                 dbc.Row(modal),
+                html.Div(id='hidden', style={'display':'none'}),
                 dbc.Row(
                     dbc.Col(
                         dbc.Button('Run Conversion', id='run_conversion_button') ,width={'size':11}
@@ -93,3 +94,12 @@ class ConverterForms(html.Div):
                 return input_value
             else:
                 return values
+
+        @self.parent_app.callback(
+            Output('hidden', 'children'),
+            [Input({'name': 'metadata_string_input', 'index': ALL}, 'value')],
+            [State({'name': 'metadata_string_input', 'index': ALL}, 'id')]
+        )
+        def get_values_from_metadata(value, ids):
+            ids_list = [id['index'] for id in ids]
+            names_list = [e.replace('input_Metadata_', '') for e in ids_list]
