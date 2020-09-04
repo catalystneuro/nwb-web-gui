@@ -144,8 +144,7 @@ class MetadataForm(dbc.Card):
         else:
             self.definitions = parent.definitions
 
-        if 'required' in self.schema:
-            self.required_fields = schema['required']
+        self.required_fields = schema.get('required', '')
 
         if 'properties' in schema:
             self.make_form(properties=schema['properties'])
@@ -153,6 +152,8 @@ class MetadataForm(dbc.Card):
     def make_form(self, properties):
         """Iterates over properties of schema and assembles form items"""
         for k, v in properties.items():
+            required = k in self.required_fields
+
             # If item is an object, e.g. NWBFile
             if 'type' in v and v['type'] == 'object':
                 item = MetadataForm(schema=v, key=k, parent=self)
@@ -171,14 +172,15 @@ class MetadataForm(dbc.Card):
                     schema = self.definitions[template_name]
                     iform = MetadataForm(schema=schema, key=k + f'_{i}', parent=self)
                     form_input.children.append(iform)
-                item = MetadataFormItem(label=k, form_input=form_input)
+                label = dbc.Label(k)
+                item = MetadataFormItem(label=label, form_input=form_input, add_required=required)
 
             # If item is an input field, e.g. description
             elif 'type' in v and (v['type'] == 'string' or v['type'] == 'number'):
                 input_id = f'input_{self.id}_{k}'
                 form_input = self.get_string_field_input(value=v, input_id=input_id)
                 label = dbc.Label(k)
-                item = MetadataFormItem(label, form_input)
+                item = MetadataFormItem(label=label, form_input=form_input, add_required=required)
 
             else:
                 continue

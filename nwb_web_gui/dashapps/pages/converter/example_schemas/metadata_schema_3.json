@@ -139,6 +139,7 @@
     "Ecephys": {
       "type": "object",
       "title": "Ecephys",
+      "required": [],
       "properties": {
         "Device1": {"$ref": "#/definitions/Device"},
         "Device2": {"$ref": "#/definitions/Device"},
@@ -149,8 +150,9 @@
     "Ophys": {
       "type": "object",
       "title": "Ophys",
+      "required": [],
       "properties": {
-        "Device1": {"$ref": "#/definitions/Device"},
+        "Device": {"$ref": "#/definitions/Device"},
         "DFOverF": {
           "type": "object",
           "title": "pynwb.ophys.DFOverF",
@@ -162,6 +164,48 @@
               "items": [
                 {"$ref":  "#/definitions/RoiResponseSeries"},
                 {"$ref":  "#/definitions/RoiResponseSeries"}
+              ]
+            }
+          }
+        },
+        "ImagingPlane": {
+          "title": "pynwb.ophys.ImagingPlane",
+          "type": "object",
+          "required": ["name", "optical_channel", "description", "device", "excitation_lambda", "indicator", "location"],
+          "properties": {
+            "name": {
+              "type": "string",
+              "description": "the name of this container"
+            },
+            "description": {
+              "type": "string",
+              "description": "Description of this ImagingPlane"
+            },
+            "device": {
+              "type": "string",
+              "enum": []
+            },
+            "excitation_lambda": {
+              "type": "number",
+              "description": "Excitation wavelength in nm"
+            },
+            "indicator": {
+              "type": "string",
+              "description": "Calcium indicator"
+            },
+            "location": {
+              "type": "string",
+              "description": "Location of image plane"
+            },
+            "imaging_rate": {
+              "type": "number",
+              "description": "Rate images are acquired, in Hz. If the corresponding TimeSeries is present, the rate should be stored there instead"
+            },
+            "optical_channels": {
+              "type": "array",
+              "items": [
+                {"$ref":  "#/definitions/OpticalChannel"},
+                {"$ref":  "#/definitions/OpticalChannel"}
               ]
             }
           }
@@ -197,6 +241,16 @@
       "properties": {
         "name": {"type": "string"},
         "description": {"type": "string"}
+      }
+    },
+    "OpticalChannel": {
+      "title": "pynwb.ophys.OpticalChannel",
+      "type": "object",
+      "required": ["name", "description", "emission_lambda"],
+      "properties": {
+        "name": {"type": "string"},
+        "description": {"type": "string"},
+        "emission_lambda": {"type": "number"}
       }
     },
     "RoiResponseSeries": {
