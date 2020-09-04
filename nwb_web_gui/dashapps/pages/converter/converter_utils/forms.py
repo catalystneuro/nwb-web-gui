@@ -86,39 +86,23 @@ class SourceForm(dbc.Card):
 
 
 class MetadataFormItem(dbc.FormGroup):
-    def __init__(self, label, form_input, sublist=False, add_required=False):
+    def __init__(self, label, form_input, add_required=False):
         super().__init__([])
 
-        if not sublist:
-            if add_required:
-                self.children = [
-                    dbc.Row([
-                        dbc.Col([label, html.Span('*', style={'color': 'red'})], width={'size': 2}),
-                        dbc.Col(form_input, width={'size': 8})
-                    ])
-                ]
-            else:
-                self.children = [
-                    dbc.Row([
-                        dbc.Col(label, width={'size': 2}),
-                        dbc.Col(form_input, width={'size': 8})
-                    ])
-                ]
+        if add_required:
+            self.children = [
+                dbc.Row([
+                    dbc.Col([label, html.Span('*', style={'color': 'red'})], width={'size': 3}),
+                    dbc.Col(form_input, width={'size': 8})
+                ])
+            ]
         else:
-            if add_required:
-                self.children = [
-                    dbc.Row([
-                        dbc.Col([label, html.Span('*', style={'color': 'red'})], width={'size': 4}),
-                        dbc.Col(form_input, width={'size': 8})
-                    ])
-                ]
-            else:
-                self.children = [
-                    dbc.Row([
-                        dbc.Col(label, width={'size': 4}),
-                        dbc.Col(form_input, width={'size': 8})
-                    ])
-                ]
+            self.children = [
+                dbc.Row([
+                    dbc.Col(label, width={'size': 3}),
+                    dbc.Col(form_input, width={'size': 8})
+                ])
+            ]
 
 
 class MetadataForm(dbc.Card):
@@ -176,7 +160,7 @@ class MetadataForm(dbc.Card):
                 item = MetadataFormItem(label=label, form_input=form_input, add_required=required)
 
             # If item is an input field, e.g. description
-            elif 'type' in v and (v['type'] == 'string' or v['type'] == 'number'):
+            elif 'type' in v and ((v['type'] == 'string' or v['type'] == 'number') or (v['type'] == 'array' and 'format' in v)):
                 input_id = f'input_{self.id}_{k}'
                 form_input = self.get_string_field_input(value=v, input_id=input_id)
                 label = dbc.Label(k)
@@ -214,6 +198,14 @@ class MetadataForm(dbc.Card):
                 options=input_values,
                 value=default,
                 className='dropdown_input'
+            )
+
+        elif 'format' in value and value['format'] == 'keywords':
+            form_input_id = {'name': 'metadata_keywords_input', 'index': input_id}
+            form_input = TagInput(
+                id=form_input_id,
+                wrapperStyle={'box-shadow': 'none', 'border-radius': '2px', 'line-height': '5px'},
+                inputStyle={'line-height': '15px', 'height': '15px'}
             )
 
         elif 'format' in value and value['format'] == 'date-time':
@@ -257,231 +249,3 @@ class MetadataForm(dbc.Card):
         ])
 
         return input_and_tooltip
-
-
-class MetadataForms(dbc.Card):
-    def __init__(self, fields, key_name, form_style, definitions=None, composite_children=None):
-        super().__init__([])
-
-        self.fields = fields
-        self.key_name = key_name
-        self.required_fields = []
-
-        if definitions is not None:
-            self.definitions = definitions
-
-        if form_style == 'composite':
-            self.composite_children = composite_children
-
-            children = self.iter_composite_form(self.fields['properties'], forms=[])
-            self.children = [
-                dbc.CardHeader(key_name),
-                dbc.CardBody([f for f in children])
-            ]
-        else:
-            self.required_fields = self.fields['required']
-
-            if self.fields['type'] == 'object':
-                children = self.create_object_form(self.fields)
-            elif self.fields['type'] == 'array':
-                children = self.create_object_form(self.fields['items'])
-
-            self.children = [
-                dbc.CardHeader(key_name),
-                dbc.CardBody(children)
-            ]
-
-        self.style = {'margin-top': '1%'}
-
-    def iter_composite_form(self, fields, forms=[]):
-
-        for k, v in fields.items():
-            if k in self.composite_children:
-                if 'type' in v and v['type'] == 'object':
-                    if 'required' in v:
-                        self.required_fields = v['required']
-                    else:
-                        self.required_fields = []
-                    children = self.create_object_form(v, composite_key=k)
-                    element = dbc.Form(dbc.Row([
-                        dbc.Col(html.H4(k), width={'size': 12}),
-                        dbc.Col(children, width={'size': 12})
-                    ], style={'margin': '3px'}))
-                elif 'type' in v and v['type'] == 'array':
-                    if 'required' in v['items']:
-                        self.required_fields = v['items']['required']
-                    children = self.create_object_form(v['items'], composite_key=k)
-                    element = dbc.Form(dbc.Row([
-                        dbc.Col(html.H4(k, className="card-title"), width={'size': 12}),
-                        dbc.Col(children, width={'size': 12})
-                    ], style={'margin': '3px'}))
-                elif 'type' not in v and '$ref' in v:
-                    ref_key = v['$ref'].split('/')[-1]
-                    extra_key = f'{k}_{ref_key}'
-                    def_form = self.get_definitions_items(ref_key, extra_key)
-                    element = dbc.Row([
-                        dbc.Col(html.H4(ref_key), className="card-title", width={'size': 12}),
-                        dbc.Col(def_form, width={'size': 12})
-                    ], style={'margin': '3px'})
-                forms.append(element)
-            else:
-                if isinstance(v, dict):
-                    self.iter_composite_form(v, forms=forms)
-
-        return forms
-
-    def create_object_form(self, fields, composite_key=None, sublist=False):
-        children = []
-        subform_layout = None
-
-        for k, v in fields['properties'].items():
-            if composite_key is None:
-                input_id = f'input_{self.key_name}_{k}'
-            else:
-                input_id = f'input_{self.key_name}_{composite_key}_{k}'
-
-            label = dbc.Label(k)
-            if k in self.required_fields:
-                add_required = True
-            else:
-                add_required = False
-            if v['type'] == 'string' or v['type'] == 'number':
-                form_input = self.get_string_field_input(v, input_id)
-            elif v['type'] == 'array':
-                if 'format' in v and v['format'] == 'keywords':
-                    form_input = TagInput(
-                        id=input_id,
-                        wrapperStyle={'box-shadow': 'none', 'border-radius': '2px', 'line-height': '5px'},
-                        inputStyle={'line-height': '15px', 'height': '15px'}
-                    )
-                else:
-                    if 'properties' in v['items']:
-                        sublist_children = []
-                        if 'required' in v['items']:
-                            self.required_fields = v['items']['required']
-                        else:
-                            self.required_fields = []
-                        for lbl, value in v['items']['properties'].items():
-                            if lbl in self.required_fields:
-                                add_required = True
-                            else:
-                                add_required = False
-                            input_id_aux = f'{input_id}_{lbl}'
-                            label = dbc.Label(lbl)
-                            form_input = self.get_string_field_input(value, input_id_aux)
-                            form_item = MetadataFormItem(label, form_input, sublist=True, add_required=add_required)
-                            sublist_children.append(form_item)
-
-                        sublist_form = dbc.Card(dbc.CardBody(dbc.Form(sublist_children)))
-                        subform_layout = dbc.Row([
-                            dbc.Col(
-                                dbc.Label(k), width={'size': 2}
-                            ),
-                            dbc.Col(
-                                sublist_form, width={'size': 8}
-                            )
-                        ])
-                    if 'allOf' in v['items']:
-                        for item in v['items']['allOf']:
-                            if isinstance(item, dict):
-                                if '$ref' in item.keys():
-                                    ref_key = item['$ref'].split('/')[-1]
-                                    extra_key = f'{composite_key}_{ref_key}'
-                                    definition_form = dbc.Card(dbc.CardBody(self.get_definitions_items(ref_key, extra_key, sublist=True)), style={'margin-top': '1%'})
-                                    definitions_layout = dbc.Row([
-                                        dbc.Col(
-                                            dbc.Label(ref_key), width={'size': 2}
-                                        ),
-                                        dbc.Col(definition_form, width={'size': 8})
-                                    ])
-                                    if subform_layout is not None:
-                                        subform_layout.children.append(dbc.Col(definitions_layout, width={'size': 12}))
-                                    else:
-                                        subform_layout = definitions_layout
-
-            if subform_layout is None:
-                form_item = MetadataFormItem(label, form_input, sublist, add_required)
-                children.append(form_item)
-            else:
-                children.append(subform_layout)
-
-        return children
-
-    def get_definitions_items(self, ref_key, extra_key, sublist=False):
-        ref = self.definitions[ref_key]
-
-        if ref['type'] == 'object':
-            if 'required' in ref:
-                self.required_fields = ref['required']
-            form = dbc.Form(self.create_object_form(ref, composite_key=extra_key, sublist=sublist))
-        elif ref['type'] == 'array':
-            if 'required' in ref['items']:
-                self.required_fields = ref['items']['required']
-            form = dbc.Form(self.create_object_form(ref['items'], sublist=sublist))
-
-        if 'allOf' in ref:
-            subforms = [form]
-            for item in ref['allOf']:
-                if '$ref' in item:
-                    ref_key = item['$ref'].split('/')[-1]
-                    key = f'{extra_key}_{ref_key}'
-                    subform = self.get_definitions_items(ref_key, key, sublist=True)
-                    subform_layout = dbc.Row([
-                        # dbc.Col(dbc.Label(ref_key), width={'size': 12}),
-                        dbc.Col(subform, width={'size': 12})
-                    ])
-                    subforms.append(subform_layout)
-
-            output_form = dbc.Container(subforms)
-            return output_form
-
-        return form
-
-    def get_string_field_input(self, value, input_id):
-
-        if 'description' in value:
-            description = value['description']
-        else:
-            description = ''
-
-        if 'enum' in value:
-            input_values = [{'label': e, 'value': e} for e in value['enum']]
-            if 'default' in value:
-                default = value['default']
-            else:
-                default = ''
-            form_input = dcc.Dropdown(
-                id={'name': 'metadata_string_input', 'index': input_id},
-                options=input_values,
-                value=default,
-                className='dropdown_input'
-            )
-        else:
-            if 'format' in value and value['format'] == 'date-time':
-                form_input = DateTimePicker(
-                    id={'name': 'metadata_date_input', 'index': input_id},
-                    style={"border": "solid 1px", "border-color": "#ced4da", "border-radius": "5px", "color": '#545057'}
-                )
-            elif 'format' in value and value['format'] == 'long':
-                form_input = dbc.Textarea(
-                    id={'name': 'metadata_string_input', 'index': input_id},
-                    placeholder=description,
-                    className='string_input',
-                    bs_size="lg",
-                    style={'font-size': '16px'}
-                )
-            else:
-                input_type = value['type']
-                if input_type == 'number':
-                    step = 0.01
-                else:
-                    step = ''
-                form_input = dbc.Input(
-                    id={'name': 'metadata_string_input', 'index': input_id},
-                    placeholder=description,
-                    className='string_input',
-                    type=input_type,
-                    step=step
-                )
-
-        return form_input
