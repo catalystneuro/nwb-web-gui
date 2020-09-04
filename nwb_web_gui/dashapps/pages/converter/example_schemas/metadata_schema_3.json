@@ -168,6 +168,21 @@
             }
           }
         },
+        "Fluorescence": {
+          "type": "object",
+          "title": "pynwb.ophys.Fluorescence",
+          "required": ["name"],
+          "properties": {
+            "name": {"type": "string"},
+            "roi_response_series": {
+              "type": "array",
+              "items": [
+                {"$ref":  "#/definitions/RoiResponseSeries"},
+                {"$ref":  "#/definitions/RoiResponseSeries"}
+              ]
+            }
+          }
+        },
         "ImagingPlane": {
           "title": "pynwb.ophys.ImagingPlane",
           "type": "object",
@@ -325,15 +340,28 @@
       "properties": {
         "name": {
           "type": "string",
-          "description": ""
+          "description": "The name of this TimeSeries dataset"
         },
         "description": {
           "type": "string",
-          "description": ""
+          "description": "Description of this TimeSeries dataset"
         },
         "rois": {
           "type": "string",
-          "description": ""
+          "description": "a table region corresponding to the ROIs that were used to generate this data"
+        },
+        "unit":{
+          "type": "string",
+          "description": "The base unit of measurement (should be SI unit)"
+        },
+        "resolution": {
+          "type": "number",
+          "description": "The smallest meaningful difference (in specified unit) between values in data"
+        },
+        "conversion": {
+          "type": "number",
+          "description": "Scalar to multiply each element in data to convert it to the specified unit",
+          "default": 1.0
         }
       }
     }
