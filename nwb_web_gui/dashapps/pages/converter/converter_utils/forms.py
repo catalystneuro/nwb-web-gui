@@ -50,10 +50,8 @@ class SourceForm(dbc.Card):
             label = dbc.Label(k)
             input_id = f'input_{parent}_{k}'
             explorer_id = input_id.replace('input', 'explorer')
-            if k in self.required_fields:
-                add_required = True
-            else:
-                add_required = False
+            add_required = k in self.required_fields
+
             if v['type'] == 'string':
                 form_input = dbc.Input(
                     id={'name': 'source_string_input', 'index': input_id},
@@ -121,6 +119,144 @@ class MetadataFormItem(dbc.FormGroup):
                         dbc.Col(form_input, width={'size': 8})
                     ])
                 ]
+
+
+class MetadataForm(dbc.Card):
+    def __init__(self, schema, key, definitions=None, parent=None):
+        super().__init__([])
+
+        self.schema = schema
+        self.parent = parent
+
+        # Unique Card IDs are composed by parent id + key from json schema
+        if parent is not None:
+            self.id = parent.id + '_' + key
+        else:
+            self.id = key
+
+        header_text = self.id.split('_')[-1]
+        self.header = dbc.CardHeader([html.H4(header_text, className="title_" + key)])
+        self.body = dbc.CardBody([])
+        self.children = [self.header, self.body]
+
+        if definitions is None and parent is None:
+            self.definitions = schema['definitions']
+        else:
+            self.definitions = parent.definitions
+
+        self.required_fields = schema.get('required', '')
+
+        if 'properties' in schema:
+            self.make_form(properties=schema['properties'])
+
+    def make_form(self, properties):
+        """Iterates over properties of schema and assembles form items"""
+        for k, v in properties.items():
+            required = k in self.required_fields
+
+            # If item is an object, e.g. NWBFile
+            if 'type' in v and v['type'] == 'object':
+                item = MetadataForm(schema=v, key=k, parent=self)
+
+            # If item references an object on definitions, e.g. Device
+            elif "$ref" in v:
+                template_name = v["$ref"].split('/')[-1]
+                schema = self.definitions[template_name]
+                item = MetadataForm(schema=schema, key=k, parent=self)
+
+            # If item is an array of subforms, e.g. ImagingPlane.optical_channels
+            elif 'type' in v and (v['type'] == 'array' and 'format' not in v):
+                form_input = html.Div([])
+                for i, iv in enumerate(v["items"]):
+                    template_name = iv["$ref"].split('/')[-1]
+                    schema = self.definitions[template_name]
+                    iform = MetadataForm(schema=schema, key=k + f'_{i}', parent=self)
+                    form_input.children.append(iform)
+                label = dbc.Label(k)
+                item = MetadataFormItem(label=label, form_input=form_input, add_required=required)
+
+            # If item is an input field, e.g. description
+            elif 'type' in v and (v['type'] == 'string' or v['type'] == 'number'):
+                input_id = f'input_{self.id}_{k}'
+                form_input = self.get_string_field_input(value=v, input_id=input_id)
+                label = dbc.Label(k)
+                item = MetadataFormItem(label=label, form_input=form_input, add_required=required)
+
+            else:
+                continue
+
+            self.body.children.append(item)
+
+    @staticmethod
+    def get_string_field_input(value, input_id):
+        """
+        Get component for user interaction. Types:
+        - text
+        - number
+        - tag input
+        - dropdown
+        - datetime
+        """
+        if 'description' in value:
+            description = value['description']
+        else:
+            description = ''
+
+        if 'enum' in value:
+            input_values = [{'label': e, 'value': e} for e in value['enum']]
+            if 'default' in value:
+                default = value['default']
+            else:
+                default = ''
+            form_input_id = {'name': 'metadata_string_input', 'index': input_id}
+            form_input = dcc.Dropdown(
+                id=form_input_id,
+                options=input_values,
+                value=default,
+                className='dropdown_input'
+            )
+
+        elif 'format' in value and value['format'] == 'date-time':
+            form_input_id = {'name': 'metadata_date_input', 'index': input_id}
+            form_input = DateTimePicker(
+                id=form_input_id,
+                style={"border": "solid 1px", "border-color": "#ced4da", "border-radius": "5px", "color": '#545057'}
+            )
+
+        elif 'format' in value and value['format'] == 'long':
+            form_input_id = {'name': 'metadata_string_input', 'index': input_id}
+            form_input = dbc.Textarea(
+                id=form_input_id,
+                className='string_input',
+                bs_size="lg",
+                style={'font-size': '16px'}
+            )
+        else:
+            input_type = value['type']
+            if input_type == 'number':
+                step = 1
+            else:
+                step = ''
+            form_input_id = {'name': 'metadata_string_input', 'index': input_id}
+            form_input = dbc.Input(
+                id=form_input_id,
+                className='string_input',
+                type=input_type,
+                step=step
+            )
+
+        input_and_tooltip = html.Div([
+            html.Div(
+                form_input,
+                id=form_input_id['index'] + '_' + form_input_id['name']
+            ),
+            dbc.Tooltip(
+                description,
+                target=form_input_id['index'] + '_' + form_input_id['name']
+            ),
+        ])
+
+        return input_and_tooltip
 
 
 class MetadataForms(dbc.Card):

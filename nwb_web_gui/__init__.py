@@ -13,15 +13,13 @@ def init_app():
         from . import routes
 
         # Import Dash application
-        # from .dashapps.pages.converter.init_converter import init_converter
+        from .dashapps.pages.converter.init_coverter import init_converter
         from .dashapps.pages.viewer.init_viewer import init_viewer
         # from .dashapps.pages.dashboard.init_dashboard import init_dashboard
-        from .dashapps.pages.converter.init_coverter import init_converter_new
 
-        # init_converter(app)
+        init_converter(app)
         init_viewer(app)
         # init_dashboard(app)
-        init_converter_new(app)
         # init_home(app)
 
         return app

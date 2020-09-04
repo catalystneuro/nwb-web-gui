@@ -22,7 +22,7 @@ class ConverterForms(html.Div):
         with open(source_schema_path, 'r') as inp:
             self.source_json_schema = json.load(inp)
 
-        metadata_schema_path = examples_path / 'metadata_schema_3.json'
+        metadata_schema_path = examples_path / 'metadata_schema.json'
         with open(metadata_schema_path, 'r') as inp:
             self.metadata_json_schema = json.load(inp)
 
@@ -36,7 +36,7 @@ class ConverterForms(html.Div):
                 dbc.Row(html.H1('NWB Converter'), style={'justify-content': 'center'}),
                 dbc.Row([
                     dbc.Col(html.H4('Input Files'), width={'size': 12}, style={'text-align': 'left'}),
-                    dbc.Col(source_forms, width={'size': 12}, style={'overflow': 'scroll', 'height': '30vh'}, className='v-scroll'),
+                    dbc.Col(source_forms, width={'size': 12}),
                     dbc.Col(
                         dbc.Button('Get Metadata Form', id='get_metadata_btn'),
                         style={'justify-content': 'right', 'text-align': 'right', 'margin-top': '1%'},
@@ -44,14 +44,14 @@ class ConverterForms(html.Div):
                     )
                 ]),
                 dbc.Row([
-                    dbc.Col(html.H4('Metadata'), width={'size': 12}, style={'text-align': 'left'}),
-                    dbc.Col(metadata_forms, width={'size': 12}, style={'overflow': 'scroll', 'height': '50vh'}, className='v-scroll')
+                    # dbc.Col(html.H4('Metadata'), width={'size': 12}, style={'text-align': 'left'}),
+                    dbc.Col(metadata_forms, width={'size': 12})
                 ]),
                 dbc.Row(modal),
                 dbc.Row(
                     dbc.Col(
-                        dbc.Button('Run Conversion',id='run_conversion_button') ,width={'size':11}
-                    ), style={'text-align':'right', 'margin-top': '1%'}
+                        dbc.Button('Run Conversion', id='run_conversion_button') ,width={'size':11}
+                    ), style={'text-align': 'right', 'margin-top': '1%'}
                 ),
             ], style={'min-height': '110vh'})
         ]
