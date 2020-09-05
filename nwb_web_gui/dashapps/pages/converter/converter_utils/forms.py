@@ -112,11 +112,13 @@ class MetadataFormItem(dbc.FormGroup):
     def get_field_input(self, value, input_id, description=None):
         """
         Get component for user interaction. Types:
-        - text
+        - string
         - number
         - tag input
-        - dropdown
         - datetime
+        - string choice
+        - link choice
+        - list
         """
 
         if isinstance(value, list):

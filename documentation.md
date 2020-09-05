@@ -6,7 +6,7 @@ A **Field** is a [FormGroup component](https://dash-bootstrap-components.opensou
 
 Labels are strings with values corresponding to the properties names of pynwb classes. The Input of each **Field** varies according to the type of data for each property. The Input type must be defined in the incoming schema and the Input value should be provided by the data.
 
-
+## Schema / Data / GUI examples
 
 ### String field
 
@@ -200,3 +200,52 @@ Labels are strings with values corresponding to the properties names of pynwb cl
 </td>
 </tr>
 </table>
+
+![](nwb_web_gui/static/documentation_linkchoice.JPG)
+
+
+### Subform list field
+
+<table>
+<tr>
+<td>Schema</td>
+<td>Data</td>
+</tr>
+<tr>
+<td>
+<pre lang="json">
+"ImagingPlane": {
+  "properties": {
+    "optical_channels": {
+      "type": "array",
+      "items": [
+        {"$ref":  "#/definitions/OpticalChannel"},
+        {"$ref":  "#/definitions/OpticalChannel"}
+      ]
+    }
+  }
+}
+</pre>
+</td>
+<td>
+<pre lang="json">
+"ImagingPlane": {
+  "optical_channel": [
+    {
+      "name": "OpticalChannel_R",
+      "description": "R Optical Channel",
+      "emission_lambda": 633.0
+    },
+    {
+      "name": "OpticalChannel_G",
+      "description": "G Optical Channel",
+      "emission_lambda": 510.0
+    }
+  ]
+}
+</pre>
+</td>
+</tr>
+</table>
+
+![](nwb_web_gui/static/documentation_subformlist.JPG)
