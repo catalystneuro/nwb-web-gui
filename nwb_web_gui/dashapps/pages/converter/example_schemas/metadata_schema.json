@@ -102,7 +102,7 @@
       "title": "pynwb.file.Subject",
       "required": ["subjectd_id"],
       "properties": {
-        "subjectd_id": {
+        "subject_id": {
           "type": "string",
           "description": "ID of animal/person used/participating in experiment (lab convention)"
         },

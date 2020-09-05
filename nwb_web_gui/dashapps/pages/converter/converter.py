@@ -27,8 +27,10 @@ class ConverterForms(html.Div):
         with open(metadata_schema_path, 'r') as inp:
             self.metadata_json_schema = json.load(inp)
 
+        # Source data Form
         source_forms = get_forms_from_schema(self.source_json_schema, source=True)
 
+        # Metadata Form
         self.parent_app.data_to_field = dict()
         metadata_forms = MetadataForm(
             schema=self.metadata_json_schema,
@@ -41,26 +43,29 @@ class ConverterForms(html.Div):
         with open(metadata_data_path, 'r') as inp:
             self.metadata_json_data = json.load(inp)
         metadata_forms.write_to_form(data=self.metadata_json_data)
-        print(self.parent_app.data_to_field)
 
         self.children = [
             dbc.Container([
+                dbc.Col(html.H4('Input Files'), width={'size': 12}, style={'text-align': 'left'}),
+                dbc.Col(source_forms, width={'size': 12}),
+                dbc.Col(
+                    dbc.Button('Get Metadata Form', id='get_metadata_btn'),
+                    style={'justify-content': 'left', 'text-align': 'left', 'margin-top': '1%'},
+                    width={'size': 4}
+                ),
                 dbc.Row([
-                    dbc.Col(html.H4('Input Files'), width={'size': 12}, style={'text-align': 'left'}),
-                    dbc.Col(source_forms, width={'size': 12}),
                     dbc.Col(
                         dbc.Button('Validate Metadata', id='validate_metadata_button'),
-                        width={'size': 6},
+                        width={'size': 2},
                         style={'justify-content': 'left', 'text-align': 'left', 'margin-top': '1%'},
                     ),
                     dbc.Col(
-                        dbc.Button('Get Metadata Form', id='get_metadata_btn'),
-                        style={'justify-content': 'right', 'text-align': 'right', 'margin-top': '1%'},
-                        width={'size': 6}
+                        dcc.Upload(dbc.Button('Load data'), id='button_load_metadata'),
+                        width={'size': 2},
+                        style={'justify-content': 'left', 'text-align': 'left', 'margin-top': '1%'},
                     )
                 ]),
                 dbc.Row([
-                    # dbc.Col(html.H4('Metadata'), width={'size': 12}, style={'text-align': 'left'}),
                     dbc.Col(metadata_forms, width={'size': 12})
                 ], style={'margin-top': '1%'}),
                 dbc.Row(modal),
@@ -112,34 +117,50 @@ class ConverterForms(html.Div):
                 return values
 
         @self.parent_app.callback(
-            Output('hidden', 'children'),
-            [Input('validate_metadata_button', 'n_clicks')],
-            [
-                State({'name': 'metadata_string_input', 'index': ALL}, 'value'),
-                State({'name': 'metadata_string_input', 'index': ALL}, 'id')
-            ]
+            [Output({'type': 'metadata-input', 'index': id}, 'value') for id in self.parent_app.data_to_field.keys()],
+            [Input('button_load_metadata', 'contents')]
         )
-        def get_values_from_metadata(click, values, ids):
+        def update_metadata(contents):
+            """
+            Updates metadata values on form when:
+            - Forms are created (receives metadata dict from Converter)
+            - User upload metadata json / yaml file
+            """
+            if contents is not None:
+                return [v for v in self.parent_app.data_to_field.values()]
+            else:
+                return ['' for _ in self.parent_app.data_to_field.keys()]
 
-            ctx = dash.callback_context
-            source = ctx.triggered[0]['prop_id'].split('.')[0]
 
-            if source == 'validate_metadata_button':
-                ids_list = [id['index'] for id in ids]
-                names_list = [e.replace('input_Metadata_', '') for e in ids_list]
-
-                output = {}
-                for name, value in zip(names_list, values):
-                    splited = name.split('_')
-                    field = splited[-1]
-                    keys = splited[:len(splited)-1]
-                    if len(splited) > 2:
-                        pass
-                    else:
-                        if keys[0] in output:
-                            output[keys[0]][field] = value
-                        else:
-                            output[keys[0]] = {field: value}
+        # @self.parent_app.callback(
+        #     Output('hidden', 'children'),
+        #     [Input('validate_metadata_button', 'n_clicks')],
+        #     [
+        #         State({'name': 'metadata_string_input', 'index': ALL}, 'value'),
+        #         State({'name': 'metadata_string_input', 'index': ALL}, 'id')
+        #     ]
+        # )
+        # def get_values_from_metadata(click, values, ids):
+        #
+        #     ctx = dash.callback_context
+        #     source = ctx.triggered[0]['prop_id'].split('.')[0]
+        #
+        #     if source == 'validate_metadata_button':
+        #         ids_list = [id['index'] for id in ids]
+        #         names_list = [e.replace('input_Metadata_', '') for e in ids_list]
+        #
+        #         output = {}
+        #         for name, value in zip(names_list, values):
+        #             splited = name.split('_')
+        #             field = splited[-1]
+        #             keys = splited[:len(splited)-1]
+        #             if len(splited) > 2:
+        #                 pass
+        #             else:
+        #                 if keys[0] in output:
+        #                     output[keys[0]][field] = value
+        #                 else:
+        #                     output[keys[0]] = {field: value}
 
     '''
     def iter_output(self, keys, field, value, output=None):

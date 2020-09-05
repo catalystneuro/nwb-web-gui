@@ -7,7 +7,6 @@
         "institution": "My University"
     },
     "Subject": {
-        "age": "",
         "description": "description of this subject",
         "genotype": "",
         "sex": "M",

@@ -11,7 +11,7 @@ class SourceFormItem(dbc.FormGroup):
         super().__init__([])
 
         if add_explorer:
-            explorer_btn = dbc.Button(id={'name': 'source_explorer', 'index': explorer_id}, children=[html.I(className="far fa-folder")], style={'background-color': 'transparent', 'color': 'black', 'border': 'none'})
+            explorer_btn = dbc.Button(id={'type': 'source_explorer', 'index': explorer_id}, children=[html.I(className="far fa-folder")], style={'background-color': 'transparent', 'color': 'black', 'border': 'none'})
             if add_required:
                 self.children = dbc.Row([
                     dbc.Col([label, html.Span('*', style={'color': 'red'})], width={'size': 2}),
@@ -55,13 +55,13 @@ class SourceForm(dbc.Card):
 
             if v['type'] == 'string':
                 form_input = dbc.Input(
-                    id={'name': 'source_string_input', 'index': input_id},
+                    id={'type': 'source_string_input', 'index': input_id},
                     className='string_input',
                     type='input'
                 )
             elif v['type'] == 'boolean':
                 form_input = dbc.Checkbox(
-                    id={'name': 'source_boolean_input', 'index': input_id}
+                    id={'type': 'source_boolean_input', 'index': input_id}
                 )
             if 'format' in v.keys():
                 if v['format'] == 'file' or v['format'] == 'directory':
@@ -121,8 +121,10 @@ class MetadataFormItem(dbc.FormGroup):
         - list
         """
 
+        field_input_id = {'type': 'metadata-input', 'index': input_id}
+
         if isinstance(value, list):
-            field_input_id = {'name': 'metadata-list-input', 'index': input_id}
+            # field_input_id = {'type': 'metadata-list-input', 'index': input_id}
             field_input = html.Div(value, id=field_input_id)
             description = ''
 
@@ -132,7 +134,7 @@ class MetadataFormItem(dbc.FormGroup):
                 default = value['default']
             else:
                 default = ''
-            field_input_id = {'name': 'metadata-string-input', 'index': input_id}
+            # field_input_id = {'type': 'metadata-string-input', 'index': input_id}
             field_input = dcc.Dropdown(
                 id=field_input_id,
                 options=input_values,
@@ -141,7 +143,7 @@ class MetadataFormItem(dbc.FormGroup):
             )
 
         elif 'type' in value and value['type'] == 'array':
-            field_input_id = {'name': 'metadata-tags-input', 'index': input_id}
+            # field_input_id = {'type': 'metadata-tags-input', 'index': input_id}
             field_input = TagInput(
                 id=field_input_id,
                 wrapperStyle={'box-shadow': 'none', 'border-radius': '2px', 'line-height': '5px'},
@@ -149,14 +151,14 @@ class MetadataFormItem(dbc.FormGroup):
             )
 
         elif 'format' in value and value['format'] == 'date-time':
-            field_input_id = {'name': 'metadata-date-input', 'index': input_id}
+            # field_input_id = {'type': 'metadata-date-input', 'index': input_id}
             field_input = DateTimePicker(
                 id=field_input_id,
                 style={"border": "solid 1px", "border-color": "#ced4da", "border-radius": "5px", "color": '#545057'}
             )
 
         elif 'format' in value and value['format'] == 'long':
-            field_input_id = {'name': 'metadata-string-input', 'index': input_id}
+            # field_input_id = {'type': 'metadata-string-input', 'index': input_id}
             field_input = dbc.Textarea(
                 id=field_input_id,
                 className='string_input',
@@ -169,7 +171,7 @@ class MetadataFormItem(dbc.FormGroup):
                 step = 1
             else:
                 step = ''
-            field_input_id = {'name': 'metadata-string-input', 'index': input_id}
+            # field_input_id = {'type': 'metadata-string-input', 'index': input_id}
             field_input = dbc.Input(
                 id=field_input_id,
                 className='string_input',
@@ -187,11 +189,11 @@ class MetadataFormItem(dbc.FormGroup):
         input_and_tooltip = html.Div([
             html.Div(
                 field_input,
-                id='wrapper-' + field_input_id['index'] + '-' + field_input_id['name']
+                id='wrapper-' + field_input_id['index'] + '-' + field_input_id['type']
             ),
             dbc.Tooltip(
                 description,
-                target='wrapper-' + field_input_id['index'] + '-' + field_input_id['name']
+                target='wrapper-' + field_input_id['index'] + '-' + field_input_id['type']
             ),
         ])
 
