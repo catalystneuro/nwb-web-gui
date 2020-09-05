@@ -177,6 +177,9 @@ class MetadataFormItem(dbc.FormGroup):
                 step=step
             )
 
+        # Add field to data_to_field mapping
+        self.parent.parent_app.data_to_field.update({input_id: None})
+
         # Add tooltip to input field
         if description is None:
             description = value.get('description', '')
@@ -196,14 +199,19 @@ class MetadataFormItem(dbc.FormGroup):
 
 
 class MetadataForm(dbc.Card):
-    def __init__(self, schema, key, definitions=None, parent=None):
+    def __init__(self, schema, key, definitions=None, parent=None, parent_app=None):
         super().__init__([])
 
         self.schema = schema
         self.parent = parent
 
+        if parent_app is None:
+            self.parent_app = parent.parent_app
+        else:
+            self.parent_app = parent_app
+
         # Unique Card IDs are composed by parent id + key from json schema
-        if parent is not None:
+        if parent is not None and parent.id != 'Metadata':
             self.id = parent.id + '-' + key
         else:
             self.id = key
@@ -220,6 +228,7 @@ class MetadataForm(dbc.Card):
 
         self.required_fields = schema.get('required', '')
 
+        # Construct form
         if 'properties' in schema:
             self.make_form(properties=schema['properties'])
 
@@ -272,3 +281,21 @@ class MetadataForm(dbc.Card):
                 add_required=required
             )
             self.body.children.append(item)
+
+    def write_to_form(self, data, key=None):
+        """Write data to form items"""
+        if key is None:
+            key = ''
+
+        for k, v in data.items():
+            # If value is a dictionary
+            if isinstance(v, dict):
+                self.write_to_form(data=v, key=k)
+            # If value is a string, number or list
+            else:
+                component_id = key + '-' + k   # e.g. NWBFile-session_description
+                self.parent_app.data_to_field[component_id] = v
+
+        # Up to this point, we are filling the data_to_field dictionary with values
+        # from data file. Each key corresponds to an unique id index for the existing
+        # field components. Now we need to update these components values

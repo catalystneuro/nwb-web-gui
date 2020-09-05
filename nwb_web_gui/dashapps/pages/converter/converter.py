@@ -5,6 +5,7 @@ from dash.dependencies import Input, Output, State, ALL, MATCH
 import dash_bootstrap_components as dbc
 import json
 from .converter_utils.utils import get_forms_from_schema
+from .converter_utils.forms import SourceForm, MetadataForm
 from nwb_web_gui.dashapps.utils.make_components import make_modal
 from pathlib import Path
 
@@ -26,10 +27,21 @@ class ConverterForms(html.Div):
         with open(metadata_schema_path, 'r') as inp:
             self.metadata_json_schema = json.load(inp)
 
-        metadata_definitions = self.metadata_json_schema['definitions']
-
         source_forms = get_forms_from_schema(self.source_json_schema, source=True)
-        metadata_forms = get_forms_from_schema(self.metadata_json_schema, definitions=metadata_definitions, source=False)
+
+        self.parent_app.data_to_field = dict()
+        metadata_forms = MetadataForm(
+            schema=self.metadata_json_schema,
+            key="Metadata",
+            parent_app=self.parent_app
+        )
+
+        # Fill form
+        metadata_data_path = examples_path / 'metadata_example_0.json'
+        with open(metadata_data_path, 'r') as inp:
+            self.metadata_json_data = json.load(inp)
+        metadata_forms.write_to_form(data=self.metadata_json_data)
+        print(self.parent_app.data_to_field)
 
         self.children = [
             dbc.Container([
