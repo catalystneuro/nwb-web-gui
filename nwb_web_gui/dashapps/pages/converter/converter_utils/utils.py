@@ -16,7 +16,7 @@ def iter_source_schema(schema, parent_name=None, forms=[]):
     return forms
 
 
-def get_forms_from_schema(schema, definitions=None, source=False):
+def get_forms_from_schema(schema, source=False):
     if source:
         forms = iter_source_schema(schema['properties'])
     else:
