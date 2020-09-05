@@ -37,6 +37,7 @@ Labels are strings with values corresponding to the properties names of pynwb cl
 </tr>
 </table>
 
+![](nwb_web_gui/static/documentation_singlestring.JPG)
 
 
 ### Numeric field
@@ -67,6 +68,7 @@ Labels are strings with values corresponding to the properties names of pynwb cl
 </tr>
 </table>
 
+![](nwb_web_gui/static/documentation_numeric.JPG)
 
 
 ### Datetime field
@@ -99,6 +101,7 @@ Labels are strings with values corresponding to the properties names of pynwb cl
 </tr>
 </table>
 
+![](nwb_web_gui/static/documentation_datetime.JPG)
 
 
 ### Tags field
@@ -131,9 +134,44 @@ Labels are strings with values corresponding to the properties names of pynwb cl
 </tr>
 </table>
 
+![](nwb_web_gui/static/documentation_tags.JPG)
 
 
-### Link field
+### String choice field
+
+<table>
+<tr>
+<td>Schema</td>
+<td>Data</td>
+</tr>
+<tr>
+<td>
+<pre lang="json">
+"Subject": {
+  "properties": {
+    "sex": {
+      "type": "string",
+      "enum": ["M", "F", "U", "O"],
+      "default": "U"
+    }
+  }
+}
+</pre>
+</td>
+<td>
+<pre lang="json">
+"Subject": {
+  "sex": "M"
+}
+</pre>
+</td>
+</tr>
+</table>
+
+![](nwb_web_gui/static/documentation_stringchoice.JPG)
+
+
+### Link choice field
 
 <table>
 <tr>

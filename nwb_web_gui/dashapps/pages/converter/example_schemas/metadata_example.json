@@ -3,7 +3,7 @@
         "session_description": "ADDME",
         "identifier": "ADDME",
         "session_start_time": "1900-01-01T00:00:00",
-        "experimenter": "",
+        "experimenter": ["Name 1", "Name 2"],
         "institution": ""
     },
     "Subject": {

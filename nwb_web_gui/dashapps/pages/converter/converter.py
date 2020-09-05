@@ -33,7 +33,6 @@ class ConverterForms(html.Div):
 
         self.children = [
             dbc.Container([
-                dbc.Row(html.H1('NWB Converter'), style={'justify-content': 'center'}),
                 dbc.Row([
                     dbc.Col(html.H4('Input Files'), width={'size': 12}, style={'text-align': 'left'}),
                     dbc.Col(source_forms, width={'size': 12}),
@@ -53,10 +52,10 @@ class ConverterForms(html.Div):
                     dbc.Col(metadata_forms, width={'size': 12})
                 ], style={'margin-top': '1%'}),
                 dbc.Row(modal),
-                html.Div(id='hidden', style={'display':'none'}),
+                html.Div(id='hidden', style={'display': 'none'}),
                 dbc.Row(
                     dbc.Col(
-                        dbc.Button('Run Conversion', id='run_conversion_button') ,width={'size':11}
+                        dbc.Button('Run Conversion', id='run_conversion_button'), width={'size': 11}
                     ), style={'text-align': 'right', 'margin-top': '1%'}
                 ),
             ], style={'min-height': '110vh'})
@@ -146,4 +145,3 @@ class ConverterForms(html.Div):
 
         return output
     '''
-    
