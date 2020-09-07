@@ -293,10 +293,15 @@ class MetadataForm(dbc.Card):
         for k, v in data.items():
             # If value is a dictionary
             if isinstance(v, dict):
-                self.write_to_form(data=v, key=k)
+                if key != '':
+                    inner_key = f'{key}-{k}'
+                else:
+                    inner_key = k
+                self.write_to_form(data=v, key=inner_key)
             # If value is a string, number or list
             else:
                 component_id = key + '-' + k   # e.g. NWBFile-session_description
+                print(component_id)
                 self.parent_app.data_to_field[component_id] = v
 
         # Up to this point, we are filling the data_to_field dictionary with values
