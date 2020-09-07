@@ -4,6 +4,7 @@ import dash_core_components as dcc
 from dash.dependencies import Input, Output, State, ALL, MATCH
 import dash_bootstrap_components as dbc
 import json
+import base64
 from .converter_utils.utils import get_forms_from_schema
 from .converter_utils.forms import SourceForm, MetadataForm
 from nwb_web_gui.dashapps.utils.make_components import make_modal
@@ -32,7 +33,7 @@ class ConverterForms(html.Div):
 
         # Metadata Form
         self.parent_app.data_to_field = dict()
-        metadata_forms = MetadataForm(
+        self.metadata_forms = MetadataForm(
             schema=self.metadata_json_schema,
             key="Metadata",
             parent_app=self.parent_app
@@ -42,7 +43,7 @@ class ConverterForms(html.Div):
         metadata_data_path = examples_path / 'metadata_example_0.json'
         with open(metadata_data_path, 'r') as inp:
             self.metadata_json_data = json.load(inp)
-        metadata_forms.write_to_form(data=self.metadata_json_data)
+        self.metadata_forms.write_to_form(data=self.metadata_json_data)
 
         self.children = [
             dbc.Container([
@@ -66,7 +67,7 @@ class ConverterForms(html.Div):
                     )
                 ]),
                 dbc.Row([
-                    dbc.Col(metadata_forms, width={'size': 12})
+                    dbc.Col(self.metadata_forms, width={'size': 12})
                 ], style={'margin-top': '1%'}),
                 dbc.Row(modal),
                 html.Div(id='hidden', style={'display': 'none'}),
@@ -126,10 +127,15 @@ class ConverterForms(html.Div):
             - Forms are created (receives metadata dict from Converter)
             - User upload metadata json / yaml file
             """
-            if contents is not None:
+            if isinstance(contents, str):
+                content_type, content_string = contents.split(',')
+                bs4decode = base64.b64decode(content_string)
+                json_string = bs4decode.decode('utf8').replace("'", '"')
+                self.metadata_json_data = json.loads(json_string)
+                self.metadata_forms.write_to_form(data=self.metadata_json_data)
                 return [v for v in self.parent_app.data_to_field.values()]
             else:
-                return ['' for _ in self.parent_app.data_to_field.keys()]
+                return [v for v in self.parent_app.data_to_field.values()]
 
 
         # @self.parent_app.callback(

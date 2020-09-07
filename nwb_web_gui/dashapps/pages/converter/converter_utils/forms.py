@@ -125,7 +125,7 @@ class MetadataFormItem(dbc.FormGroup):
 
         if isinstance(value, list):
             # field_input_id = {'type': 'metadata-list-input', 'index': input_id}
-            field_input = html.Div(value, id=field_input_id)
+            field_input = html.Div(value) #id=field_input_id)
             description = ''
 
         elif 'enum' in value:
@@ -180,7 +180,8 @@ class MetadataFormItem(dbc.FormGroup):
             )
 
         # Add field to data_to_field mapping
-        self.parent.parent_app.data_to_field.update({input_id: None})
+        if not isinstance(value, list):
+            self.parent.parent_app.data_to_field.update({input_id: None})
 
         # Add tooltip to input field
         if description is None:
