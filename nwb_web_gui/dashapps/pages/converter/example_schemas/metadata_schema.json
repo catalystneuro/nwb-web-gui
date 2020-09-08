@@ -163,7 +163,7 @@
             "device": {
               "type": "string",
               "description": "the device that was used to record from this electrode group",
-              "enum": []
+              "target": "pynwb.device.Device"
             }
           }
         }
@@ -222,7 +222,7 @@
             },
             "device": {
               "type": "string",
-              "enum": []
+              "target": "pynwb.device.Device"
             },
             "excitation_lambda": {
               "type": "number",
@@ -407,7 +407,7 @@
         "imaging_plane": {
           "type": "string",
           "description": "Imaging plane class/pointer",
-          "enum": []
+          "target": "pynwb.ophys.ImagingPlane"
         },
         "unit":{
           "type": "string",

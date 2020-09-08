@@ -43,7 +43,7 @@ class ConverterForms(html.Div):
         metadata_data_path = examples_path / 'metadata_example_0.json'
         with open(metadata_data_path, 'r') as inp:
             self.metadata_json_data = json.load(inp)
-        self.metadata_forms.write_to_form(data=self.metadata_json_data)
+        self.metadata_forms.update_form_dict_values(data=self.metadata_json_data)
 
         self.children = [
             dbc.Container([
@@ -62,6 +62,11 @@ class ConverterForms(html.Div):
                     ),
                     dbc.Col(
                         dcc.Upload(dbc.Button('Load data'), id='button_load_metadata'),
+                        width={'size': 2},
+                        style={'justify-content': 'left', 'text-align': 'left', 'margin-top': '1%'},
+                    ),
+                    dbc.Col(
+                        dbc.Button('Update', id='button_update'),
                         width={'size': 2},
                         style={'justify-content': 'left', 'text-align': 'left', 'margin-top': '1%'},
                     )
@@ -118,24 +123,72 @@ class ConverterForms(html.Div):
                 return values
 
         @self.parent_app.callback(
-            [Output({'type': 'metadata-input', 'index': id}, 'value') for id in self.parent_app.data_to_field.keys()],
+            [Output(v['compound_id'], 'value') for v in self.parent_app.data_to_field.values() if v['compound_id']['data_type'] != 'link'],
             [Input('button_load_metadata', 'contents')]
         )
-        def update_metadata(contents):
+        def update_forms_values(contents):
             """
-            Updates metadata values on form when:
+            Updates forms values (except links) when:
             - Forms are created (receives metadata dict from Converter)
             - User upload metadata json / yaml file
             """
-            if isinstance(contents, str):
+            ctx = dash.callback_context
+            trigger_source = ctx.triggered[0]['prop_id'].split('.')[0]
+
+            if trigger_source == 'button_load_metadata':
                 content_type, content_string = contents.split(',')
                 bs4decode = base64.b64decode(content_string)
                 json_string = bs4decode.decode('utf8').replace("'", '"')
                 self.metadata_json_data = json.loads(json_string)
-                self.metadata_forms.write_to_form(data=self.metadata_json_data)
-                return [v for v in self.parent_app.data_to_field.values()]
+                self.metadata_forms.update_form_dict_values(data=self.metadata_json_data)
+                return [v['value'] for v in self.parent_app.data_to_field.values() if v['compound_id']['data_type'] != 'link']
             else:
-                return [v for v in self.parent_app.data_to_field.values()]
+                return [v['value'] for v in self.parent_app.data_to_field.values() if v['compound_id']['data_type'] != 'link']
+
+        @self.parent_app.callback(
+            [Output(v['compound_id'], 'options') for v in self.parent_app.data_to_field.values() if v['compound_id']['data_type'] == 'link'],
+            [Input('button_update', 'n_clicks')],
+            [State(v['compound_id'], 'value') for v in self.parent_app.data_to_field.values() if v['compound_id']['data_type'] == 'name']
+        )
+        def update_forms_links(click_update, *name_change):
+            """
+            Updates forms values for links when names change.
+            """
+            ctx = dash.callback_context
+            trigger_source = ctx.triggered[0]['prop_id'].split('.')[0]
+
+            if trigger_source == 'button_update':
+                # Update changed names on backend mapping dictionary
+                i = 0
+                for k, v in self.parent_app.data_to_field.items():
+                    if v['compound_id']['data_type'] == 'name':
+                        self.parent_app.data_to_field[k]['value'] = name_change[i]
+                        i += 1
+
+                # Get specific options for each link dropdown
+                list_options = []
+                for k, v in self.parent_app.data_to_field.items():
+                    if v['target'] is not None:
+                        target_class = v['target']
+                        options = [
+                            v['value'] for v in self.parent_app.data_to_field.values() if
+                            (v['owner_class'] == target_class and 'name' in v['compound_id']['index'])
+                        ]
+                        list_options.append(options)
+                return list_options
+
+            return [[] for v in self.parent_app.data_to_field.values() if v['compound_id']['data_type'] == 'link']
+
+
+
+
+
+
+
+
+
+
+
 
 
         # @self.parent_app.callback(
