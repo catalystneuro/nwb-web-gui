@@ -1,0 +1,48 @@
+NWBFile:
+  experimenter:
+    - Experimenter 1
+    - Experimenter 2
+  identifier: ID123
+  institution: My University
+  lab: My lab
+  session_description: ADDME
+  session_start_time: 1900-01-01T00:00:00
+Subject:
+  description: description of this subject
+  sex: M
+  subject_id: ID123
+  date_of_birth: 1900-01-01T00:00:00
+Ecephys:
+  Device1:
+    name: Ecephys device name
+    description: ecephys device description
+  Device2:
+    name: Ecephys device 2
+    description: ecephys device 2 description
+  ElectricalSeries1:
+    name: ElectricalSeries name
+    description: Electrical Series description
+    electrodes: Electrical Series electrodes
+Ophys:
+  Device1:
+    name: Ophys device1 name
+    description: Ophys device1 description
+  TwoPhotonSeries1:
+    name: Ophys two photon series 1 name
+  DFOverF1:
+    name: DFOverF1 name
+    roi_response_series:
+      0:
+        name: DFOverF1 roi name 0
+        description: DFOverF1 roi description
+  Fluorescence1:
+    name: Fluorescence1 name
+    roi_response_series:
+      0:
+        name: Fluorescence1 roi name
+  ImagingPlane:
+    name: Ophys ImagingPlane name
+    description: Ophys ImagingPlane description
+    optical_channels:
+      0:
+        name: ImagingPlane optical_channels 0 name

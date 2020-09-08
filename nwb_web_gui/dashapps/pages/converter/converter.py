@@ -4,6 +4,7 @@ import dash_core_components as dcc
 from dash.dependencies import Input, Output, State, ALL, MATCH
 import dash_bootstrap_components as dbc
 import json
+import yaml
 import base64
 from .converter_utils.utils import get_forms_from_schema
 from .converter_utils.forms import SourceForm, MetadataForm
@@ -137,10 +138,16 @@ class ConverterForms(html.Div):
 
             if trigger_source == 'button_load_metadata':
                 content_type, content_string = contents.split(',')
-                bs4decode = base64.b64decode(content_string)
-                json_string = bs4decode.decode('utf8').replace("'", '"')
-                self.metadata_json_data = json.loads(json_string)
-                self.metadata_forms.update_form_dict_values(data=self.metadata_json_data)
+                if 'json' in content_type:
+                    bs4decode = base64.b64decode(content_string)
+                    json_string = bs4decode.decode('utf8').replace("'", '"')
+                    self.metadata_json_data = json.loads(json_string)
+                    self.metadata_forms.update_form_dict_values(data=self.metadata_json_data)
+                elif 'yaml' in content_type:
+                    bs4decode = base64.b64decode(content_string)
+                    yaml_data = yaml.load(bs4decode, Loader=yaml.BaseLoader)
+                    self.metadata_json_data = yaml_data
+                    self.metadata_forms.update_form_dict_values(data=self.metadata_json_data)
                 return [v['value'] for v in self.parent_app.data_to_field.values() if v['compound_id']['data_type'] != 'link']
             else:
                 return [v['value'] for v in self.parent_app.data_to_field.values() if v['compound_id']['data_type'] != 'link']
@@ -194,7 +201,7 @@ class ConverterForms(html.Div):
                     if v['target'] is not None:
                         target_class = v['target']
                         options = [
-                            v['value']
+                            {'label': v['value'], 'value': v['value']}
                             for v in self.parent_app.data_to_field.values() if
                             (v['owner_class'] == target_class and 'name' in v['compound_id']['index'])
                         ]
