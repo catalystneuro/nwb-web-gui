@@ -66,7 +66,7 @@ class ConverterForms(html.Div):
                         style={'justify-content': 'left', 'text-align': 'left', 'margin-top': '1%'},
                     ),
                     dbc.Col(
-                        dbc.Button('Update', id='button_update'),
+                        dbc.Button('Refresh', id='button_refresh'),
                         width={'size': 2},
                         style={'justify-content': 'left', 'text-align': 'left', 'margin-top': '1%'},
                     )
@@ -147,7 +147,7 @@ class ConverterForms(html.Div):
 
         @self.parent_app.callback(
             [Output(v['compound_id'], 'options') for v in self.parent_app.data_to_field.values() if v['compound_id']['data_type'] == 'link'],
-            [Input('button_update', 'n_clicks')],
+            [Input('button_refresh', 'n_clicks')],
             [State(v['compound_id'], 'value') for v in self.parent_app.data_to_field.values() if v['compound_id']['data_type'] == 'name']
         )
         def update_forms_links(click_update, *name_change):
@@ -157,7 +157,7 @@ class ConverterForms(html.Div):
             ctx = dash.callback_context
             trigger_source = ctx.triggered[0]['prop_id'].split('.')[0]
 
-            if trigger_source == 'button_update':
+            if trigger_source == 'button_refresh':
                 # Update changed names on backend mapping dictionary
                 i = 0
                 for k, v in self.parent_app.data_to_field.items():
@@ -171,13 +171,13 @@ class ConverterForms(html.Div):
                     if v['target'] is not None:
                         target_class = v['target']
                         options = [
-                            {'label': v['value'], 'value': v['value']}
+                            v['value']
                             for v in self.parent_app.data_to_field.values() if
                             (v['owner_class'] == target_class and 'name' in v['compound_id']['index'])
                         ]
-                        list_options.append(options)
-
-                print(list_options)
+                        options_corrected = [{'label': v, 'value': v} if isinstance(v, str)
+                                             else {'label': '', 'value': ''} for v in options]
+                        list_options.append(options_corrected)
                 return list_options
 
             return [[] for v in self.parent_app.data_to_field.values() if v['compound_id']['data_type'] == 'link']

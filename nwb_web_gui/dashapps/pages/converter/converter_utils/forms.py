@@ -153,7 +153,9 @@ class MetadataFormItem(dbc.FormGroup):
                 id=compound_id,
                 options=[],
                 value='',
-                className='dropdown_input'
+                className='dropdown_input',
+                searchable=False,
+                clearable=False
             )
 
         elif 'type' in value and value['type'] == 'array':
