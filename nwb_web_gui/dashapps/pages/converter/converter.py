@@ -57,7 +57,12 @@ class ConverterForms(html.Div):
                 ),
                 dbc.Row([
                     dbc.Col(
-                        dbc.Button('Validate Metadata', id='validate_metadata_button'),
+                        dbc.Button('Save Metadata', id='save_metadata_button'),
+                        width={'size': 2},
+                        style={'justify-content': 'left', 'text-align': 'left', 'margin-top': '1%'},
+                    ),
+                    dbc.Col(
+                        dbc.Button('Save as JSON', id='save_as_json_button'),
                         width={'size': 2},
                         style={'justify-content': 'left', 'text-align': 'left', 'margin-top': '1%'},
                     ),
@@ -223,61 +228,49 @@ class ConverterForms(html.Div):
 
             return [[] for v in self.parent_app.data_to_field.values() if v['compound_id']['data_type'] == 'link']
 
+        @self.parent_app.callback(
+            Output('hidden', 'children'),
+            [
+                Input('save_metadata_button', 'n_clicks'),
+                Input('save_as_json_button', 'n_clicks')
+            ],
+            [State(v['compound_id'], 'value') for v in self.parent_app.data_to_field.values()]
+        )
+        def update_data_to_field(click, *values):
+            """
+            Updates data_to_field dictionary with input values from forms
+            This allows the user to save the fields already filled and even 
+            if he uploads a new metadata file, the fields not present in the file will be kept
+            """
+
+            ctx = dash.callback_context
+            trigger_source = ctx.triggered[0]['prop_id'].split('.')[0]
+
+            if trigger_source == 'save_metadata_button':
+                i = 0
+                for k, v in self.parent_app.data_to_field.items():
+                    field_value = values[i]
+                    v['value'] = field_value
+                    i += 1
+            elif trigger_source == 'save_as_json_button':
+                output_json = self.field_to_json(values)
+                # self.parent_app.data_to_field.key
 
 
+    def field_to_json(self, values):
+        output = {}
+        for k, v in self.parent_app.data_to_field.items():
+            splited_keys = k.split('-')
+            field_name = splited_keys[-1]
+            if len(splited_keys) > 2:
+                # here create compound nested dict
+                pass
+            else:
+                # create simple nested dict
+                if splited_keys[0] in output:
+                    output[splited_keys[0]][field_name] = v['value']
+                else:
+                    output[splited_keys[0]] = {field_name: v['value']}
+        
+        print(output)
 
-
-
-
-
-
-
-
-
-
-        # @self.parent_app.callback(
-        #     Output('hidden', 'children'),
-        #     [Input('validate_metadata_button', 'n_clicks')],
-        #     [
-        #         State({'name': 'metadata_string_input', 'index': ALL}, 'value'),
-        #         State({'name': 'metadata_string_input', 'index': ALL}, 'id')
-        #     ]
-        # )
-        # def get_values_from_metadata(click, values, ids):
-        #
-        #     ctx = dash.callback_context
-        #     source = ctx.triggered[0]['prop_id'].split('.')[0]
-        #
-        #     if source == 'validate_metadata_button':
-        #         ids_list = [id['index'] for id in ids]
-        #         names_list = [e.replace('input_Metadata_', '') for e in ids_list]
-        #
-        #         output = {}
-        #         for name, value in zip(names_list, values):
-        #             splited = name.split('_')
-        #             field = splited[-1]
-        #             keys = splited[:len(splited)-1]
-        #             if len(splited) > 2:
-        #                 pass
-        #             else:
-        #                 if keys[0] in output:
-        #                     output[keys[0]][field] = value
-        #                 else:
-        #                     output[keys[0]] = {field: value}
-
-    '''
-    def iter_output(self, keys, field, value, output=None):
-        if output is None:
-            output = {}
-        if len(keys) > 1:
-            for i, key in enumerate(keys):
-                if key not in output:
-                    output[key] = {}
-                    output = output[key]
-                if i < len(keys) -1:
-                    self.iter_output(keys[i+1:], field, value, output)
-        else:
-            output[keys[0]] = {field: value}
-
-        return output
-    '''
