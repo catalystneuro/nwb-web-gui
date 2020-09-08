@@ -198,9 +198,13 @@ class ConverterForms(html.Div):
                             for v in self.parent_app.data_to_field.values() if
                             (v['owner_class'] == target_class and 'name' in v['compound_id']['index'])
                         ]
-                        options_corrected = [{'label': v, 'value': v} if isinstance(v, str)
-                                             else {'label': '', 'value': ''} for v in options]
-                        list_options.append(options_corrected)
+                        list_options.append(options)
+
+                for sublist in list_options[:]:
+                    for e in sublist[:]:
+                        if e['value'] is None:
+                            sublist.remove(e)
+
                 return list_options
 
             return [[] for v in self.parent_app.data_to_field.values() if v['compound_id']['data_type'] == 'link']
