@@ -152,7 +152,30 @@ class ConverterForms(html.Div):
         )
         def update_forms_links(click_update, *name_change):
             """
-            Updates forms values for links when names change.
+            Updates forms values for links (dropdown options) when names change.
+
+            data_to_field = {
+                'Ecephys-ElectrodeGroup1-device': {
+                    'compound_id': {
+                        'type': 'metadata-input',
+                        'index': 'Ecephys-ElectrodeGroup1-device',
+                        'owner_class': 'pynwb.ecephys.ElectrodeGroup',
+                        'data_type': 'link'
+                    }
+                    'value': 'device 1',
+                    'target': 'pynwb.device.Device'
+                },
+                'Ecephys-Device-name': {
+                    'compound_id': {
+                        'type': 'metadata-input',
+                        'index': 'Ecephys-Device-name',
+                        'owner_class': 'pynwb.device.Device',
+                        'data_type': 'string'
+                    }
+                    'value': 'device 1',
+                    'target': None
+                }
+            }
             """
             ctx = dash.callback_context
             trigger_source = ctx.triggered[0]['prop_id'].split('.')[0]
