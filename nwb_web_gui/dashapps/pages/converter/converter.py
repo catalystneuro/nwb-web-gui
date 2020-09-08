@@ -85,6 +85,9 @@ class ConverterForms(html.Div):
             ], style={'min-height': '110vh'})
         ]
 
+        self.update_forms_callback_outputs = [Output(v['compound_id'], 'value') for v in self.parent_app.data_to_field.values() if v['compound_id']['data_type'] != 'link']
+        self.update_forms_callback_outputs.append(Output('button_refresh', 'n_clicks'))
+
         @self.parent_app.callback(
             Output('modal_explorer', 'is_open'),
             [Input({'name': 'source_explorer', 'index': ALL}, 'n_clicks'), Input('close_explorer_modal', 'n_clicks')],
@@ -124,7 +127,7 @@ class ConverterForms(html.Div):
                 return values
 
         @self.parent_app.callback(
-            [Output(v['compound_id'], 'value') for v in self.parent_app.data_to_field.values() if v['compound_id']['data_type'] != 'link'],
+            self.update_forms_callback_outputs,
             [Input('button_load_metadata', 'contents')]
         )
         def update_forms_values(contents):
@@ -148,9 +151,13 @@ class ConverterForms(html.Div):
                     yaml_data = yaml.load(bs4decode, Loader=yaml.BaseLoader)
                     self.metadata_json_data = yaml_data
                     self.metadata_forms.update_form_dict_values(data=self.metadata_json_data)
-                return [v['value'] for v in self.parent_app.data_to_field.values() if v['compound_id']['data_type'] != 'link']
+                output = [v['value'] for v in self.parent_app.data_to_field.values() if v['compound_id']['data_type'] != 'link']
+                output.append(1)
+                return output
             else:
-                return [v['value'] for v in self.parent_app.data_to_field.values() if v['compound_id']['data_type'] != 'link']
+                output = [v['value'] for v in self.parent_app.data_to_field.values() if v['compound_id']['data_type'] != 'link']
+                output.append(1)
+                return output
 
         @self.parent_app.callback(
             [Output(v['compound_id'], 'options') for v in self.parent_app.data_to_field.values() if v['compound_id']['data_type'] == 'link'],
