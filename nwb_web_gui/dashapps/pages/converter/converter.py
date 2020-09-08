@@ -177,7 +177,11 @@ class ConverterForms(html.Div):
                         ]
                         list_options.append(options)
 
-                print(list_options)
+                for sublist in list_options[:]:
+                    for e in sublist[:]:
+                        if e['value'] is None:
+                            sublist.remove(e)
+
                 return list_options
 
             return [[] for v in self.parent_app.data_to_field.values() if v['compound_id']['data_type'] == 'link']
