@@ -111,6 +111,12 @@ class ConverterForms(html.Div):
         self.update_forms_callback_outputs = [Output(v['compound_id'], 'value') for v in self.parent_app.data_to_field.values() if v['compound_id']['data_type'] != 'link']
         self.update_forms_callback_outputs.append(Output('button_refresh', 'n_clicks'))
 
+        link_output_options = [Output(v['compound_id'], 'options') for v in self.parent_app.data_to_field.values() if v['compound_id']['data_type'] == 'link']
+        link_output_values = [Output(v['compound_id'], 'value') for v in self.parent_app.data_to_field.values() if v['compound_id']['data_type'] == 'link']
+        self.update_forms_links_outputs = link_output_options + link_output_values
+
+        
+
         @self.parent_app.callback(
             Output('modal_explorer', 'is_open'),
             [Input({'name': 'source_explorer', 'index': ALL}, 'n_clicks'), Input('close_explorer_modal', 'n_clicks')],
@@ -186,7 +192,7 @@ class ConverterForms(html.Div):
                 return output
 
         @self.parent_app.callback(
-            [Output(v['compound_id'], 'options') for v in self.parent_app.data_to_field.values() if v['compound_id']['data_type'] == 'link'],
+            self.update_forms_links_outputs,
             [Input('button_refresh', 'n_clicks')],
             [State(v['compound_id'], 'value') for v in self.parent_app.data_to_field.values() if v['compound_id']['data_type'] == 'name']
         )
@@ -235,6 +241,7 @@ class ConverterForms(html.Div):
 
                 # Get specific options for each link dropdown
                 list_options = []
+                list_values = []
                 for k, v in self.parent_app.data_to_field.items():
                     if v['target'] is not None:
                         target_class = v['target']
@@ -243,6 +250,7 @@ class ConverterForms(html.Div):
                             for v in self.parent_app.data_to_field.values() if
                             (v['owner_class'] == target_class and 'name' in v['compound_id']['index'])
                         ]
+                        list_values.append(options[0]['value'])
                         list_options.append(options)
 
                 for sublist in list_options[:]:
@@ -250,9 +258,9 @@ class ConverterForms(html.Div):
                         if e['value'] is None:
                             sublist.remove(e)
 
-                return list_options
+                return list_options + list_values
 
-            return [[] for v in self.parent_app.data_to_field.values() if v['compound_id']['data_type'] == 'link']
+            #return [[] for v in self.parent_app.data_to_field.values() if v['compound_id']['data_type'] == 'link']
 
         @self.parent_app.callback(
             Output("popover_export_metadata", "is_open"),

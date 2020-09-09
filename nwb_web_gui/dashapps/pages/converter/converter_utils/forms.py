@@ -233,7 +233,7 @@ class MetadataForm(dbc.Card):
         super().__init__([])
 
         self.schema = schema
-        self.pynwb_class = schema.get('title', '')
+        self.pynwb_class = schema.get('tag', '')
         self.parent = parent
 
         if parent_app is None:

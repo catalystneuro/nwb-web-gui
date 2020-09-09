@@ -12,7 +12,7 @@
     "NWBFile": {
       "type": "object",
       "additionalProperties": false,
-      "title": "pynwb.file.NWBFile",
+      "tag": "pynwb.file.NWBFile",
       "required": ["session_description", "identifier", "session_start_time"],
       "properties": {
         "session_description": {
@@ -99,7 +99,7 @@
 
     "Subject": {
       "type": "object",
-      "title": "pynwb.file.Subject",
+      "tag": "pynwb.file.Subject",
       "required": ["subjectd_id"],
       "properties": {
         "subject_id": {
@@ -144,7 +144,7 @@
         "Device2": {"$ref": "#/definitions/Device"},
         "ElectricalSeries1": {"$ref": "#/definitions/ElectricalSeries"},
         "ElectrodeGroup1": {
-          "title": "pynwb.ecephys.ElectrodeGroup",
+          "tag": "pynwb.ecephys.ElectrodeGroup",
           "type": "object",
           "required": ["name", "description", "location", "device"],
           "properties": {
@@ -179,7 +179,7 @@
         "TwoPhotonSeries1": {"$ref": "#/definitions/TwoPhotonSeries"},
         "DFOverF1": {
           "type": "object",
-          "title": "pynwb.ophys.DFOverF",
+          "tag": "pynwb.ophys.DFOverF",
           "required": ["name"],
           "properties": {
             "name": {"type": "string"},
@@ -194,7 +194,7 @@
         },
         "Fluorescence1": {
           "type": "object",
-          "title": "pynwb.ophys.Fluorescence",
+          "tag": "pynwb.ophys.Fluorescence",
           "required": ["name"],
           "properties": {
             "name": {"type": "string"},
@@ -208,7 +208,7 @@
           }
         },
         "ImagingPlane": {
-          "title": "pynwb.ophys.ImagingPlane",
+          "tag": "pynwb.ophys.ImagingPlane",
           "type": "object",
           "required": ["name", "optical_channel", "description", "device", "excitation_lambda", "indicator", "location"],
           "properties": {
@@ -258,7 +258,7 @@
   "definitions": {
     "Device": {
       "type": "object",
-      "title": "pynwb.device.Device",
+      "tag": "pynwb.device.Device",
       "required": ["name"],
       "properties": {
         "name": {
@@ -277,7 +277,7 @@
     },
 
     "TimeSeries": {
-      "title": "pynwb.base.TimeSeries",
+      "tag": "pynwb.base.TimeSeries",
       "type": "object",
       "required": ["name", "description"],
       "properties": {
@@ -306,7 +306,7 @@
     },
 
     "ElectricalSeries": {
-      "title": "pynwb.ecephys.ElectricalSeries",
+      "tag": "pynwb.ecephys.ElectricalSeries",
       "type": "object",
       "required": ["name", "description"],
       "properties": {
@@ -339,7 +339,7 @@
     },
 
     "OpticalChannel": {
-      "title": "pynwb.ophys.OpticalChannel",
+      "tag": "pynwb.ophys.OpticalChannel",
       "type": "object",
       "required": ["name", "description", "emission_lambda"],
       "properties": {
@@ -359,7 +359,7 @@
     },
 
     "RoiResponseSeries": {
-      "title": "pynwb.ophys.RoiResponseSeries",
+      "tag": "pynwb.ophys.RoiResponseSeries",
       "type": "object",
       "required": ["name"],
       "properties": {
@@ -392,7 +392,7 @@
     },
 
     "TwoPhotonSeries": {
-      "title": "pynwb.ophys.TwoPhotonSeries",
+      "tag": "pynwb.ophys.TwoPhotonSeries",
       "type": "object",
       "required": ["name", "description"],
       "properties": {
