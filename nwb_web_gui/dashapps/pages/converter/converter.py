@@ -20,6 +20,7 @@ class ConverterForms(html.Div):
         modal = make_modal(parent_app)
 
         examples_path = Path(__file__).parent.absolute() / 'example_schemas'
+        self.examples_path = examples_path
 
         source_schema_path = examples_path / 'source_schema.json'
         with open(source_schema_path, 'r') as inp:
@@ -57,17 +58,28 @@ class ConverterForms(html.Div):
                 ),
                 dbc.Row([
                     dbc.Col(
-                        dbc.Button('Save Metadata', id='save_metadata_button'),
+                        dcc.Upload(dbc.Button('Load Metadata'), id='button_load_metadata'),
                         width={'size': 2},
                         style={'justify-content': 'left', 'text-align': 'left', 'margin-top': '1%'},
                     ),
                     dbc.Col(
-                        dbc.Button('Save as JSON', id='save_as_json_button'),
-                        width={'size': 2},
-                        style={'justify-content': 'left', 'text-align': 'left', 'margin-top': '1%'},
-                    ),
-                    dbc.Col(
-                        dcc.Upload(dbc.Button('Load data'), id='button_load_metadata'),
+                        html.Div([
+                            dbc.Button('Export Metadata', id='button_export_metadata'),
+                            dbc.Popover(
+                                [
+                                    dbc.PopoverBody([
+                                        html.Div([
+                                            dbc.Button("Export as JSON", id='button_export_json', color="link"),
+                                            dbc.Button("Export as YAML", id='button_export_yaml', color="link")
+                                        ])
+                                    ])
+                                ],
+                                id="popover_export_metadata",
+                                target='button_export_metadata',
+                                is_open=False,
+                                placement='top',
+                            )
+                        ]),
                         width={'size': 2},
                         style={'justify-content': 'left', 'text-align': 'left', 'margin-top': '1%'},
                     ),
@@ -93,6 +105,16 @@ class ConverterForms(html.Div):
         # Create Outputs for the callback that updates Forms values
         self.update_forms_callback_outputs = [Output(v['compound_id'], 'value') for v in self.parent_app.data_to_field.values() if v['compound_id']['data_type'] != 'link']
         self.update_forms_callback_outputs.append(Output('button_refresh', 'n_clicks'))
+
+        @self.parent_app.callback(
+            Output("popover_export_metadata", "is_open"),
+            [Input("button_export_metadata", "n_clicks")],
+            [State("popover_export_metadata", "is_open")],
+        )
+        def toggle_export_popover(n, is_open):
+            if n:
+                return not is_open
+            return is_open
 
         @self.parent_app.callback(
             Output('modal_explorer', 'is_open'),
@@ -240,12 +262,12 @@ class ConverterForms(html.Div):
         @self.parent_app.callback(
             Output('hidden', 'children'),
             [
-                Input('save_metadata_button', 'n_clicks'),
-                Input('save_as_json_button', 'n_clicks')
+                Input('button_export_json', 'n_clicks'),
+                Input('button_export_yaml', 'n_clicks')
             ],
             [State(v['compound_id'], 'value') for v in self.parent_app.data_to_field.values()]
         )
-        def update_data_to_field(click, *values):
+        def export_metadata(click_json, click_yaml, *form_values):
             """
             Updates data_to_field internal dictionary with input values from forms.
             This allows the user to save the fields already filled and even if he
@@ -255,29 +277,34 @@ class ConverterForms(html.Div):
             ctx = dash.callback_context
             trigger_source = ctx.triggered[0]['prop_id'].split('.')[0]
 
-            if trigger_source == 'save_metadata_button':
-                i = 0
-                for k, v in self.parent_app.data_to_field.items():
-                    field_value = values[i]
+            output = dict()
+            if trigger_source in ['button_export_json', 'button_export_yaml'] and (click_json or click_yaml):
+                for i, (k, v) in enumerate(self.parent_app.data_to_field.items()):
+                    field_value = form_values[i]
                     v['value'] = field_value
-                    i += 1
-            elif trigger_source == 'save_as_json_button':
-                output_json = self.field_to_json(values)
-                # self.parent_app.data_to_field.key
 
-    def field_to_json(self, values):
-        output = {}
-        for k, v in self.parent_app.data_to_field.items():
-            splited_keys = k.split('-')
-            field_name = splited_keys[-1]
-            if len(splited_keys) > 2:
-                # here create compound nested dict
-                pass
-            else:
-                # create simple nested dict
-                if splited_keys[0] in output:
-                    output[splited_keys[0]][field_name] = v['value']
-                else:
-                    output[splited_keys[0]] = {field_name: v['value']}
+                    # Organize item inside the output dictionary
+                    splited_keys = k.split('-')
+                    field_name = splited_keys[-1]
+                    if len(splited_keys) > 2:
+                        # here create compound nested dict
+                        pass
+                    else:
+                        # create simple nested dict
+                        if splited_keys[0] in output:
+                            output[splited_keys[0]][field_name] = v['value']
+                        else:
+                            output[splited_keys[0]] = {field_name: v['value']}
 
-        print(output)
+                # Make temporary file on server side
+                print(output)
+                # JSON
+                if trigger_source == 'button_export_json':
+                    exported_file_path = self.examples_path / 'exported_metadata.json'
+                    with open(exported_file_path, 'w') as outfile:
+                        json.dump(output, outfile, indent=4)
+                # YAML
+                elif trigger_source == 'button_export_yaml':
+                    exported_file_path = self.examples_path / 'exported_metadata.yaml'
+                    with open(exported_file_path, 'w') as outfile:
+                        yaml.dump(output, outfile, default_flow_style=False)
