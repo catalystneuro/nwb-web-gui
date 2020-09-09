@@ -31,12 +31,12 @@ Labels are strings with values corresponding to the properties names of pynwb cl
 <td>
 <pre lang="json">
 "NWBFile": {
-	"identifier": ID123
+	"identifier": "ID123"
 }
 </pre>
 </td>
 <td>
-<pre lang="json">
+<pre lang="yaml">
 NWBFile:
   identifier: ID123
 </pre>
@@ -109,14 +109,14 @@ ImagingPlane:
 <td>
 <pre lang="json">
 "NWBFile": {
-	"session_start_time": "2020-09-02T16:24:00"
+   "session_start_time": "2020-09-02T16:24:00"
 }
 </pre>
 </td>
 <td>
 <pre lang="yaml">
 NWBFile:
-	session_start_time: 2020-09-02T16:24:00
+  session_start_time: 2020-09-02T16:24:00
 </pre>
 </td>
 </tr>
@@ -296,10 +296,10 @@ ImagingPlane:
   optical_channel:
     - description: R Optical Channel
       emission_lambda: 633.0
-	  name: OpticalChannel_R
+      name: OpticalChannel_R
     - description: G Optical Channel
       emission_lambda: 510.0
-	  name: OpticalChannel_G
+      name: OpticalChannel_G
 </pre>
 </td>
 </tr>
