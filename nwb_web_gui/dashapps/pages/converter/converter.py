@@ -294,20 +294,14 @@ class ConverterForms(html.Div):
                             splited_keys = k.split('-')
                             master_key_name = splited_keys[0]
                             field_name = splited_keys[-1]
-                            if len(splited_keys) > 2:
-                                for e in reversed(splited_keys):
-                                    if e == field_name:
-                                        curr_dict = {field_name: v['value']}
-                                    else:
-                                        curr_dict = {e: curr_dict}
-                                    if e == master_key_name:
-                                        dicts_list.append(curr_dict)
-                            else:
-                                # create simple nested dict
-                                if splited_keys[0] in output:
-                                    output[splited_keys[0]][field_name] = v['value']
+
+                            for e in reversed(splited_keys):
+                                if e == field_name:
+                                    curr_dict = {field_name: v['value']}
                                 else:
-                                    output[splited_keys[0]] = {field_name: v['value']}
+                                    curr_dict = {e: curr_dict}
+                                if e == master_key_name:
+                                    dicts_list.append(curr_dict)
 
                     for e in dicts_list:
                         master_key_name = list(e.keys())[0]
