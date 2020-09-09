@@ -314,7 +314,7 @@ class MetadataForm(dbc.Card):
             self.body.children.append(item)
 
     def update_form_dict_values(self, data, key=None):
-        """Update data on mapping dictionary"""
+        """Update data in the internal mapping dictionary"""
         if key is None:
             key = ''
 

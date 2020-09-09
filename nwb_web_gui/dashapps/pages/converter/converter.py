@@ -90,6 +90,7 @@ class ConverterForms(html.Div):
             ], style={'min-height': '110vh'})
         ]
 
+        # Create Outputs for the callback that updates Forms values
         self.update_forms_callback_outputs = [Output(v['compound_id'], 'value') for v in self.parent_app.data_to_field.values() if v['compound_id']['data_type'] != 'link']
         self.update_forms_callback_outputs.append(Output('button_refresh', 'n_clicks'))
 
@@ -133,9 +134,10 @@ class ConverterForms(html.Div):
 
         @self.parent_app.callback(
             self.update_forms_callback_outputs,
-            [Input('button_load_metadata', 'contents')]
+            [Input('button_load_metadata', 'contents')],
+            [State('button_load_metadata', 'filename')]
         )
-        def update_forms_values(contents):
+        def update_forms_values(contents, filename):
             """
             Updates forms values (except links) when:
             - Forms are created (receives metadata dict from Converter)
@@ -146,12 +148,14 @@ class ConverterForms(html.Div):
 
             if trigger_source == 'button_load_metadata':
                 content_type, content_string = contents.split(',')
-                if 'json' in content_type:
+                filename_extension = filename.split('.')[-1]
+
+                if filename_extension == 'json':
                     bs4decode = base64.b64decode(content_string)
                     json_string = bs4decode.decode('utf8').replace("'", '"')
                     self.metadata_json_data = json.loads(json_string)
                     self.metadata_forms.update_form_dict_values(data=self.metadata_json_data)
-                elif 'yaml' in content_type:
+                elif filename_extension in ['yaml', 'yml']:
                     bs4decode = base64.b64decode(content_string)
                     yaml_data = yaml.load(bs4decode, Loader=yaml.BaseLoader)
                     self.metadata_json_data = yaml_data
@@ -172,26 +176,31 @@ class ConverterForms(html.Div):
         def update_forms_links(click_update, *name_change):
             """
             Updates forms values for links (dropdown options) when names change.
+            If a field has a valid value for the 'target' property, this function
+            will sweep the data_to_field internal dictionary in search for field
+            ids ending with '-name' where the 'owner_class' value matches 'target'.
+            The resulting list will populate the dropdown menu of the field.
 
+            Example:
             data_to_field = {
                 'Ecephys-ElectrodeGroup1-device': {
                     'compound_id': {
                         'type': 'metadata-input',
                         'index': 'Ecephys-ElectrodeGroup1-device',
-                        'owner_class': 'pynwb.ecephys.ElectrodeGroup',
                         'data_type': 'link'
                     }
                     'value': 'device 1',
+                    'owner_class': 'pynwb.ecephys.ElectrodeGroup',
                     'target': 'pynwb.device.Device'
                 },
                 'Ecephys-Device-name': {
                     'compound_id': {
                         'type': 'metadata-input',
                         'index': 'Ecephys-Device-name',
-                        'owner_class': 'pynwb.device.Device',
                         'data_type': 'string'
                     }
                     'value': 'device 1',
+                    'owner_class': 'pynwb.device.Device',
                     'target': None
                 }
             }
@@ -238,9 +247,9 @@ class ConverterForms(html.Div):
         )
         def update_data_to_field(click, *values):
             """
-            Updates data_to_field dictionary with input values from forms
-            This allows the user to save the fields already filled and even 
-            if he uploads a new metadata file, the fields not present in the file will be kept
+            Updates data_to_field internal dictionary with input values from forms.
+            This allows the user to save the fields already filled and even if he
+            uploads a new metadata file, the fields not present in the file will be kept.
             """
 
             ctx = dash.callback_context
@@ -256,7 +265,6 @@ class ConverterForms(html.Div):
                 output_json = self.field_to_json(values)
                 # self.parent_app.data_to_field.key
 
-
     def field_to_json(self, values):
         output = {}
         for k, v in self.parent_app.data_to_field.items():
@@ -271,6 +279,5 @@ class ConverterForms(html.Div):
                     output[splited_keys[0]][field_name] = v['value']
                 else:
                     output[splited_keys[0]] = {field_name: v['value']}
-        
-        print(output)
 
+        print(output)
