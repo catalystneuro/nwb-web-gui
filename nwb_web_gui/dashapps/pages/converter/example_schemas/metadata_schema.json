@@ -31,15 +31,14 @@
         },
         "experimenter": {
           "type": "array",
-          "format": "keywords",
           "items": {"type": "string", "title": "experimenter"},
           "description": "name of person who performed experiment"
         },
-        "experiment_description": {
+        "experimentd_description": {
           "type": "string",
           "description": "general description of the experiment"
         },
-        "session_id": {
+        "sessiond_id": {
           "type": "string",
           "description": "lab-specific ID for the session"
         },
@@ -101,7 +100,7 @@
     "Subject": {
       "type": "object",
       "title": "pynwb.file.Subject",
-      "required": ["subject_id"],
+      "required": ["subjectd_id"],
       "properties": {
         "subject_id": {
           "type": "string",
@@ -164,7 +163,7 @@
             "device": {
               "type": "string",
               "description": "the device that was used to record from this electrode group",
-              "enum": []
+              "target": "pynwb.device.Device"
             }
           }
         }
@@ -223,7 +222,7 @@
             },
             "device": {
               "type": "string",
-              "enum": []
+              "target": "pynwb.device.Device"
             },
             "excitation_lambda": {
               "type": "number",
@@ -243,6 +242,7 @@
             },
             "optical_channels": {
               "type": "array",
+              "description": "One of possibly many groups storing channel-specific data.",
               "items": [
                 {"$ref":  "#/definitions/OpticalChannel"},
                 {"$ref":  "#/definitions/OpticalChannel"}
@@ -351,7 +351,7 @@
           "type": "string",
           "description": "Any notes or comments about the channel"
         },
-        "emission_lambda": {
+        "emissiond-lambda": {
           "type": "number",
           "description": "Emission wavelength for channel, in nm"
         }
@@ -407,7 +407,7 @@
         "imaging_plane": {
           "type": "string",
           "description": "Imaging plane class/pointer",
-          "enum": []
+          "target": "pynwb.ophys.ImagingPlane"
         },
         "unit":{
           "type": "string",

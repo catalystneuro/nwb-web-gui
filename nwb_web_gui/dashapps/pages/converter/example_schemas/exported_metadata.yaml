@@ -1,0 +1,13 @@
+NWBFile:
+  experimenter:
+  - Experimenter 1
+  - Experimenter 2
+  identifier: ID123
+  institution: My University
+  session_description: Description of my experiment
+  session_start_time: '1900-01-01T00:00:00'
+Subject:
+  date_of_birth: '1900-01-01T00:00:00'
+  description: description of this subject
+  sex: M
+  subject_id: ID123
