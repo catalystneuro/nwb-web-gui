@@ -7,29 +7,12 @@
             "Experimenter 1",
             "Experimenter 2"
         ],
-        "experimentd_description": null,
-        "sessiond_id": null,
-        "institution": "My University",
-        "notes": null,
-        "pharmacology": null,
-        "protocol": null,
-        "related_publications": null,
-        "slices": null,
-        "source_script": null,
-        "source_script_file_name": null,
-        "data_collection": null,
-        "surgery": null,
-        "virus": null,
-        "stimulus_notes": null,
-        "lab": null
+        "institution": "My University"
     },
     "Subject": {
         "subject_id": "ID123",
         "description": "description of this subject",
-        "genotype": "",
         "sex": "M",
-        "species": "",
-        "weight": "",
         "date_of_birth": "1900-01-01T00:00:00"
     }
 }

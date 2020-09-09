@@ -11,6 +11,9 @@ from .converter_utils.forms import SourceForm, MetadataForm
 from nwb_web_gui.dashapps.utils.make_components import make_modal
 from pathlib import Path
 
+import flask
+import time
+
 
 class ConverterForms(html.Div):
     def __init__(self, parent_app):
@@ -20,7 +23,7 @@ class ConverterForms(html.Div):
         modal = make_modal(parent_app)
 
         examples_path = Path(__file__).parent.absolute() / 'example_schemas'
-        self.examples_path = examples_path
+        self.downloads_path = Path(__file__).parent.parent.parent.parent.parent.absolute() / 'downloads'
 
         source_schema_path = examples_path / 'source_schema.json'
         with open(source_schema_path, 'r') as inp:
@@ -69,8 +72,10 @@ class ConverterForms(html.Div):
                                 [
                                     dbc.PopoverBody([
                                         html.Div([
-                                            dbc.Button("Export as JSON", id='button_export_json', color="link"),
-                                            dbc.Button("Export as YAML", id='button_export_yaml', color="link")
+                                            dbc.Button("Download as JSON", id='button_export_json', color="link",
+                                                       href='/../../downloads/exported_metadata.json'),
+                                            dbc.Button("Download as YAML", id='button_export_yaml', color="link",
+                                                       href='/../../../downloads/exported_metadata.yaml')
                                         ])
                                     ])
                                 ],
@@ -105,16 +110,6 @@ class ConverterForms(html.Div):
         # Create Outputs for the callback that updates Forms values
         self.update_forms_callback_outputs = [Output(v['compound_id'], 'value') for v in self.parent_app.data_to_field.values() if v['compound_id']['data_type'] != 'link']
         self.update_forms_callback_outputs.append(Output('button_refresh', 'n_clicks'))
-
-        @self.parent_app.callback(
-            Output("popover_export_metadata", "is_open"),
-            [Input("button_export_metadata", "n_clicks")],
-            [State("popover_export_metadata", "is_open")],
-        )
-        def toggle_export_popover(n, is_open):
-            if n:
-                return not is_open
-            return is_open
 
         @self.parent_app.callback(
             Output('modal_explorer', 'is_open'),
@@ -260,51 +255,65 @@ class ConverterForms(html.Div):
             return [[] for v in self.parent_app.data_to_field.values() if v['compound_id']['data_type'] == 'link']
 
         @self.parent_app.callback(
-            Output('hidden', 'children'),
-            [
-                Input('button_export_json', 'n_clicks'),
-                Input('button_export_yaml', 'n_clicks')
-            ],
+            Output("popover_export_metadata", "is_open"),
+            [Input('button_export_metadata', 'n_clicks')],
+            [State("popover_export_metadata", "is_open")] +
             [State(v['compound_id'], 'value') for v in self.parent_app.data_to_field.values()]
         )
-        def export_metadata(click_json, click_yaml, *form_values):
+        def export_metadata(click, is_open, *form_values):
             """
-            Updates data_to_field internal dictionary with input values from forms.
-            This allows the user to save the fields already filled and even if he
-            uploads a new metadata file, the fields not present in the file will be kept.
+            Exports data to JSON or YAML files.
             """
 
             ctx = dash.callback_context
             trigger_source = ctx.triggered[0]['prop_id'].split('.')[0]
 
             output = dict()
-            if trigger_source in ['button_export_json', 'button_export_yaml'] and (click_json or click_yaml):
-                for i, (k, v) in enumerate(self.parent_app.data_to_field.items()):
-                    field_value = form_values[i]
-                    v['value'] = field_value
+            if click:
+                # If popover was opened, just close it
+                if is_open:
+                    return not is_open
+                # If popover was closed, make files and open options
+                else:
+                    for i, (k, v) in enumerate(self.parent_app.data_to_field.items()):
+                        # Read data current from each field
+                        field_value = form_values[i]
 
-                    # Organize item inside the output dictionary
-                    splited_keys = k.split('-')
-                    field_name = splited_keys[-1]
-                    if len(splited_keys) > 2:
-                        # here create compound nested dict
-                        pass
-                    else:
-                        # create simple nested dict
-                        if splited_keys[0] in output:
-                            output[splited_keys[0]][field_name] = v['value']
-                        else:
-                            output[splited_keys[0]] = {field_name: v['value']}
+                        # Ignore empty fields
+                        if field_value not in ['', None]:
+                            v['value'] = field_value
 
-                # Make temporary file on server side
-                print(output)
-                # JSON
-                if trigger_source == 'button_export_json':
-                    exported_file_path = self.examples_path / 'exported_metadata.json'
+                            # Organize item inside the output dictionary
+                            splited_keys = k.split('-')
+                            field_name = splited_keys[-1]
+                            if len(splited_keys) > 2:
+                                # here create compound nested dict
+                                pass
+                            else:
+                                # create simple nested dict
+                                if splited_keys[0] in output:
+                                    output[splited_keys[0]][field_name] = v['value']
+                                else:
+                                    output[splited_keys[0]] = {field_name: v['value']}
+
+                    # Make temporary files on server side
+                    # JSON
+                    exported_file_path = self.downloads_path / 'exported_metadata.json'
                     with open(exported_file_path, 'w') as outfile:
                         json.dump(output, outfile, indent=4)
-                # YAML
-                elif trigger_source == 'button_export_yaml':
-                    exported_file_path = self.examples_path / 'exported_metadata.yaml'
+
+                    # YAML
+                    exported_file_path = self.downloads_path / 'exported_metadata.yaml'
                     with open(exported_file_path, 'w') as outfile:
                         yaml.dump(output, outfile, default_flow_style=False)
+
+                    return not is_open
+            return is_open
+
+        @self.parent_app.server.route('/../downloads/<path:filename>')
+        def download_file(filename):
+            return flask.send_from_directory(
+                self.parent_app.files_path,
+                filename,
+                as_attachment=True
+            )
