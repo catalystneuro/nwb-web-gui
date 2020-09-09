@@ -3,16 +3,16 @@
         "session_description": "Description of my experiment",
         "identifier": "ID123",
         "session_start_time": "1900-01-01T00:00:00",
-        "experimenter": ["Experimenter 1", "Experimenter 2"],
+        "experimenter": [
+            "Experimenter 1",
+            "Experimenter 2"
+        ],
         "institution": "My University"
     },
     "Subject": {
-        "description": "description of this subject",
-        "genotype": "",
-        "sex": "M",
-        "species": "",
         "subject_id": "ID123",
-        "weight": "",
+        "description": "description of this subject",
+        "sex": "M",
         "date_of_birth": "1900-01-01T00:00:00"
     }
 }

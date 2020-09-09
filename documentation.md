@@ -13,7 +13,8 @@ Labels are strings with values corresponding to the properties names of pynwb cl
 <table>
 <tr>
 <td>Schema</td>
-<td>Data</td>
+<td>Data JSON</td>
+<td>Data YAML</td>
 </tr>
 <tr>
 <td>
@@ -30,8 +31,14 @@ Labels are strings with values corresponding to the properties names of pynwb cl
 <td>
 <pre lang="json">
 "NWBFile": {
-	"identifier": "ADDME"
+	"identifier": ID123
 }
+</pre>
+</td>
+<td>
+<pre lang="json">
+NWBFile:
+  identifier: ID123
 </pre>
 </td>
 </tr>
@@ -45,7 +52,8 @@ Labels are strings with values corresponding to the properties names of pynwb cl
 <table>
 <tr>
 <td>Schema</td>
-<td>Data</td>
+<td>Data JSON</td>
+<td>Data YAML</td>
 </tr>
 <tr>
 <td>
@@ -65,6 +73,12 @@ Labels are strings with values corresponding to the properties names of pynwb cl
 }
 </pre>
 </td>
+<td>
+<pre lang="yaml">
+ImagingPlane:
+  excitation_lambda: 588
+</pre>
+</td>
 </tr>
 </table>
 
@@ -76,7 +90,8 @@ Labels are strings with values corresponding to the properties names of pynwb cl
 <table>
 <tr>
 <td>Schema</td>
-<td>Data</td>
+<td>Data JSON</td>
+<td>Data YAML</td>
 </tr>
 <tr>
 <td>
@@ -94,8 +109,14 @@ Labels are strings with values corresponding to the properties names of pynwb cl
 <td>
 <pre lang="json">
 "NWBFile": {
-	"session_start_time": "1900-01-01T00:00:00"
+	"session_start_time": "2020-09-02T16:24:00"
 }
+</pre>
+</td>
+<td>
+<pre lang="yaml">
+NWBFile:
+	session_start_time: 2020-09-02T16:24:00
 </pre>
 </td>
 </tr>
@@ -109,7 +130,8 @@ Labels are strings with values corresponding to the properties names of pynwb cl
 <table>
 <tr>
 <td>Schema</td>
-<td>Data</td>
+<td>Data JSON</td>
+<td>Data YAML</td>
 </tr>
 <tr>
 <td>
@@ -131,6 +153,14 @@ Labels are strings with values corresponding to the properties names of pynwb cl
 }
 </pre>
 </td>
+<td>
+<pre lang="yaml">
+NWBFile:
+  experimenter:
+    - Name 1
+    - Name 2
+</pre>
+</td>
 </tr>
 </table>
 
@@ -142,7 +172,8 @@ Labels are strings with values corresponding to the properties names of pynwb cl
 <table>
 <tr>
 <td>Schema</td>
-<td>Data</td>
+<td>Data JSON</td>
+<td>Data YAML</td>
 </tr>
 <tr>
 <td>
@@ -165,6 +196,12 @@ Labels are strings with values corresponding to the properties names of pynwb cl
 }
 </pre>
 </td>
+<td>
+<pre lang="yaml">
+Subject:
+  sex: M
+</pre>
+</td>
 </tr>
 </table>
 
@@ -176,7 +213,8 @@ Labels are strings with values corresponding to the properties names of pynwb cl
 <table>
 <tr>
 <td>Schema</td>
-<td>Data</td>
+<td>Data JSON</td>
+<td>Data YAML</td>
 </tr>
 <tr>
 <td>
@@ -185,7 +223,7 @@ Labels are strings with values corresponding to the properties names of pynwb cl
   "properties": {
     "device": {
       "type": "string",
-      "enum": []
+      "target": "pynwb.device.Device"
     }
   }
 }
@@ -196,6 +234,12 @@ Labels are strings with values corresponding to the properties names of pynwb cl
 "ImagingPlane": {
   "device": "device_name"
 }
+</pre>
+</td>
+<td>
+<pre lang="yaml">
+ImagingPlane:
+  device: device_name
 </pre>
 </td>
 </tr>
@@ -209,7 +253,8 @@ Labels are strings with values corresponding to the properties names of pynwb cl
 <table>
 <tr>
 <td>Schema</td>
-<td>Data</td>
+<td>Data JSON</td>
+<td>Data YAML</td>
 </tr>
 <tr>
 <td>
@@ -243,6 +288,18 @@ Labels are strings with values corresponding to the properties names of pynwb cl
     }
   ]
 }
+</pre>
+</td>
+<td>
+<pre lang="yaml">
+ImagingPlane:
+  optical_channel:
+    - description: R Optical Channel
+      emission_lambda: 633.0
+	  name: OpticalChannel_R
+    - description: G Optical Channel
+      emission_lambda: 510.0
+	  name: OpticalChannel_G
 </pre>
 </td>
 </tr>

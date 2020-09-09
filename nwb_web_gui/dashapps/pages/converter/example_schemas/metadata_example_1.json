@@ -1,0 +1,76 @@
+{
+    "NWBFile": {
+        "session_description": "Test of metatada example",
+        "identifier": "ID123",
+        "session_start_time": "1900-01-01T00:00:00",
+        "experimenter": ["Experimenter 1", "Experimenter 2"],
+        "institution": "My University",
+        "notes": "some notes",
+        "virus": "virus"
+    },
+    "Subject": {
+        "description": "description of this subject",
+        "genotype": "",
+        "sex": "M",
+        "species": "",
+        "subject_id": "ID123",
+        "weight": "",
+        "date_of_birth": "1900-01-01T00:00:00"
+    },
+    "Ecephys": {
+        "Device1": {
+            "name": "Ecephys Device1 name",
+            "description": "Device1 description"
+        },
+        "Device2": {
+            "name": "Ecephys Device2 name",
+            "description": "Device2 description"
+        },
+        "ElectricalSeries1": {
+            "name": "ElectricalSeries1 name",
+            "description": "ElectricalSeries1 description",
+            "electrodes": "ElectricalSeries1 electrodes"
+        },
+        "ElectrodeGroup1": {
+            "name": "ElectrodeGroup1 name",
+            "description": "ElectrodeGroup1 description",
+            "location": "ElectrodeGroup1 location"
+        }
+    },
+    "Ophys": {
+        "Device1": {
+            "name": "Ophys Device1 name",
+            "description": "Ophys device1 description"
+        },
+        "TwoPhotonSeries1": {
+            "name": "Ophys two photon series 1 name",
+            "description": "Ophys two photon series 1 description"
+        },
+        "DFOverF1": {
+            "name": "DFOverF1 name",
+            "roi_response_series": {
+                "0": {
+                    "name": "DFOverF1 roi name 0",
+                    "description": "dfoverf1 roi description"
+                }
+            }
+        },
+        "Fluorescence1": {
+            "name": "Fluorescence1 name",
+            "roi_response_series": {
+                "0": {
+                    "name": "Fluorescence1 roi name"
+                }
+            }
+        },
+        "ImagingPlane": {
+            "name": "Ophys ImagingPlane name",
+            "description": "Ophys ImagingPlane description",
+            "optical_channels": {
+                "0": {
+                    "name": "ImagingPlane optical_channels 0 name"
+                }
+            }
+        }
+    }
+}

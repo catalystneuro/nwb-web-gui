@@ -11,7 +11,7 @@ class SourceFormItem(dbc.FormGroup):
         super().__init__([])
 
         if add_explorer:
-            explorer_btn = dbc.Button(id={'name': 'source_explorer', 'index': explorer_id}, children=[html.I(className="far fa-folder")], style={'background-color': 'transparent', 'color': 'black', 'border': 'none'})
+            explorer_btn = dbc.Button(id={'type': 'source_explorer', 'index': explorer_id}, children=[html.I(className="far fa-folder")], style={'background-color': 'transparent', 'color': 'black', 'border': 'none'})
             if add_required:
                 self.children = dbc.Row([
                     dbc.Col([label, html.Span('*', style={'color': 'red'})], width={'size': 2}),
@@ -55,13 +55,13 @@ class SourceForm(dbc.Card):
 
             if v['type'] == 'string':
                 form_input = dbc.Input(
-                    id={'name': 'source_string_input', 'index': input_id},
+                    id={'type': 'source_string_input', 'index': input_id},
                     className='string_input',
                     type='input'
                 )
             elif v['type'] == 'boolean':
                 form_input = dbc.Checkbox(
-                    id={'name': 'source_boolean_input', 'index': input_id}
+                    id={'type': 'source_boolean_input', 'index': input_id}
                 )
             if 'format' in v.keys():
                 if v['format'] == 'file' or v['format'] == 'directory':
@@ -121,44 +121,62 @@ class MetadataFormItem(dbc.FormGroup):
         - list
         """
 
+        owner_class = self.parent.pynwb_class
+        compound_id = {
+            'type': 'metadata-input',
+            'index': input_id,
+            'data_type': ''
+        }
+
         if isinstance(value, list):
-            field_input_id = {'name': 'metadata-list-input', 'index': input_id}
-            field_input = html.Div(value, id=field_input_id)
+            compound_id['data_type'] = 'list'
+            field_input = html.Div(value)  # id=compound_id)
             description = ''
 
         elif 'enum' in value:
             input_values = [{'label': e, 'value': e} for e in value['enum']]
-            if 'default' in value:
-                default = value['default']
-            else:
-                default = ''
-            field_input_id = {'name': 'metadata-string-input', 'index': input_id}
+            # if 'default' in value:
+            default = value['default']
+            # else:
+            #     default = ''
+            compound_id['data_type'] = 'choicestring'
             field_input = dcc.Dropdown(
-                id=field_input_id,
+                id=compound_id,
                 options=input_values,
                 value=default,
                 className='dropdown_input'
             )
 
+        elif 'target' in value:
+            compound_id['data_type'] = 'link'
+            field_input = dcc.Dropdown(
+                id=compound_id,
+                options=[],
+                value='',
+                className='dropdown_input',
+                searchable=False,
+                clearable=False
+            )
+
         elif 'type' in value and value['type'] == 'array':
-            field_input_id = {'name': 'metadata-tags-input', 'index': input_id}
+            compound_id['data_type'] = 'tags'
             field_input = TagInput(
-                id=field_input_id,
+                id=compound_id,
                 wrapperStyle={'box-shadow': 'none', 'border-radius': '2px', 'line-height': '5px'},
                 inputStyle={'line-height': '15px', 'height': '15px'}
             )
 
         elif 'format' in value and value['format'] == 'date-time':
-            field_input_id = {'name': 'metadata-date-input', 'index': input_id}
+            compound_id['data_type'] = 'datetime'
             field_input = DateTimePicker(
-                id=field_input_id,
+                id=compound_id,
                 style={"border": "solid 1px", "border-color": "#ced4da", "border-radius": "5px", "color": '#545057'}
             )
 
         elif 'format' in value and value['format'] == 'long':
-            field_input_id = {'name': 'metadata-string-input', 'index': input_id}
+            compound_id['data_type'] = 'string'
             field_input = dbc.Textarea(
-                id=field_input_id,
+                id=compound_id,
                 className='string_input',
                 bs_size="lg",
                 style={'font-size': '16px'}
@@ -167,18 +185,30 @@ class MetadataFormItem(dbc.FormGroup):
             input_type = value['type']
             if input_type == 'number':
                 step = 1
+                compound_id['data_type'] = 'number'
+            elif 'name' in input_id:
+                step = ''
+                compound_id['data_type'] = 'name'
             else:
                 step = ''
-            field_input_id = {'name': 'metadata-string-input', 'index': input_id}
+                compound_id['data_type'] = 'string'
             field_input = dbc.Input(
-                id=field_input_id,
+                id=compound_id,
                 className='string_input',
                 type=input_type,
                 step=step
             )
 
         # Add field to data_to_field mapping
-        self.parent.parent_app.data_to_field.update({input_id: None})
+        if not isinstance(value, list):
+            self.parent.parent_app.data_to_field.update({
+                input_id: {
+                    'compound_id': compound_id,
+                    'owner_class': str(owner_class),
+                    'target': value.get('target', None),
+                    'value': None
+                }
+            })
 
         # Add tooltip to input field
         if description is None:
@@ -187,11 +217,11 @@ class MetadataFormItem(dbc.FormGroup):
         input_and_tooltip = html.Div([
             html.Div(
                 field_input,
-                id='wrapper-' + field_input_id['index'] + '-' + field_input_id['name']
+                id='wrapper-' + compound_id['index'] + '-' + compound_id['type']
             ),
             dbc.Tooltip(
                 description,
-                target='wrapper-' + field_input_id['index'] + '-' + field_input_id['name']
+                target='wrapper-' + compound_id['index'] + '-' + compound_id['type']
             ),
         ])
 
@@ -203,6 +233,7 @@ class MetadataForm(dbc.Card):
         super().__init__([])
 
         self.schema = schema
+        self.pynwb_class = schema.get('title', '')
         self.parent = parent
 
         if parent_app is None:
@@ -282,20 +313,21 @@ class MetadataForm(dbc.Card):
             )
             self.body.children.append(item)
 
-    def write_to_form(self, data, key=None):
-        """Write data to form items"""
+    def update_form_dict_values(self, data, key=None):
+        """Update data in the internal mapping dictionary"""
         if key is None:
             key = ''
 
+        # Update dict with incoming data
         for k, v in data.items():
             # If value is a dictionary
             if isinstance(v, dict):
-                self.write_to_form(data=v, key=k)
+                if key != '':
+                    inner_key = f'{key}-{k}'
+                else:
+                    inner_key = k
+                self.update_form_dict_values(data=v, key=inner_key)
             # If value is a string, number or list
             else:
                 component_id = key + '-' + k   # e.g. NWBFile-session_description
-                self.parent_app.data_to_field[component_id] = v
-
-        # Up to this point, we are filling the data_to_field dictionary with values
-        # from data file. Each key corresponds to an unique id index for the existing
-        # field components. Now we need to update these components values
+                self.parent_app.data_to_field[component_id]['value'] = v
