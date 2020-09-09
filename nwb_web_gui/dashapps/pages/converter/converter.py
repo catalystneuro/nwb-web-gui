@@ -311,7 +311,7 @@ class ConverterForms(html.Div):
 
                     for e in dicts_list:
                         master_key_name = list(e.keys())[0]
-                        output = self.create_nested_dict(data=e, output=output, master_key_name=master_key_name)
+                        output = ConverterForms._create_nested_dict(data=e, output=output, master_key_name=master_key_name)
 
                     # Make temporary files on server side
                     # JSON
@@ -335,17 +335,18 @@ class ConverterForms(html.Div):
                 as_attachment=True
             )
 
-    def create_nested_dict(self, data, output, master_key_name):
+    @staticmethod
+    def _create_nested_dict(data, output, master_key_name):
         for k, v in data.items():
             if isinstance(v, dict):
                 if k == master_key_name and k not in output:
                     output[k] = {}
-                    self.create_nested_dict(v, output[k], master_key_name)
+                    ConverterForms._create_nested_dict(v, output[k], master_key_name)
                 elif k != master_key_name and k not in output:
                     output[k] = {}
-                    self.create_nested_dict(v, output[k], master_key_name)
+                    ConverterForms._create_nested_dict(v, output[k], master_key_name)
                 else:
-                    self.create_nested_dict(v, output[k], master_key_name)
+                    ConverterForms._create_nested_dict(v, output[k], master_key_name)
             else:
                 output[k] = v
 
