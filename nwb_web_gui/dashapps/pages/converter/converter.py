@@ -45,7 +45,7 @@ class ConverterForms(html.Div):
         )
 
         # Fill form
-        metadata_data_path = examples_path / 'metadata_example_0.json'
+        metadata_data_path = examples_path / 'metadata_example_1.json'
         with open(metadata_data_path, 'r') as inp:
             self.metadata_json_data = json.load(inp)
         self.metadata_forms.update_form_dict_values(data=self.metadata_json_data)
@@ -277,6 +277,7 @@ class ConverterForms(html.Div):
             trigger_source = ctx.triggered[0]['prop_id'].split('.')[0]
 
             output = dict()
+            dicts_list = []
             if click:
                 # If popover was opened, just close it
                 if is_open:
@@ -286,23 +287,31 @@ class ConverterForms(html.Div):
                     for i, (k, v) in enumerate(self.parent_app.data_to_field.items()):
                         # Read data current from each field
                         field_value = form_values[i]
-
                         # Ignore empty fields
                         if field_value not in ['', None]:
                             v['value'] = field_value
-
                             # Organize item inside the output dictionary
                             splited_keys = k.split('-')
+                            master_key_name = splited_keys[0]
                             field_name = splited_keys[-1]
                             if len(splited_keys) > 2:
-                                # here create compound nested dict
-                                pass
+                                for e in reversed(splited_keys):
+                                    if e == field_name:
+                                        curr_dict = {field_name: v['value']}
+                                    else:
+                                        curr_dict = {e: curr_dict}
+                                    if e == master_key_name:
+                                        dicts_list.append(curr_dict)
                             else:
                                 # create simple nested dict
                                 if splited_keys[0] in output:
                                     output[splited_keys[0]][field_name] = v['value']
                                 else:
                                     output[splited_keys[0]] = {field_name: v['value']}
+
+                    for e in dicts_list:
+                        master_key_name = list(e.keys())[0]
+                        output = self.create_nested_dict(data=e, output=output, master_key_name=master_key_name)
 
                     # Make temporary files on server side
                     # JSON
@@ -325,3 +334,19 @@ class ConverterForms(html.Div):
                 filename,
                 as_attachment=True
             )
+
+    def create_nested_dict(self, data, output, master_key_name):
+        for k, v in data.items():
+            if isinstance(v, dict):
+                if k == master_key_name and k not in output:
+                    output[k] = {}
+                    self.create_nested_dict(v, output[k], master_key_name)
+                elif k != master_key_name and k not in output:
+                    output[k] = {}
+                    self.create_nested_dict(v, output[k], master_key_name)
+                else:
+                    self.create_nested_dict(v, output[k], master_key_name)
+            else:
+                output[k] = v
+
+        return output
