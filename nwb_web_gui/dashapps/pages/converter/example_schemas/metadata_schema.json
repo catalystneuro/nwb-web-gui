@@ -251,6 +251,50 @@
           }
         }
       }
+    },
+    "Behavior": {
+    	"type": "object",
+    	"title": "Behavior",
+    	"required": [],
+    	"properties": {
+    		"Position": {
+    			"type": "object",
+    			"tag": "pynwb.behavior.Position",
+    			"required": [],
+    			"properties": {
+    				"name": {
+              "type": "string",
+              "description": "Position"
+            },
+            "spatial_series": {
+              "type": "array",
+              "description": "Spatial Series",
+              "items": [
+                {"$ref": "#/definitions/TimeSeries"},
+                {"$ref": "#/definitions/TimeSeries"}
+              ]
+            }
+    			}
+    		},
+        "BehavioralEvents": {
+          "type": "object",
+          "tag": "pynwb.behavior.BehavioralEvents",
+          "required": [],
+          "properties": {
+            "name": {
+              "type": "string",
+              "description": "Behavioral Event name"
+            },
+            "time_series": {
+              "type": "array",
+              "description": "BehavioralEvents time series",
+              "items": [
+                {"$ref": "#definitions/TimeSeries"}
+              ]
+            }
+          }
+        }
+    	}
     }
 
   },
