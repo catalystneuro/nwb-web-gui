@@ -10,9 +10,7 @@ from .converter_utils.utils import get_forms_from_schema
 from .converter_utils.forms import SourceForm, MetadataForm
 from nwb_web_gui.dashapps.utils.make_components import make_modal
 from pathlib import Path
-
 import flask
-import time
 
 
 class ConverterForms(html.Div):
@@ -52,13 +50,15 @@ class ConverterForms(html.Div):
 
         self.children = [
             dbc.Container([
-                dbc.Col(html.H4('Input Files'), width={'size': 12}, style={'text-align': 'left'}),
-                dbc.Col(source_forms, width={'size': 12}),
-                dbc.Col(
-                    dbc.Button('Get Metadata Form', id='get_metadata_btn'),
-                    style={'justify-content': 'left', 'text-align': 'left', 'margin-top': '1%'},
-                    width={'size': 4}
-                ),
+                dbc.Row([
+                    dbc.Col(html.H4('Input Files'), width={'size': 12}, style={'text-align': 'left'}),
+                    dbc.Col(source_forms, width={'size': 12}),
+                    dbc.Col(
+                        dbc.Button('Get Metadata Form', id='get_metadata_btn'),
+                        style={'justify-content': 'left', 'text-align': 'left', 'margin-top': '1%'},
+                        width={'size': 4}
+                    )
+                ]),
                 dbc.Row([
                     dbc.Col(
                         dcc.Upload(dbc.Button('Load Metadata'), id='button_load_metadata'),
@@ -132,7 +132,7 @@ class ConverterForms(html.Div):
 
         @self.parent_app.callback(
             Output('modal_explorer', 'is_open'),
-            [Input({'name': 'source_explorer', 'index': ALL}, 'n_clicks'), Input('close_explorer_modal', 'n_clicks')],
+            [Input({'type': 'source_explorer', 'index': ALL}, 'n_clicks'), Input('close_explorer_modal', 'n_clicks')],
             [State("modal_explorer", "is_open")]
         )
         def open_explorer(click_open, click_close, is_open):
@@ -151,12 +151,12 @@ class ConverterForms(html.Div):
                 return is_open
 
         @self.parent_app.callback(
-            Output({'name': 'source_string_input', 'index': MATCH}, 'value'),
+            Output({'type': 'source_string_input', 'index': MATCH}, 'value'),
             [Input('submit_file_browser_modal', 'n_clicks')],
             [
                 State('chosen_file_modal', 'value'),
-                State({'name': 'source_string_input', 'index': MATCH}, 'value'),
-                State({'name': 'source_string_input', 'index': MATCH}, 'id'),
+                State({'type': 'source_string_input', 'index': MATCH}, 'value'),
+                State({'type': 'source_string_input', 'index': MATCH}, 'id'),
             ]
         )
         def change_path_values(click, input_value, values, ids):
