@@ -99,6 +99,17 @@ class ConverterForms(html.Div):
                     )
                 ]),
                 dbc.Row([
+                    dbc.Col(
+                        dbc.Alert(
+                            "Required fields missing",
+                            id="alert_required",
+                            dismissable=True,
+                            is_open=False,
+                            color='danger'
+                        )
+                    )
+                ]),
+                dbc.Row([
                     dbc.Col(self.metadata_forms, width={'size': 12})
                 ], style={'margin-top': '1%'}),
                 dbc.Row(modal),
@@ -265,12 +276,12 @@ class ConverterForms(html.Div):
             #return [[] for v in self.parent_app.data_to_field.values() if v['compound_id']['data_type'] == 'link']
 
         @self.parent_app.callback(
-            Output("popover_export_metadata", "is_open"),
+            [Output("popover_export_metadata", "is_open"), Output('alert_required', 'is_open')],
             [Input('button_export_metadata', 'n_clicks')],
-            [State("popover_export_metadata", "is_open")] +
+            [State("popover_export_metadata", "is_open"), State('alert_required', 'is_open')] +
             [State(v['compound_id'], 'value') for v in self.parent_app.data_to_field.values()]
         )
-        def export_metadata(click, is_open, *form_values):
+        def export_metadata(click, is_open, req_is_open,*form_values):
             """
             Exports data to JSON or YAML files.
             """
@@ -280,15 +291,24 @@ class ConverterForms(html.Div):
 
             output = dict()
             dicts_list = []
+            empty_required_fields = []
             if click:
                 # If popover was opened, just close it
                 if is_open:
-                    return not is_open
+                    return not is_open, req_is_open
                 # If popover was closed, make files and open options
                 else:
                     for i, (k, v) in enumerate(self.parent_app.data_to_field.items()):
                         # Read data current from each field
                         field_value = form_values[i]
+                        if v['required']:
+                            if form_values[i] is None:
+                                empty_required_fields.append(k)
+                            elif isinstance(form_values[i], str):
+                                if form_values[i].isspace() or form_values[i] == '':
+                                    empty_required_fields.append(k)
+                            elif form_values[i] == '':
+                                empty_required_fields.append(k)
                         # Ignore empty fields
                         if field_value not in ['', None]:
                             v['value'] = field_value
@@ -309,6 +329,9 @@ class ConverterForms(html.Div):
                         master_key_name = list(e.keys())[0]
                         output = ConverterForms._create_nested_dict(data=e, output=output, master_key_name=master_key_name)
 
+                    # If required fields missing return alert
+                    if len(empty_required_fields) > 0:
+                        return is_open, not req_is_open
                     # Make temporary files on server side
                     # JSON
                     exported_file_path = self.downloads_path / 'exported_metadata.json'
@@ -320,8 +343,8 @@ class ConverterForms(html.Div):
                     with open(exported_file_path, 'w') as outfile:
                         yaml.dump(output, outfile, default_flow_style=False)
 
-                    return not is_open
-            return is_open
+                    return not is_open, req_is_open
+            return is_open, req_is_open
 
         @self.parent_app.server.route('/downloads/<path:filename>')
         def download_file(filename):

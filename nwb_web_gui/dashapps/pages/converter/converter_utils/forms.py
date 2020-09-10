@@ -92,7 +92,7 @@ class MetadataFormItem(dbc.FormGroup):
 
         self.parent = parent
 
-        field_input = self.get_field_input(value=value, input_id=input_id)
+        field_input = self.get_field_input(value=value, input_id=input_id, add_required=add_required)
 
         if add_required:
             self.children = [
@@ -109,7 +109,7 @@ class MetadataFormItem(dbc.FormGroup):
                 ])
             ]
 
-    def get_field_input(self, value, input_id, description=None):
+    def get_field_input(self, value, input_id, description=None, add_required=False):
         """
         Get component for user interaction. Types:
         - string
@@ -206,7 +206,8 @@ class MetadataFormItem(dbc.FormGroup):
                     'compound_id': compound_id,
                     'owner_class': str(owner_class),
                     'target': value.get('target', None),
-                    'value': None
+                    'value': None,
+                    'required': add_required
                 }
             })
 
