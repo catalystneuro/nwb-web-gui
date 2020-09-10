@@ -45,7 +45,7 @@ class ConverterForms(html.Div):
         )
 
         # Fill form
-        metadata_data_path = examples_path / 'metadata_example_1.json'
+        metadata_data_path = examples_path / 'metadata_example_0.json'
         with open(metadata_data_path, 'r') as inp:
             self.metadata_json_data = json.load(inp)
         self.metadata_forms.update_form_dict_values(data=self.metadata_json_data)
@@ -72,10 +72,14 @@ class ConverterForms(html.Div):
                                 [
                                     dbc.PopoverBody([
                                         html.Div([
-                                            dbc.Button("Download as JSON", id='button_export_json', color="link",
-                                                       href='/../../downloads/exported_metadata.json'),
-                                            dbc.Button("Download as YAML", id='button_export_yaml', color="link",
-                                                       href='/../../../downloads/exported_metadata.yaml')
+                                            html.A(
+                                                dbc.Button("Download as JSON", id='button_export_json', color="link"), 
+                                                href='/downloads/exported_metadata.json'
+                                                ),
+                                            html.A(
+                                                dbc.Button("Download as YAML", id='button_export_yaml', color="link"), 
+                                                href='/downloads/exported_metadata.yaml'
+                                                )
                                         ])
                                     ])
                                 ],
@@ -114,8 +118,6 @@ class ConverterForms(html.Div):
         link_output_options = [Output(v['compound_id'], 'options') for v in self.parent_app.data_to_field.values() if v['compound_id']['data_type'] == 'link']
         link_output_values = [Output(v['compound_id'], 'value') for v in self.parent_app.data_to_field.values() if v['compound_id']['data_type'] == 'link']
         self.update_forms_links_outputs = link_output_options + link_output_values
-
-        
 
         @self.parent_app.callback(
             Output('modal_explorer', 'is_open'),
@@ -321,13 +323,15 @@ class ConverterForms(html.Div):
                     return not is_open
             return is_open
 
-        @self.parent_app.server.route('/../downloads/<path:filename>')
+        @self.parent_app.server.route('/downloads/<path:filename>')
         def download_file(filename):
+
             return flask.send_from_directory(
-                self.parent_app.files_path,
+                self.downloads_path,
                 filename,
                 as_attachment=True
             )
+
 
     @staticmethod
     def _create_nested_dict(data, output, master_key_name):
