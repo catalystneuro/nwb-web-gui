@@ -386,10 +386,13 @@ class SchemaFormContainer(html.Div):
         ]
 
         # Create Outputs for the callback that updates Forms values
-        self.update_forms_values_callback_outputs = [
-            Output(v['compound_id'], 'value') for v in self.data.values()
-            if v['compound_id']['data_type'] != 'link'
-        ]
+        self.update_forms_values_callback_outputs = []
+        for v in self.data.values():
+            if v['compound_id']['data_type'] != 'link':
+                if v['compound_id']['data_type'] == 'boolean':
+                    self.update_forms_values_callback_outputs.append(Output(v['compound_id'], 'checked'))
+                else:
+                    self.update_forms_values_callback_outputs.append(Output(v['compound_id'], 'value'))
         self.update_forms_values_callback_outputs.append(Output(id + '-trigger-update-links-values', 'children'))
 
         # Create Outputs for the callback that updates Links values and options

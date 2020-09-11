@@ -172,13 +172,16 @@ class ConverterForms(html.Div):
             [State("modal_explorer", "is_open")]
         )
         def open_explorer(click_open, click_close, is_open):
+            """
+            Get selected FileExplorer index to use 
+            as reference in writing specified path
+            """
 
             ctx = dash.callback_context
             source = ctx.triggered[0]['prop_id'].split('.')[0]
 
             if 'index' in source:
                 dict_source = json.loads(source)
-
                 self.current_modal_source = dict_source['index']
 
             if source != '' and (any(click_open) or click_close):
@@ -187,22 +190,36 @@ class ConverterForms(html.Div):
                 return is_open
 
         @self.parent_app.callback(
-            Output({'type': 'source_string_input', 'index': MATCH}, 'value'),
+            Output('sourcedata-trigger-update-forms-values', 'children'),
             [Input('submit_file_browser_modal', 'n_clicks')],
-            [
-                State('chosen_file_modal', 'value'),
-                State({'type': 'source_string_input', 'index': MATCH}, 'value'),
-                State({'type': 'source_string_input', 'index': MATCH}, 'id'),
-            ]
+            [State('chosen_file_modal', 'value')] +
+            [State(v['compound_id'], 'id') for v in self.source_forms.data.values() if v['compound_id']['data_type'] != 'boolean']
         )
-        def change_path_values(click, input_value, values, ids):
+        def change_path_values(click, input_value, *ids):
+            """
+            Take path value in file explorer modal and 
+            write to the right string input in source forms
+            """
             ctx = dash.callback_context
             source = ctx.triggered[0]['prop_id'].split('.')[0]
 
-            if self.current_modal_source.replace('explorer', 'input') == ids['index'] and input_value != '':
-                return input_value
-            else:
-                return values
+            if source == 'submit_file_browser_modal':
+                for e in ids:
+                    if e['index'] == self.current_modal_source:
+                        splited_keys = e['index'].split('-')
+                        master_key_name = splited_keys[0]
+                        field_name = splited_keys[-1]
+                        for e in reversed(splited_keys):
+                            if e == field_name:
+                                curr_dict = {field_name: input_value}
+                            else:
+                                curr_dict = {e: curr_dict}
+
+                        self.source_forms.update_data(data=curr_dict)
+                        output = str(np.random.rand())
+                        return output
+            output = []
+            return output
 
         @self.parent_app.callback(
             Output('metadata-trigger-update-forms-values', 'children'),
