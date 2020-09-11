@@ -1,92 +1,102 @@
+import dash
 import dash_html_components as html
 import dash_core_components as dcc
 import dash_bootstrap_components as dbc
-import warnings
+from dash.dependencies import Input, Output, State, ALL, MATCH
 from dash_cool_components import KeyedFileBrowser, TagInput, DateTimePicker
+import warnings
 
 
-class SourceFormItem(dbc.FormGroup):
-    """Custom form group instance"""
-    def __init__(self, label, form_input, add_explorer, explorer_id, add_required):
-        super().__init__([])
+# class SourceFormItem(dbc.FormGroup):
+#     """Custom form group instance"""
+#     def __init__(self, label, form_input, add_explorer, explorer_id, add_required):
+#         super().__init__([])
+#
+#         if add_explorer:
+#             explorer_btn = dbc.Button(
+#                 id={'type': 'source_explorer', 'index': explorer_id},
+#                 children=[html.I(className="far fa-folder")],
+#                 style={'background-color': 'transparent', 'color': 'black', 'border': 'none'}
+#             )
+#             if add_required:
+#                 self.children = dbc.Row([
+#                     dbc.Col([label, html.Span('*', style={'color': 'red'})], width={'size': 2}),
+#                     dbc.Col(dbc.InputGroup(
+#                         [
+#                             form_input,
+#                             dbc.InputGroupAddon(explorer_btn, addon_type="append"),
+#                         ]
+#                     )),
+#                 ])
+#             else:
+#                 self.children = dbc.Row([
+#                     dbc.Col(label, width={'size': 2}),
+#                     dbc.Col(form_input, width={'size': 8}, style={'justify-content': 'center', 'text-align': 'center'}),
+#                     dbc.Col(explorer_btn, width={'size': 2}, style={'text-align': 'left'})
+#                 ])
+#         else:
+#             if add_required:
+#                 self.children = dbc.Row([
+#                     dbc.Col([label, html.Span('*', style={'color': 'red'})], width={'size': 2}),
+#                     dbc.Col(form_input, width={'size': 10}, style={'justify-content': 'left', 'text-align': 'left'})
+#                 ])
+#             else:
+#                 self.children = dbc.Row([
+#                     dbc.Col(label, width={'size': 2}),
+#                     dbc.Col(form_input, width={'size': 10}, style={'justify-content': 'left', 'text-align': 'left'})
+#                 ])
+#
+#
+# class SourceForm(dbc.Card):
+#     def __init__(self, required, fields, parent_name):
+#         super().__init__([])
+#
+#         self.required_fields = required
+#         self.parent_name = parent_name
+#
+#         parent = self.parent_name.replace(' ', '_')
+#
+#         all_inputs = []
+#         for k, v in fields.items():
+#             label = dbc.Label(k)
+#             input_id = f'input_{parent}_{k}'
+#             explorer_id = input_id.replace('input', 'explorer')
+#             add_required = k in self.required_fields
+#
+#             if v['type'] == 'string':
+#                 form_input = dbc.Input(
+#                     id={'type': 'source_string_input', 'index': input_id},
+#                     className='string_input',
+#                     type='input'
+#                 )
+#             elif v['type'] == 'boolean':
+#                 form_input = dbc.Checkbox(
+#                     id={'type': 'source_boolean_input', 'index': input_id}
+#                 )
+#             if 'format' in v.keys():
+#                 if v['format'] == 'file' or v['format'] == 'directory':
+#                     add_explorer = True
+#                     explorer_id = input_id.replace('input', 'explorer')
+#                 else:
+#                     add_explorer = False
+#                     explorer_id = ''
+#             else:
+#                 add_explorer = False
+#                 explorer_id = ''
+#
+#             form_item = SourceFormItem(label, form_input, add_explorer, explorer_id, add_required)
+#             all_inputs.append(form_item)
+#
+#         form = dbc.Form(all_inputs)
+#         self.children = [
+#             dbc.CardHeader(self.parent_name.title(), style={'text-align': 'left'}),
+#             dbc.CardBody(form)
+#         ]
+#
+#         self.style = {'margin-top': '1%'}
 
-        if add_explorer:
-            explorer_btn = dbc.Button(id={'type': 'source_explorer', 'index': explorer_id}, children=[html.I(className="far fa-folder")], style={'background-color': 'transparent', 'color': 'black', 'border': 'none'})
-            if add_required:
-                self.children = dbc.Row([
-                    dbc.Col([label, html.Span('*', style={'color': 'red'})], width={'size': 2}),
-                    dbc.Col(form_input, width={'size': 8}, style={'justify-content': 'center', 'text-align': 'center'}),
-                    dbc.Col(explorer_btn, width={'size': 2}, style={'text-align': 'left'})
-                ])
-            else:
-                self.children = dbc.Row([
-                    dbc.Col(label, width={'size': 2}),
-                    dbc.Col(form_input, width={'size': 8}, style={'justify-content': 'center', 'text-align': 'center'}),
-                    dbc.Col(explorer_btn, width={'size': 2}, style={'text-align': 'left'})
-                ])
-        else:
-            if add_required:
-                self.children = dbc.Row([
-                    dbc.Col([label, html.Span('*', style={'color': 'red'})], width={'size': 2}),
-                    dbc.Col(form_input, width={'size': 10}, style={'justify-content': 'left', 'text-align': 'left'})
-                ])
-            else:
-                self.children = dbc.Row([
-                    dbc.Col(label, width={'size': 2}),
-                    dbc.Col(form_input, width={'size': 10}, style={'justify-content': 'left', 'text-align': 'left'})
-                ])
 
-
-class SourceForm(dbc.Card):
-    def __init__(self, required, fields, parent_name):
-        super().__init__([])
-
-        self.required_fields = required
-        self.parent_name = parent_name
-
-        parent = self.parent_name.replace(' ', '_')
-
-        all_inputs = []
-        for k, v in fields.items():
-            label = dbc.Label(k)
-            input_id = f'input_{parent}_{k}'
-            explorer_id = input_id.replace('input', 'explorer')
-            add_required = k in self.required_fields
-
-            if v['type'] == 'string':
-                form_input = dbc.Input(
-                    id={'type': 'source_string_input', 'index': input_id},
-                    className='string_input',
-                    type='input'
-                )
-            elif v['type'] == 'boolean':
-                form_input = dbc.Checkbox(
-                    id={'type': 'source_boolean_input', 'index': input_id}
-                )
-            if 'format' in v.keys():
-                if v['format'] == 'file' or v['format'] == 'directory':
-                    add_explorer = True
-                    explorer_id = input_id.replace('input', 'explorer')
-                else:
-                    add_explorer = False
-                    explorer_id = ''
-            else:
-                add_explorer = False
-                explorer_id = ''
-
-            form_item = SourceFormItem(label, form_input, add_explorer, explorer_id, add_required)
-            all_inputs.append(form_item)
-
-        form = dbc.Form(all_inputs)
-        self.children = [
-            dbc.CardHeader(self.parent_name.title(), style={'text-align': 'left'}),
-            dbc.CardBody(form)
-        ]
-
-        self.style = {'margin-top': '1%'}
-
-
-class MetadataFormItem(dbc.FormGroup):
+class SchemaFormItem(dbc.FormGroup):
     def __init__(self, label, value, input_id, parent, add_required=False):
         super().__init__([])
 
@@ -114,14 +124,16 @@ class MetadataFormItem(dbc.FormGroup):
         Get component for user interaction. Types:
         - string
         - number
-        - tag input
+        - tag list
         - datetime
         - string choice
         - link choice
-        - list
+        - list of subforms
+        - boolean
+        - path to file or dir
         """
 
-        owner_class = self.parent.pynwb_class
+        owner_class = self.parent.owner_class
         compound_id = {
             'type': 'metadata-input',
             'index': input_id,
@@ -181,6 +193,30 @@ class MetadataFormItem(dbc.FormGroup):
                 bs_size="lg",
                 style={'font-size': '16px'}
             )
+
+        elif 'format' in value and value['format'] in ['file', 'dir']:
+            compound_id['data_type'] = 'string'
+            input_path = dbc.Input(
+                id=compound_id,
+                className='string_input',
+                type='input'
+            )
+            explorer_btn = dbc.Button(
+                id={'type': 'source_explorer', 'index': compound_id['index']},
+                children=[html.I(className="far fa-folder")],
+                style={'background-color': 'transparent', 'color': 'black', 'border': 'none'}
+            )
+            field_input = dbc.InputGroup([
+                input_path,
+                dbc.InputGroupAddon(explorer_btn, addon_type="append"),
+            ])
+
+        elif value['type'] == 'boolean':
+            compound_id['data_type'] = 'boolean'
+            field_input = dbc.Checkbox(
+                id=compound_id
+            )
+
         else:
             input_type = value['type']
             if input_type == 'number':
@@ -199,9 +235,9 @@ class MetadataFormItem(dbc.FormGroup):
                 step=step
             )
 
-        # Add field to data_to_field mapping
+        # Add data
         if not isinstance(value, list):
-            self.parent.parent_app.data_to_field.update({
+            self.parent.container.data.update({
                 input_id: {
                     'compound_id': compound_id,
                     'owner_class': str(owner_class),
@@ -229,37 +265,34 @@ class MetadataFormItem(dbc.FormGroup):
         return input_and_tooltip
 
 
-class MetadataForm(dbc.Card):
-    def __init__(self, schema, key, definitions=None, parent=None, parent_app=None):
+class SchemaForm(dbc.Card):
+    """
+    Form generated by JSON Schema.
+    """
+    def __init__(self, schema, key, container=None, parent_form=None):
         super().__init__([])
 
         self.schema = schema
-        self.pynwb_class = schema.get('tag', '')
-        self.parent = parent
-
-        if parent_app is None:
-            self.parent_app = parent.parent_app
-        else:
-            self.parent_app = parent_app
+        self.owner_class = schema.get('tag', '')
+        self.parent_form = parent_form
 
         # Unique Card IDs are composed by parent id + key from json schema
-        if parent is not None and parent.id != 'Metadata':
-            self.id = parent.id + '-' + key
-        else:
+        if parent_form is None:
             self.id = key
-
-        if 'title' in schema:
-            header_text = schema['title']
+            self.container = container
         else:
-            header_text = self.id.split('-')[-1]
+            self.id = parent_form.id + '-' + key
+            self.container = parent_form.container
+
+        if 'definitions' in self.container.schema:
+            self.definitions = self.container.schema['definitions']
+        else:
+            self.definitions = dict()
+
+        header_text = schema.get('title', self.id.split('-')[-1])
         self.header = dbc.CardHeader([html.H4(header_text, className="title_" + key)])
         self.body = dbc.CardBody([])
         self.children = [self.header, self.body]
-
-        if definitions is None and parent is None:
-            self.definitions = schema['definitions']
-        else:
-            self.definitions = parent.definitions
 
         self.required_fields = schema.get('required', '')
 
@@ -272,20 +305,19 @@ class MetadataForm(dbc.Card):
         for k, v in properties.items():
             required = k in self.required_fields
 
-            # If item is a pynwb object or reference to an object on definitions,
-            # e.g. NWBFile, make subform
+            # If item is an object or reference to an object on definitions, make subform
             if 'type' in v and v['type'] == 'object':
-                item = MetadataForm(schema=v, key=k, parent=self)
+                item = SchemaForm(schema=v, key=k, parent_form=self)
                 self.body.children.append(item)
                 continue
             elif "$ref" in v:
                 template_name = v["$ref"].split('/')[-1]
                 schema = self.definitions[template_name]
-                item = MetadataForm(schema=schema, key=k, parent=self)
+                item = SchemaForm(schema=schema, key=k, parent_form=self)
                 self.body.children.append(item)
                 continue
 
-            # If item is a pynwb field
+            # If item is a field
             if 'type' in v and (v['type'] == 'array'):
                 # If field is an array of subforms, e.g. ImagingPlane.optical_channels
                 if isinstance(v['items'], list):
@@ -293,13 +325,13 @@ class MetadataForm(dbc.Card):
                     for i, iv in enumerate(v["items"]):
                         template_name = iv["$ref"].split('/')[-1]
                         schema = self.definitions[template_name]
-                        iform = MetadataForm(schema=schema, key=k + f'-{i}', parent=self)
+                        iform = SchemaForm(schema=schema, key=k + f'-{i}', parent_form=self)
                         value.append(iform)
                 # If field is an array of strings, e.g. NWBFile.experimenter
                 elif isinstance(v['items'], dict):
                     value = v
             # If field is a simple input field, e.g. description
-            elif 'type' in v and (v['type'] == 'string' or v['type'] == 'number'):
+            elif 'type' in v and v['type'] in ['string', 'number', 'boolean']:
                 value = v
             # If field is something not yet implemented
             else:
@@ -308,7 +340,7 @@ class MetadataForm(dbc.Card):
 
             label = dbc.Label(k)
             input_id = f'{self.id}-{k}'
-            item = MetadataFormItem(
+            item = SchemaFormItem(
                 label=label,
                 value=value,
                 input_id=input_id,
@@ -317,8 +349,137 @@ class MetadataForm(dbc.Card):
             )
             self.body.children.append(item)
 
-    def update_form_dict_values(self, data, key=None):
-        """Update data in the internal mapping dictionary"""
+
+class SchemaFormContainer(html.Div):
+    """
+    Root Container for Schema Forms
+
+    IDs exposed for external trigger of update functions:
+    id + '-trigger-update-forms-values'
+    id + '-trigger-update-links-values'
+    """
+    def __init__(self, id, schema, parent_app):
+        super().__init__([])
+
+        self.id = id
+        self.schema = schema
+        self.parent_app = parent_app
+        self.data = {}
+
+        # Construct children forms
+        self.children_forms = []
+        if 'properties' in schema:
+            for form_key, form_value in schema['properties'].items():
+                iform = SchemaForm(
+                    schema=form_value,
+                    key=form_key,
+                    container=self
+                )
+                self.children_forms.append(iform)
+
+        self.children = []
+        self.children += self.children_forms
+        self.children += [
+            html.Div(id=id + '-trigger-update-forms-values', style={'display': 'none'}),
+            html.Div(id=id + '-trigger-update-links-values', style={'display': 'none'}),
+            html.Div(id=id + '-output-placeholder-links-values', style={'display': 'none'})
+        ]
+
+        # Create Outputs for the callback that updates Forms values
+        self.update_forms_values_callback_outputs = [
+            Output(v['compound_id'], 'value') for v in self.data.values()
+            if v['compound_id']['data_type'] != 'link'
+        ]
+        self.update_forms_values_callback_outputs.append(Output(id + '-trigger-update-links-values', 'children'))
+
+        # Create Outputs for the callback that updates Links values and options
+        # An extra paceholder is needed for when there is no link fields
+        link_output_options = [Output(v['compound_id'], 'options') for v in self.data.values() if v['compound_id']['data_type'] == 'link']
+        link_output_values = [Output(v['compound_id'], 'value') for v in self.data.values() if v['compound_id']['data_type'] == 'link']
+        link_output_placeholder = [Output(id + '-output-placeholder-links-values', 'children')]
+        self.update_forms_links_callback_outputs = link_output_options + link_output_values + link_output_placeholder
+
+        @self.parent_app.callback(
+            self.update_forms_values_callback_outputs,
+            [Input(self.id + '-trigger-update-forms-values', 'children')]
+        )
+        def update_forms_values(trigger):
+            """Updates forms values (except links)"""
+            output = [v['value'] for v in self.data.values() if v['compound_id']['data_type'] != 'link']
+            output.append(1)
+            return output
+
+        @self.parent_app.callback(
+            self.update_forms_links_callback_outputs,
+            [Input(self.id + '-trigger-update-links-values', 'children')],
+            [State(v['compound_id'], 'value') for v in self.data.values() if v['compound_id']['data_type'] == 'name']
+        )
+        def update_forms_links(trigger, *name_change):
+            """
+            Updates forms values for links (dropdown options) when names change.
+            If a field has a valid value for the 'target' property, this function
+            will sweep the data internal dictionary in search for field
+            ids ending with '-name' where the 'owner_class' value matches 'target'.
+            The resulting list will populate the dropdown menu of the field.
+
+            Example:
+            data = {
+                'Ecephys-ElectrodeGroup1-device': {
+                    'compound_id': {
+                        'type': 'metadata-input',
+                        'index': 'Ecephys-ElectrodeGroup1-device',
+                        'data_type': 'link'
+                    }
+                    'value': 'device 1',
+                    'owner_class': 'pynwb.ecephys.ElectrodeGroup',
+                    'target': 'pynwb.device.Device'
+                },
+                'Ecephys-Device-name': {
+                    'compound_id': {
+                        'type': 'metadata-input',
+                        'index': 'Ecephys-Device-name',
+                        'data_type': 'string'
+                    }
+                    'value': 'device 1',
+                    'owner_class': 'pynwb.device.Device',
+                    'target': None
+                }
+            }
+            """
+            ctx = dash.callback_context
+            trigger_source = ctx.triggered[0]['prop_id'].split('.')[0]
+
+            if trigger_source == self.id + '-trigger-update-links-values':
+                # Update changed names on backend mapping dictionary
+                i = 0
+                for k, v in self.data.items():
+                    if v['compound_id']['data_type'] == 'name':
+                        self.data[k]['value'] = name_change[i]
+                        i += 1
+
+                # Get specific options for each link dropdown
+                list_options = []
+                list_values = []
+                for k, v in self.data.items():
+                    if v['target'] is not None:
+                        target_class = v['target']
+                        options = [
+                            {'label': v['value'], 'value': v['value']}
+                            for v in self.data.values() if
+                            (v['owner_class'] == target_class and 'name' in v['compound_id']['index'])
+                        ]
+                        list_values.append(options[0]['value'])
+                        list_options.append(options)
+
+                for sublist in list_options[:]:
+                    for e in sublist[:]:
+                        if e['value'] is None:
+                            sublist.remove(e)
+
+                return list_options + list_values + [1]
+
+    def update_data(self, data, key=None):
+        """Update data in the internal mapping dictionary of this Container"""
         if key is None:
             key = ''
 
@@ -330,8 +491,8 @@ class MetadataForm(dbc.Card):
                     inner_key = f'{key}-{k}'
                 else:
                     inner_key = k
-                self.update_form_dict_values(data=v, key=inner_key)
-            # If value is a string, number or list
+                self.update_data(data=v, key=inner_key)
+            # If value is a string, number, list or boolean
             else:
                 component_id = key + '-' + k   # e.g. NWBFile-session_description
-                self.parent_app.data_to_field[component_id]['value'] = v
+                self.data[component_id]['value'] = v

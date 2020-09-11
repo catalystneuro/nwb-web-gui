@@ -63,7 +63,7 @@
                 }
             }
         },
-        "ImagingPlane": {
+        "ImagingPlane1": {
             "name": "Ophys ImagingPlane name",
             "description": "Ophys ImagingPlane description",
             "optical_channels": {

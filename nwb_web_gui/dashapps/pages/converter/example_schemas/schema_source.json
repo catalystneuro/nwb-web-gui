@@ -18,11 +18,13 @@
       "properties": {
         "raw_data": {
           "type": "string",
-          "format": "file"
+          "format": "file",
+          "description": "path to raw data file"
         },
         "processed_data": {
           "type": "string",
-          "format": "directory"
+          "format": "directory",
+          "description": "path to directory containing processed data files"
         }
       }
     },

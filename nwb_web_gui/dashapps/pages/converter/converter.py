@@ -4,11 +4,11 @@ import dash_core_components as dcc
 from dash.dependencies import Input, Output, State, ALL, MATCH
 import dash_bootstrap_components as dbc
 import sd_material_ui as sdm
+import numpy as np
 import json
 import yaml
 import base64
-from .converter_utils.utils import get_forms_from_schema
-from .converter_utils.forms import SourceForm, MetadataForm
+from .converter_utils.forms import SchemaFormContainer
 from nwb_web_gui.dashapps.utils.make_components import make_modal
 from pathlib import Path
 import flask
@@ -33,13 +33,16 @@ class ConverterForms(html.Div):
             self.metadata_json_schema = json.load(inp)
 
         # Source data Form
-        source_forms = get_forms_from_schema(self.source_json_schema, source=True)
+        self.source_forms = SchemaFormContainer(
+            id='sourcedata',
+            schema=self.source_json_schema,
+            parent_app=self.parent_app
+        )
 
         # Metadata Form
-        self.parent_app.data_to_field = dict()
-        self.metadata_forms = MetadataForm(
+        self.metadata_forms = SchemaFormContainer(
+            id='metadata',
             schema=self.metadata_json_schema,
-            key="Metadata",
             parent_app=self.parent_app
         )
 
@@ -47,7 +50,7 @@ class ConverterForms(html.Div):
         metadata_data_path = examples_path / 'metadata_example_0.json'
         with open(metadata_data_path, 'r') as inp:
             self.metadata_json_data = json.load(inp)
-        self.metadata_forms.update_form_dict_values(data=self.metadata_json_data)
+        self.metadata_forms.update_data(data=self.metadata_json_data)
 
         self.children = [
             dbc.Container([
@@ -73,8 +76,7 @@ class ConverterForms(html.Div):
                 # ),
                 dbc.Row([
                     html.Br(),
-                    dbc.Col(html.H4('Source data'), width={'size': 12}, style={'text-align': 'left'}),
-                    dbc.Col(source_forms, width={'size': 12}),
+                    dbc.Col(self.source_forms, width={'size': 12}),
                     dbc.Col(
                         dbc.Button('Get Metadata Form', id='get_metadata_btn'),
                         style={'justify-content': 'left', 'text-align': 'left', 'margin-top': '1%'},
@@ -164,14 +166,6 @@ class ConverterForms(html.Div):
             ], style={'min-height': '110vh'})
         ]
 
-        # Create Outputs for the callback that updates Forms values
-        self.update_forms_callback_outputs = [Output(v['compound_id'], 'value') for v in self.parent_app.data_to_field.values() if v['compound_id']['data_type'] != 'link']
-        self.update_forms_callback_outputs.append(Output('button_refresh', 'n_clicks'))
-
-        link_output_options = [Output(v['compound_id'], 'options') for v in self.parent_app.data_to_field.values() if v['compound_id']['data_type'] == 'link']
-        link_output_values = [Output(v['compound_id'], 'value') for v in self.parent_app.data_to_field.values() if v['compound_id']['data_type'] == 'link']
-        self.update_forms_links_outputs = link_output_options + link_output_values
-
         @self.parent_app.callback(
             Output('modal_explorer', 'is_open'),
             [Input({'type': 'source_explorer', 'index': ALL}, 'n_clicks'), Input('close_explorer_modal', 'n_clicks')],
@@ -211,15 +205,15 @@ class ConverterForms(html.Div):
                 return values
 
         @self.parent_app.callback(
-            self.update_forms_callback_outputs,
+            Output('metadata-trigger-update-forms-values', 'children'),
             [Input('button_load_metadata', 'contents')],
             [State('button_load_metadata', 'filename')]
         )
-        def update_forms_values(contents, filename):
+        def update_forms_values_metadata(contents, filename):
             """
             Updates forms values (except links) when:
             - Forms are created (receives metadata dict from Converter)
-            - User upload metadata json / yaml file
+            - User uploads metadata json / yaml file
             """
             ctx = dash.callback_context
             trigger_source = ctx.triggered[0]['prop_id'].split('.')[0]
@@ -228,100 +222,30 @@ class ConverterForms(html.Div):
                 content_type, content_string = contents.split(',')
                 filename_extension = filename.split('.')[-1]
 
+                # Update SchemaFormContainer internal data dictionary
                 if filename_extension == 'json':
                     bs4decode = base64.b64decode(content_string)
                     json_string = bs4decode.decode('utf8').replace("'", '"')
                     self.metadata_json_data = json.loads(json_string)
-                    self.metadata_forms.update_form_dict_values(data=self.metadata_json_data)
+                    self.metadata_forms.update_data(data=self.metadata_json_data)
                 elif filename_extension in ['yaml', 'yml']:
                     bs4decode = base64.b64decode(content_string)
                     yaml_data = yaml.load(bs4decode, Loader=yaml.BaseLoader)
                     self.metadata_json_data = yaml_data
-                    self.metadata_forms.update_form_dict_values(data=self.metadata_json_data)
-                output = [v['value'] for v in self.parent_app.data_to_field.values() if v['compound_id']['data_type'] != 'link']
-                output.append(1)
+                    self.metadata_forms.update_data(data=self.metadata_json_data)
+
+                # Trigger update of React components
+                output = str(np.random.rand())
                 return output
             else:
-                output = [v['value'] for v in self.parent_app.data_to_field.values() if v['compound_id']['data_type'] != 'link']
-                output.append(1)
+                output = []
                 return output
-
-        @self.parent_app.callback(
-            self.update_forms_links_outputs,
-            [Input('button_refresh', 'n_clicks')],
-            [State(v['compound_id'], 'value') for v in self.parent_app.data_to_field.values() if v['compound_id']['data_type'] == 'name']
-        )
-        def update_forms_links(click_update, *name_change):
-            """
-            Updates forms values for links (dropdown options) when names change.
-            If a field has a valid value for the 'target' property, this function
-            will sweep the data_to_field internal dictionary in search for field
-            ids ending with '-name' where the 'owner_class' value matches 'target'.
-            The resulting list will populate the dropdown menu of the field.
-
-            Example:
-            data_to_field = {
-                'Ecephys-ElectrodeGroup1-device': {
-                    'compound_id': {
-                        'type': 'metadata-input',
-                        'index': 'Ecephys-ElectrodeGroup1-device',
-                        'data_type': 'link'
-                    }
-                    'value': 'device 1',
-                    'owner_class': 'pynwb.ecephys.ElectrodeGroup',
-                    'target': 'pynwb.device.Device'
-                },
-                'Ecephys-Device-name': {
-                    'compound_id': {
-                        'type': 'metadata-input',
-                        'index': 'Ecephys-Device-name',
-                        'data_type': 'string'
-                    }
-                    'value': 'device 1',
-                    'owner_class': 'pynwb.device.Device',
-                    'target': None
-                }
-            }
-            """
-            ctx = dash.callback_context
-            trigger_source = ctx.triggered[0]['prop_id'].split('.')[0]
-
-            if trigger_source == 'button_refresh':
-                # Update changed names on backend mapping dictionary
-                i = 0
-                for k, v in self.parent_app.data_to_field.items():
-                    if v['compound_id']['data_type'] == 'name':
-                        self.parent_app.data_to_field[k]['value'] = name_change[i]
-                        i += 1
-
-                # Get specific options for each link dropdown
-                list_options = []
-                list_values = []
-                for k, v in self.parent_app.data_to_field.items():
-                    if v['target'] is not None:
-                        target_class = v['target']
-                        options = [
-                            {'label': v['value'], 'value': v['value']}
-                            for v in self.parent_app.data_to_field.values() if
-                            (v['owner_class'] == target_class and 'name' in v['compound_id']['index'])
-                        ]
-                        list_values.append(options[0]['value'])
-                        list_options.append(options)
-
-                for sublist in list_options[:]:
-                    for e in sublist[:]:
-                        if e['value'] is None:
-                            sublist.remove(e)
-
-                return list_options + list_values
-
-            #return [[] for v in self.parent_app.data_to_field.values() if v['compound_id']['data_type'] == 'link']
 
         @self.parent_app.callback(
             [Output("popover_export_metadata", "is_open"), Output('alert_required', 'is_open')],
             [Input('button_export_metadata', 'n_clicks')],
             [State("popover_export_metadata", "is_open"), State('alert_required', 'is_open')] +
-            [State(v['compound_id'], 'value') for v in self.parent_app.data_to_field.values()]
+            [State(v['compound_id'], 'value') for v in self.metadata_forms.data.values()]
         )
         def export_metadata(click, fileoption_is_open, req_is_open, *form_values):
             """
@@ -340,7 +264,7 @@ class ConverterForms(html.Div):
                     return not fileoption_is_open, req_is_open
                 # If popover was closed, make files and open options
                 else:
-                    for i, (k, v) in enumerate(self.parent_app.data_to_field.items()):
+                    for i, (k, v) in enumerate(self.metadata_forms.data.items()):
                         # Read data current from each field
                         field_value = form_values[i]
                         if v['required']:
@@ -407,7 +331,6 @@ class ConverterForms(html.Div):
             if click:
                 return "This will call NWBConverter.run_conversion() and print results."
             return ""
-
 
     @staticmethod
     def _create_nested_dict(data, output, master_key_name):
