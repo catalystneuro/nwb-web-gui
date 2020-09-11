@@ -23,11 +23,11 @@ class ConverterForms(html.Div):
         examples_path = Path(__file__).parent.absolute() / 'example_schemas'
         self.downloads_path = Path(__file__).parent.parent.parent.parent.parent.absolute() / 'downloads'
 
-        source_schema_path = examples_path / 'source_schema.json'
+        source_schema_path = examples_path / 'schema_source.json'
         with open(source_schema_path, 'r') as inp:
             self.source_json_schema = json.load(inp)
 
-        metadata_schema_path = examples_path / 'metadata_schema.json'
+        metadata_schema_path = examples_path / 'schema_metadata.json'
         with open(metadata_schema_path, 'r') as inp:
             self.metadata_json_schema = json.load(inp)
 
@@ -73,13 +73,13 @@ class ConverterForms(html.Div):
                                     dbc.PopoverBody([
                                         html.Div([
                                             html.A(
-                                                dbc.Button("Download as JSON", id='button_export_json', color="link"), 
+                                                dbc.Button("Download as JSON", id='button_export_json', color="link"),
                                                 href='/downloads/exported_metadata.json'
-                                                ),
+                                            ),
                                             html.A(
-                                                dbc.Button("Download as YAML", id='button_export_yaml', color="link"), 
+                                                dbc.Button("Download as YAML", id='button_export_yaml', color="link"),
                                                 href='/downloads/exported_metadata.yaml'
-                                                )
+                                            )
                                         ])
                                     ])
                                 ],
@@ -281,7 +281,7 @@ class ConverterForms(html.Div):
             [State("popover_export_metadata", "is_open"), State('alert_required', 'is_open')] +
             [State(v['compound_id'], 'value') for v in self.parent_app.data_to_field.values()]
         )
-        def export_metadata(click, is_open, req_is_open,*form_values):
+        def export_metadata(click, fileoption_is_open, req_is_open, *form_values):
             """
             Exports data to JSON or YAML files.
             """
@@ -294,8 +294,8 @@ class ConverterForms(html.Div):
             empty_required_fields = []
             if click:
                 # If popover was opened, just close it
-                if is_open:
-                    return not is_open, req_is_open
+                if fileoption_is_open:
+                    return not fileoption_is_open, req_is_open
                 # If popover was closed, make files and open options
                 else:
                     for i, (k, v) in enumerate(self.parent_app.data_to_field.items()):
@@ -331,7 +331,8 @@ class ConverterForms(html.Div):
 
                     # If required fields missing return alert
                     if len(empty_required_fields) > 0:
-                        return is_open, not req_is_open
+                        return fileoption_is_open, not req_is_open
+
                     # Make temporary files on server side
                     # JSON
                     exported_file_path = self.downloads_path / 'exported_metadata.json'
@@ -343,15 +344,15 @@ class ConverterForms(html.Div):
                     with open(exported_file_path, 'w') as outfile:
                         yaml.dump(output, outfile, default_flow_style=False)
 
-                    return not is_open, req_is_open
-            return is_open, req_is_open
+                    return not fileoption_is_open, req_is_open
+            return fileoption_is_open, req_is_open
 
         @self.parent_app.server.route('/downloads/<path:filename>')
         def download_file(filename):
 
             return flask.send_from_directory(
-                self.downloads_path,
-                filename,
+                directory=self.downloads_path,
+                filename=filename,
                 as_attachment=True
             )
 

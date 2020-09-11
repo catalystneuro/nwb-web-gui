@@ -248,7 +248,10 @@ class MetadataForm(dbc.Card):
         else:
             self.id = key
 
-        header_text = self.id.split('-')[-1]
+        if 'title' in schema:
+            header_text = schema['title']
+        else:
+            header_text = self.id.split('-')[-1]
         self.header = dbc.CardHeader([html.H4(header_text, className="title_" + key)])
         self.body = dbc.CardBody([])
         self.children = [self.header, self.body]
