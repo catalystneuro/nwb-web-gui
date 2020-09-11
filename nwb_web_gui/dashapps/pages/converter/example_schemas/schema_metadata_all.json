@@ -359,6 +359,7 @@
 
     "TimeSeries": {
       "tag": "pynwb.base.TimeSeries",
+      "title": "TimeSeries", 
       "type": "object",
       "required": ["name"],
       "properties": {
