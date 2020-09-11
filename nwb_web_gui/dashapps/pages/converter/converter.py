@@ -164,6 +164,16 @@ class ConverterForms(html.Div):
             ], style={'min-height': '110vh'})
         ]
 
+        '''
+        output_list = []
+        for v in self.parent_app.data_to_field.values():
+            if v['compound_id']['data_type'] != 'link':
+                if v['compound_id']['data_type'] == 'tags':
+                    output_list.append(Output(v['compound_id'], 'injectedTags'))
+                else:
+                    output_list.append(Output(v['compound_id'], 'value'))
+        '''
+
         # Create Outputs for the callback that updates Forms values
         self.update_forms_callback_outputs = [Output(v['compound_id'], 'value') for v in self.parent_app.data_to_field.values() if v['compound_id']['data_type'] != 'link']
         self.update_forms_callback_outputs.append(Output('button_refresh', 'n_clicks'))
@@ -238,6 +248,9 @@ class ConverterForms(html.Div):
                     yaml_data = yaml.load(bs4decode, Loader=yaml.BaseLoader)
                     self.metadata_json_data = yaml_data
                     self.metadata_forms.update_form_dict_values(data=self.metadata_json_data)
+
+                for v in self.parent_app.data_to_field.values():
+                    print(v['value'])                    
                 output = [v['value'] for v in self.parent_app.data_to_field.values() if v['compound_id']['data_type'] != 'link']
                 output.append(1)
                 return output

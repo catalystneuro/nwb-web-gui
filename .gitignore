@@ -33,6 +33,7 @@ MANIFEST
 files
 oephys_dataset_original
 temp_voila_notebook.ipynb
+metadata_example_full_required.json
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
