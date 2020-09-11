@@ -1,15 +1,15 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://github.com/catalystneuro/nwb-conversion-tools/tree/master/nwb_conversion_tools/schemas/source_schema.json",
+  "$id": "source.schema.json",
   "title": "Source data and conversion options",
   "description": "Schema for the source data and conversion options",
   "version": "0.1.0",
   "type": "object",
   "additionalProperties": false,
   "properties": {
-    "additionalProperties": false,
-    "source files": {
-      "additionalProperties": false,
+
+    "source_files": {
+      "title": "Source Files",
       "type": "object",
       "required": [
         "raw_data",
@@ -26,7 +26,9 @@
         }
       }
     },
-    "conversion options": {
+
+    "conversion_options": {
+      "title": "Conversion Options",
       "type": "object",
       "properties": {
         "add_raw": {

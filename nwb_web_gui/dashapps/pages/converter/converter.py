@@ -3,6 +3,7 @@ import dash_html_components as html
 import dash_core_components as dcc
 from dash.dependencies import Input, Output, State, ALL, MATCH
 import dash_bootstrap_components as dbc
+import sd_material_ui as sdm
 import json
 import yaml
 import base64
@@ -27,7 +28,7 @@ class ConverterForms(html.Div):
         with open(source_schema_path, 'r') as inp:
             self.source_json_schema = json.load(inp)
 
-        metadata_schema_path = examples_path / 'schema_metadata.json'
+        metadata_schema_path = examples_path / 'schema_metadata_all.json'
         with open(metadata_schema_path, 'r') as inp:
             self.metadata_json_schema = json.load(inp)
 
@@ -50,8 +51,29 @@ class ConverterForms(html.Div):
 
         self.children = [
             dbc.Container([
+                # sdm.Drawer(
+                #     id='left-drawer',
+                #     open=True,
+                #     children=[
+                #         html.H4(children='Source Data'),
+                #         html.Ul(children=[
+                #             html.Li(children=['Source Files']),
+                #             html.Li(children=['Conversion Options'])
+                #         ]),
+                #         html.H4(children='Metadata'),
+                #         html.Ul(children=[
+                #             html.Li(children=['NWBFile']),
+                #             html.Li(children=['Subject']),
+                #             html.Li(children=['Ecephys']),
+                #             html.Li(children=['Ophys']),
+                #             html.Li(children=['Behavior'])
+                #         ]),
+                #         html.H4(children='Conversion')
+                #     ]
+                # ),
                 dbc.Row([
-                    dbc.Col(html.H4('Input Files'), width={'size': 12}, style={'text-align': 'left'}),
+                    html.Br(),
+                    dbc.Col(html.H4('Source data'), width={'size': 12}, style={'text-align': 'left'}),
                     dbc.Col(source_forms, width={'size': 12}),
                     dbc.Col(
                         dbc.Button('Get Metadata Form', id='get_metadata_btn'),
@@ -109,16 +131,36 @@ class ConverterForms(html.Div):
                         )
                     )
                 ]),
-                dbc.Row([
-                    dbc.Col(self.metadata_forms, width={'size': 12})
-                ], style={'margin-top': '1%'}),
+                dbc.Row(
+                    [dbc.Col(self.metadata_forms, width={'size': 12})],
+                    style={'margin-top': '1%'}
+                ),
                 dbc.Row(modal),
                 html.Div(id='hidden', style={'display': 'none'}),
                 dbc.Row(
                     dbc.Col(
-                        dbc.Button('Run Conversion', id='run_conversion_button'), width={'size': 11}
-                    ), style={'text-align': 'right', 'margin-top': '1%'}
+                        dbc.InputGroup(
+                            [
+                                dbc.InputGroupAddon("Output file: ", addon_type="prepend"),
+                                dbc.Input(id="output-nwbfile-name", placeholder="filename.nwb"),
+                                dbc.InputGroupAddon(
+                                    dbc.Button('Run Conversion', id='button_run_conversion'),
+                                    addon_type="append",
+                                ),
+                            ]
+                        ),
+                        width={'size': 11}
+                    ),
+                    style={'text-align': 'left', 'margin-top': '1%'}
                 ),
+                dbc.Textarea(
+                    id='text-conversion-results',
+                    className='string_input',
+                    bs_size="lg",
+                    readOnly=True,
+                    style={'font-size': '16px'}
+                ),
+                html.Br()
             ], style={'min-height': '110vh'})
         ]
 
@@ -355,6 +397,16 @@ class ConverterForms(html.Div):
                 filename=filename,
                 as_attachment=True
             )
+
+        @self.parent_app.callback(
+            Output("text-conversion-results", "value"),
+            [Input('button_run_conversion', 'n_clicks')]
+        )
+        def run_conversion(click):
+            """Run conversion """
+            if click:
+                return "This will call NWBConverter.run_conversion() and print results."
+            return ""
 
 
     @staticmethod
