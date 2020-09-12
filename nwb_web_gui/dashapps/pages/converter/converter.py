@@ -9,7 +9,6 @@ import json
 import yaml
 import base64
 from .converter_utils.forms import SchemaFormContainer
-from nwb_web_gui.dashapps.utils.make_components import make_modal
 from pathlib import Path
 import flask
 
@@ -18,8 +17,6 @@ class ConverterForms(html.Div):
     def __init__(self, parent_app):
         super().__init__([])
         self.parent_app = parent_app
-        self.current_modal_source = ''
-        modal = make_modal(parent_app)
 
         examples_path = Path(__file__).parent.absolute() / 'example_schemas'
         self.downloads_path = Path(__file__).parent.parent.parent.parent.parent.absolute() / 'downloads'
@@ -78,20 +75,20 @@ class ConverterForms(html.Div):
                     html.Br(),
                     dbc.Col(self.source_forms, width={'size': 12}),
                     dbc.Col(
-                        dbc.Button('Get Metadata Form', id='get_metadata_btn'),
+                        dbc.Button('Get Metadata Form', id='get_metadata_btn', color='dark'),
                         style={'justify-content': 'left', 'text-align': 'left', 'margin-top': '1%'},
                         width={'size': 4}
                     )
                 ]),
                 dbc.Row([
                     dbc.Col(
-                        dcc.Upload(dbc.Button('Load Metadata'), id='button_load_metadata'),
+                        dcc.Upload(dbc.Button('Load Metadata', color='dark'), id='button_load_metadata'),
                         width={'size': 2},
                         style={'justify-content': 'left', 'text-align': 'left', 'margin-top': '1%'},
                     ),
                     dbc.Col(
                         html.Div([
-                            dbc.Button('Export Metadata', id='button_export_metadata'),
+                            dbc.Button('Export Metadata', id='button_export_metadata', color='dark'),
                             dbc.Popover(
                                 [
                                     dbc.PopoverBody([
@@ -117,7 +114,7 @@ class ConverterForms(html.Div):
                         style={'justify-content': 'left', 'text-align': 'left', 'margin-top': '1%'},
                     ),
                     dbc.Col(
-                        dbc.Button('Refresh', id='button_refresh'),
+                        dbc.Button('Refresh', id='button_refresh', color='dark'),
                         width={'size': 2},
                         style={'justify-content': 'left', 'text-align': 'left', 'margin-top': '1%'},
                     )
@@ -137,7 +134,6 @@ class ConverterForms(html.Div):
                     [dbc.Col(self.metadata_forms, width={'size': 12})],
                     style={'margin-top': '1%'}
                 ),
-                dbc.Row(modal),
                 html.Div(id='hidden', style={'display': 'none'}),
                 dbc.Row(
                     dbc.Col(
@@ -165,61 +161,6 @@ class ConverterForms(html.Div):
                 html.Br()
             ], style={'min-height': '110vh'})
         ]
-
-        @self.parent_app.callback(
-            Output('modal_explorer', 'is_open'),
-            [Input({'type': 'source_explorer', 'index': ALL}, 'n_clicks'), Input('close_explorer_modal', 'n_clicks')],
-            [State("modal_explorer", "is_open")]
-        )
-        def open_explorer(click_open, click_close, is_open):
-            """
-            Get selected FileExplorer index to use 
-            as reference in writing specified path
-            """
-
-            ctx = dash.callback_context
-            source = ctx.triggered[0]['prop_id'].split('.')[0]
-
-            if 'index' in source:
-                dict_source = json.loads(source)
-                self.current_modal_source = dict_source['index']
-
-            if source != '' and (any(click_open) or click_close):
-                return not is_open
-            else:
-                return is_open
-
-        @self.parent_app.callback(
-            Output('sourcedata-trigger-update-forms-values', 'children'),
-            [Input('submit_file_browser_modal', 'n_clicks')],
-            [State('chosen_file_modal', 'value')] +
-            [State(v['compound_id'], 'id') for v in self.source_forms.data.values() if v['compound_id']['data_type'] != 'boolean']
-        )
-        def change_path_values(click, input_value, *ids):
-            """
-            Take path value in file explorer modal and 
-            write to the right string input in source forms
-            """
-            ctx = dash.callback_context
-            source = ctx.triggered[0]['prop_id'].split('.')[0]
-
-            if source == 'submit_file_browser_modal':
-                for e in ids:
-                    if e['index'] == self.current_modal_source:
-                        splited_keys = e['index'].split('-')
-                        master_key_name = splited_keys[0]
-                        field_name = splited_keys[-1]
-                        for e in reversed(splited_keys):
-                            if e == field_name:
-                                curr_dict = {field_name: input_value}
-                            else:
-                                curr_dict = {e: curr_dict}
-
-                        self.source_forms.update_data(data=curr_dict)
-                        output = str(np.random.rand())
-                        return output
-            output = []
-            return output
 
         @self.parent_app.callback(
             Output('metadata-trigger-update-forms-values', 'children'),

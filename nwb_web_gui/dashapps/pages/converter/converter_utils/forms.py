@@ -3,97 +3,9 @@ import dash_html_components as html
 import dash_core_components as dcc
 import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output, State, ALL, MATCH
-from dash_cool_components import KeyedFileBrowser, TagInput, DateTimePicker
+from dash_cool_components import TagInput, DateTimePicker
+from nwb_web_gui.dashapps.utils.make_components import make_filebrowser_modal
 import warnings
-
-
-# class SourceFormItem(dbc.FormGroup):
-#     """Custom form group instance"""
-#     def __init__(self, label, form_input, add_explorer, explorer_id, add_required):
-#         super().__init__([])
-#
-#         if add_explorer:
-#             explorer_btn = dbc.Button(
-#                 id={'type': 'source_explorer', 'index': explorer_id},
-#                 children=[html.I(className="far fa-folder")],
-#                 style={'background-color': 'transparent', 'color': 'black', 'border': 'none'}
-#             )
-#             if add_required:
-#                 self.children = dbc.Row([
-#                     dbc.Col([label, html.Span('*', style={'color': 'red'})], width={'size': 2}),
-#                     dbc.Col(dbc.InputGroup(
-#                         [
-#                             form_input,
-#                             dbc.InputGroupAddon(explorer_btn, addon_type="append"),
-#                         ]
-#                     )),
-#                 ])
-#             else:
-#                 self.children = dbc.Row([
-#                     dbc.Col(label, width={'size': 2}),
-#                     dbc.Col(form_input, width={'size': 8}, style={'justify-content': 'center', 'text-align': 'center'}),
-#                     dbc.Col(explorer_btn, width={'size': 2}, style={'text-align': 'left'})
-#                 ])
-#         else:
-#             if add_required:
-#                 self.children = dbc.Row([
-#                     dbc.Col([label, html.Span('*', style={'color': 'red'})], width={'size': 2}),
-#                     dbc.Col(form_input, width={'size': 10}, style={'justify-content': 'left', 'text-align': 'left'})
-#                 ])
-#             else:
-#                 self.children = dbc.Row([
-#                     dbc.Col(label, width={'size': 2}),
-#                     dbc.Col(form_input, width={'size': 10}, style={'justify-content': 'left', 'text-align': 'left'})
-#                 ])
-#
-#
-# class SourceForm(dbc.Card):
-#     def __init__(self, required, fields, parent_name):
-#         super().__init__([])
-#
-#         self.required_fields = required
-#         self.parent_name = parent_name
-#
-#         parent = self.parent_name.replace(' ', '_')
-#
-#         all_inputs = []
-#         for k, v in fields.items():
-#             label = dbc.Label(k)
-#             input_id = f'input_{parent}_{k}'
-#             explorer_id = input_id.replace('input', 'explorer')
-#             add_required = k in self.required_fields
-#
-#             if v['type'] == 'string':
-#                 form_input = dbc.Input(
-#                     id={'type': 'source_string_input', 'index': input_id},
-#                     className='string_input',
-#                     type='input'
-#                 )
-#             elif v['type'] == 'boolean':
-#                 form_input = dbc.Checkbox(
-#                     id={'type': 'source_boolean_input', 'index': input_id}
-#                 )
-#             if 'format' in v.keys():
-#                 if v['format'] == 'file' or v['format'] == 'directory':
-#                     add_explorer = True
-#                     explorer_id = input_id.replace('input', 'explorer')
-#                 else:
-#                     add_explorer = False
-#                     explorer_id = ''
-#             else:
-#                 add_explorer = False
-#                 explorer_id = ''
-#
-#             form_item = SourceFormItem(label, form_input, add_explorer, explorer_id, add_required)
-#             all_inputs.append(form_item)
-#
-#         form = dbc.Form(all_inputs)
-#         self.children = [
-#             dbc.CardHeader(self.parent_name.title(), style={'text-align': 'left'}),
-#             dbc.CardBody(form)
-#         ]
-#
-#         self.style = {'margin-top': '1%'}
 
 
 class SchemaFormItem(dbc.FormGroup):
@@ -147,10 +59,7 @@ class SchemaFormItem(dbc.FormGroup):
 
         elif 'enum' in value:
             input_values = [{'label': e, 'value': e} for e in value['enum']]
-            # if 'default' in value:
-            default = value['default']
-            # else:
-            #     default = ''
+            default = value.get('default', '')
             compound_id['data_type'] = 'choicestring'
             field_input = dcc.Dropdown(
                 id=compound_id,
@@ -194,21 +103,36 @@ class SchemaFormItem(dbc.FormGroup):
                 style={'font-size': '16px'}
             )
 
-        elif 'format' in value and value['format'] in ['file', 'dir']:
+        elif 'format' in value and value['format'] in ['file', 'directory']:
             compound_id['data_type'] = 'string'
             input_path = dbc.Input(
                 id=compound_id,
                 className='string_input',
                 type='input'
             )
-            explorer_btn = dbc.Button(
-                id={'type': 'source_explorer', 'index': compound_id['index']},
+            btn_id = "open-filebrowser-" + compound_id['index']
+            btn_open_filebrowser = dbc.Button(
+                id=btn_id,
                 children=[html.I(className="far fa-folder")],
                 style={'background-color': 'transparent', 'color': 'black', 'border': 'none'}
             )
-            field_input = dbc.InputGroup([
-                input_path,
-                dbc.InputGroupAddon(explorer_btn, addon_type="append"),
+            modal_id = "modal-filebrowser-" + compound_id['index']
+            modal = make_filebrowser_modal(
+                parent_app=self.parent.container.parent_app,
+                modal_id=modal_id
+            )
+            self.register_filebrowser_callbacks(
+                modal_id=modal_id,
+                button_id=btn_id,
+                input_id=compound_id
+            )
+
+            field_input = html.Div([
+                dbc.InputGroup([
+                    input_path,
+                    dbc.InputGroupAddon(btn_open_filebrowser, addon_type="append"),
+                ]),
+                modal
             ])
 
         elif value['type'] == 'boolean':
@@ -263,6 +187,36 @@ class SchemaFormItem(dbc.FormGroup):
         ])
 
         return input_and_tooltip
+
+    def register_filebrowser_callbacks(self, modal_id, button_id, input_id):
+        """Register callbacks for filebroswer component"""
+        @self.parent.container.parent_app.callback(
+            Output(modal_id, 'is_open'),
+            [
+                Input(button_id, 'n_clicks'),
+                Input(modal_id + "-close", 'n_clicks')
+            ],
+            [State(modal_id, 'is_open')]
+        )
+        def toggle_filebrowser(click_open, click_close, is_open):
+            """Toggle modal open/close"""
+            if click_open or click_close:
+                return not is_open
+            else:
+                return is_open
+
+        @self.parent.container.parent_app.callback(
+            Output(input_id, 'value'),
+            [Input('submit-filebrowser-' + modal_id, 'n_clicks')],
+            [State('chosen-filebrowser-' + modal_id, 'value')]
+        )
+        def get_path_values(click, chosen_path):
+            """
+            Get path value from file browser and write to the string input in form item
+            """
+            if click:
+                return chosen_path
+            return ''
 
 
 class SchemaForm(dbc.Card):
