@@ -222,9 +222,9 @@ class SchemaFormItem(dbc.FormGroup):
             frontend components updates
             """
             if click:
-                # Update Container internal dictionary of values
-                self.parent.container.update_data(data={trigger_id['index']: chosen_path})
-
+                # Update Container internal dictionary value
+                self.parent.container.data[trigger_id['index']]['value'] = chosen_path
+                # Triggers components update
                 return str(np.random.rand())
             return ''
 
@@ -356,8 +356,6 @@ class SchemaFormContainer(html.Div):
             if v['compound_id']['data_type'] != 'link':
                 if v['compound_id']['data_type'] == 'boolean':
                     self.update_forms_values_callback_outputs.append(Output(v['compound_id'], 'checked'))
-                elif v['compound_id']['data_type'] == 'path':
-                    print(v)
                 else:
                     self.update_forms_values_callback_outputs.append(Output(v['compound_id'], 'value'))
         self.update_forms_values_callback_outputs.append(Output(id + '-trigger-update-links-values', 'children'))
@@ -376,7 +374,7 @@ class SchemaFormContainer(html.Div):
                 Input({'type': 'internal-trigger-update-forms-values', 'index': ALL}, 'children')
             ]
         )
-        def update_forms_values(trigger_external, trigger_internal):
+        def update_forms_values(*triggers):
             """Updates forms values (except links)"""
             output = [v['value'] for v in self.data.values() if v['compound_id']['data_type'] != 'link']
             output.append(1)
