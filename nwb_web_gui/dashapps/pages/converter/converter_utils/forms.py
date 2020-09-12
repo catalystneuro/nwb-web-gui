@@ -371,12 +371,23 @@ class SchemaFormContainer(html.Div):
             self.update_forms_values_callback_outputs,
             [
                 Input(self.id + '-external-trigger-update-forms-values', 'children'),
-                Input({'type': 'internal-trigger-update-forms-values', 'index': ALL}, 'children')
-            ]
+                #Input({'type': 'internal-trigger-update-forms-values', 'index': ALL}, 'children')
+            ],
+            [State(v['compound_id'], 'value') for v in self.data.values() if (v['compound_id']['data_type'] != 'link' and v['compound_id']['data_type'] != 'boolean')] + 
+            [State(v['compound_id'], 'checked') for v in self.data.values() if (v['compound_id']['data_type'] != 'link' and v['compound_id']['data_type'] == 'boolean')]
+
         )
-        def update_forms_values(*triggers):
+        def update_forms_values(trigger, *states):
             """Updates forms values (except links)"""
-            output = [v['value'] for v in self.data.values() if v['compound_id']['data_type'] != 'link']
+
+            curr_data = [v['value'] for v in self.data.values() if v['compound_id']['data_type'] != 'link']
+            output = []
+            for i, v in enumerate(curr_data):
+                # find a way to generalize this to not depend on a specific trigger
+                if states[i] is not None and trigger == 'refresh_trigger':
+                    output.append(states[i])
+                else:
+                    output.append(v)
             output.append(1)
             return output
 

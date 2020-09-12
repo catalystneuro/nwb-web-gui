@@ -164,10 +164,10 @@ class ConverterForms(html.Div):
 
         @self.parent_app.callback(
             Output('metadata-external-trigger-update-forms-values', 'children'),
-            [Input('button_load_metadata', 'contents')],
+            [Input('button_load_metadata', 'contents'), Input('button_refresh', 'n_clicks')],
             [State('button_load_metadata', 'filename')]
         )
-        def update_forms_values_metadata(contents, filename):
+        def update_forms_values_metadata(contents, refresh, filename):
             """
             Updates forms values (except links) when:
             - Forms are created (receives metadata dict from Converter)
@@ -191,9 +191,11 @@ class ConverterForms(html.Div):
                     yaml_data = yaml.load(bs4decode, Loader=yaml.BaseLoader)
                     self.metadata_json_data = yaml_data
                     self.metadata_forms.update_data(data=self.metadata_json_data)
-
                 # Trigger update of React components
                 output = str(np.random.rand())
+                return output
+            elif trigger_source == 'button_refresh':
+                output = 'refresh_trigger'
                 return output
             else:
                 output = []
@@ -235,14 +237,7 @@ class ConverterForms(html.Div):
                         field_value = form_values[i]
                         # Check for empty required entries
                         if v['required']:
-                            if form_values[i] is None:
-                                raise_alarm = True
-                            elif isinstance(form_values[i], str):
-                                if form_values[i].isspace() or form_values[i] == '':
-                                    raise_alarm = True
-                                else:
-                                    raise_alarm = False
-                            elif form_values[i] == '':
+                            if form_values[i] is None or (isinstance(form_values[i], str) and form_values[i].isspace()) or form_values[i] == '':
                                 raise_alarm = True
                             else:
                                 raise_alarm = False
