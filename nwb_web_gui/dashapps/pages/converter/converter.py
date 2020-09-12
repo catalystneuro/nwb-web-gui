@@ -236,18 +236,24 @@ class ConverterForms(html.Div):
                         # Check for empty required entries
                         if v['required']:
                             if form_values[i] is None:
-                                empty_required_fields.append(k)
-                                alert_children.append(html.A(
-                                    k,
-                                    href="#" + 'wrapper-' + v['compound_id']['index'] + '-' + v['compound_id']['type'],
-                                    className="alert-link"
-                                ))
-                                alert_children.append(html.Hr())
+                                raise_alarm = True
                             elif isinstance(form_values[i], str):
                                 if form_values[i].isspace() or form_values[i] == '':
-                                    empty_required_fields.append(k)
+                                    raise_alarm = True
+                                else:
+                                    raise_alarm = False
                             elif form_values[i] == '':
-                                empty_required_fields.append(k)
+                                raise_alarm = True
+                            else:
+                                raise_alarm = False
+                        if raise_alarm:
+                            empty_required_fields.append(k)
+                            alert_children.append(html.A(
+                                k,
+                                href="#" + 'wrapper-' + v['compound_id']['index'] + '-' + v['compound_id']['type'],
+                                className="alert-link"
+                            ))
+                            alert_children.append(html.Hr())
                         # Ignore non-required empty fields
                         if field_value not in ['', None]:
                             v['value'] = field_value
