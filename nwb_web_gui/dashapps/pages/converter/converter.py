@@ -163,7 +163,7 @@ class ConverterForms(html.Div):
         ]
 
         @self.parent_app.callback(
-            Output('metadata-trigger-update-forms-values', 'children'),
+            Output('metadata-external-trigger-update-forms-values', 'children'),
             [Input('button_load_metadata', 'contents')],
             [State('button_load_metadata', 'filename')]
         )

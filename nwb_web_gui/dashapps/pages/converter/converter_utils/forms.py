@@ -5,6 +5,7 @@ import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output, State, ALL, MATCH
 from dash_cool_components import TagInput, DateTimePicker
 from nwb_web_gui.dashapps.utils.make_components import make_filebrowser_modal
+import numpy as np
 import warnings
 
 
@@ -104,7 +105,7 @@ class SchemaFormItem(dbc.FormGroup):
             )
 
         elif 'format' in value and value['format'] in ['file', 'directory']:
-            compound_id['data_type'] = 'string'
+            compound_id['data_type'] = 'path'
             input_path = dbc.Input(
                 id=compound_id,
                 className='string_input',
@@ -121,10 +122,15 @@ class SchemaFormItem(dbc.FormGroup):
                 parent_app=self.parent.container.parent_app,
                 modal_id=modal_id
             )
+            # Create internal trigger component and add it to parent Container
+            trigger_id = {'type': 'internal-trigger-update-forms-values', 'index': compound_id['index']}
+            trigger = html.Div(id=trigger_id, style={'display': 'none'})
+            self.parent.container.children_triggers.append(trigger)
+
             self.register_filebrowser_callbacks(
                 modal_id=modal_id,
                 button_id=btn_id,
-                input_id=compound_id
+                trigger_id=trigger_id
             )
 
             field_input = html.Div([
@@ -188,7 +194,7 @@ class SchemaFormItem(dbc.FormGroup):
 
         return input_and_tooltip
 
-    def register_filebrowser_callbacks(self, modal_id, button_id, input_id):
+    def register_filebrowser_callbacks(self, modal_id, button_id, trigger_id):
         """Register callbacks for filebroswer component"""
         @self.parent.container.parent_app.callback(
             Output(modal_id, 'is_open'),
@@ -206,16 +212,20 @@ class SchemaFormItem(dbc.FormGroup):
                 return is_open
 
         @self.parent.container.parent_app.callback(
-            Output(input_id, 'value'),
+            Output(trigger_id, 'children'),
             [Input('submit-filebrowser-' + modal_id, 'n_clicks')],
             [State('chosen-filebrowser-' + modal_id, 'value')]
         )
         def get_path_values(click, chosen_path):
             """
-            Get path value from file browser and write to the string input in form item
+            Get path value from file browser, update Container data and trigger
+            frontend components updates
             """
             if click:
-                return chosen_path
+                # Update Container internal dictionary of values
+                self.parent.container.update_data(data={trigger_id['index']: chosen_path})
+
+                return str(np.random.rand())
             return ''
 
 
@@ -309,8 +319,8 @@ class SchemaFormContainer(html.Div):
     Root Container for Schema Forms
 
     IDs exposed for external trigger of update functions:
-    id + '-trigger-update-forms-values'
-    id + '-trigger-update-links-values'
+    id + '-external-trigger-update-forms-values'
+    id + '-external-trigger-update-links-values'
     """
     def __init__(self, id, schema, parent_app):
         super().__init__([])
@@ -319,6 +329,13 @@ class SchemaFormContainer(html.Div):
         self.schema = schema
         self.parent_app = parent_app
         self.data = {}
+
+        # Hidden componentes that serve to trigger callbacks
+        self.children_triggers = [
+            html.Div(id=id + '-external-trigger-update-forms-values', style={'display': 'none'}),
+            html.Div(id=id + '-trigger-update-links-values', style={'display': 'none'}),
+            html.Div(id=id + '-output-placeholder-links-values', style={'display': 'none'})
+        ]
 
         # Construct children forms
         self.children_forms = []
@@ -331,13 +348,7 @@ class SchemaFormContainer(html.Div):
                 )
                 self.children_forms.append(iform)
 
-        self.children = []
-        self.children += self.children_forms
-        self.children += [
-            html.Div(id=id + '-trigger-update-forms-values', style={'display': 'none'}),
-            html.Div(id=id + '-trigger-update-links-values', style={'display': 'none'}),
-            html.Div(id=id + '-output-placeholder-links-values', style={'display': 'none'})
-        ]
+        self.children = self.children_forms + self.children_triggers
 
         # Create Outputs for the callback that updates Forms values
         self.update_forms_values_callback_outputs = []
@@ -345,6 +356,8 @@ class SchemaFormContainer(html.Div):
             if v['compound_id']['data_type'] != 'link':
                 if v['compound_id']['data_type'] == 'boolean':
                     self.update_forms_values_callback_outputs.append(Output(v['compound_id'], 'checked'))
+                elif v['compound_id']['data_type'] == 'path':
+                    print(v)
                 else:
                     self.update_forms_values_callback_outputs.append(Output(v['compound_id'], 'value'))
         self.update_forms_values_callback_outputs.append(Output(id + '-trigger-update-links-values', 'children'))
@@ -358,9 +371,12 @@ class SchemaFormContainer(html.Div):
 
         @self.parent_app.callback(
             self.update_forms_values_callback_outputs,
-            [Input(self.id + '-trigger-update-forms-values', 'children')]
+            [
+                Input(self.id + '-external-trigger-update-forms-values', 'children'),
+                Input({'type': 'internal-trigger-update-forms-values', 'index': ALL}, 'children')
+            ]
         )
-        def update_forms_values(trigger):
+        def update_forms_values(trigger_external, trigger_internal):
             """Updates forms values (except links)"""
             output = [v['value'] for v in self.data.values() if v['compound_id']['data_type'] != 'link']
             output.append(1)

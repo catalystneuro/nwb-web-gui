@@ -174,7 +174,7 @@ class FileBrowserComponent(html.Div):
         @self.parent_app.callback(
             [
                 Output("collapse_file_browser_" + id_suffix, "is_open"),
-                Output("chosen_file_" + id_suffix, 'value')
+                Output("chosen-filebrowser-" + id_suffix, 'value')
             ],
             [
                 Input("button_file_browser_" + id_suffix, "n_clicks"),
