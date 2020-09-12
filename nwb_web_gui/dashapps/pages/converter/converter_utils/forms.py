@@ -10,14 +10,14 @@ import warnings
 
 
 class SchemaFormItem(dbc.FormGroup):
-    def __init__(self, label, value, input_id, parent, add_required=False):
+    def __init__(self, label, value, input_id, parent, required=False):
         super().__init__([])
 
         self.parent = parent
 
-        field_input = self.get_field_input(value=value, input_id=input_id, add_required=add_required)
+        field_input = self.get_field_input(value=value, input_id=input_id, required=required)
 
-        if add_required:
+        if required:
             self.children = [
                 dbc.Row([
                     dbc.Col([label, html.Span('*', style={'color': 'red'})], width={'size': 3}),
@@ -32,7 +32,7 @@ class SchemaFormItem(dbc.FormGroup):
                 ])
             ]
 
-    def get_field_input(self, value, input_id, description=None, add_required=False):
+    def get_field_input(self, value, input_id, description=None, required=False):
         """
         Get component for user interaction. Types:
         - string
@@ -173,7 +173,7 @@ class SchemaFormItem(dbc.FormGroup):
                     'owner_class': str(owner_class),
                     'target': value.get('target', None),
                     'value': None,
-                    'required': add_required
+                    'required': required
                 }
             })
 
@@ -309,7 +309,7 @@ class SchemaForm(dbc.Card):
                 value=value,
                 input_id=input_id,
                 parent=self,
-                add_required=required
+                required=required
             )
             self.body.children.append(item)
 

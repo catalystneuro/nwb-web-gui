@@ -122,7 +122,7 @@ class ConverterForms(html.Div):
                 dbc.Row([
                     dbc.Col(
                         dbc.Alert(
-                            "Required fields missing",
+                            children=[],
                             id="alert_required",
                             dismissable=True,
                             is_open=False,
@@ -200,7 +200,11 @@ class ConverterForms(html.Div):
                 return output
 
         @self.parent_app.callback(
-            [Output("popover_export_metadata", "is_open"), Output('alert_required', 'is_open')],
+            [
+                Output("popover_export_metadata", "is_open"),
+                Output('alert_required', 'is_open'),
+                Output('alert_required', 'children'),
+            ],
             [Input('button_export_metadata', 'n_clicks')],
             [State("popover_export_metadata", "is_open"), State('alert_required', 'is_open')] +
             [State(v['compound_id'], 'value') for v in self.metadata_forms.data.values()]
@@ -219,21 +223,32 @@ class ConverterForms(html.Div):
             if click:
                 # If popover was opened, just close it
                 if fileoption_is_open:
-                    return not fileoption_is_open, req_is_open
+                    return not fileoption_is_open, req_is_open, []
                 # If popover was closed, make files and open options
                 else:
+                    # Read data current from each field
+                    alert_children = [
+                        html.H4("There are missing required fields:", className="alert-heading"),
+                        html.Hr()
+                    ]
                     for i, (k, v) in enumerate(self.metadata_forms.data.items()):
-                        # Read data current from each field
                         field_value = form_values[i]
+                        # Check for empty required entries
                         if v['required']:
                             if form_values[i] is None:
                                 empty_required_fields.append(k)
+                                alert_children.append(html.A(
+                                    k,
+                                    href="#" + 'wrapper-' + v['compound_id']['index'] + '-' + v['compound_id']['type'],
+                                    className="alert-link"
+                                ))
+                                alert_children.append(html.Hr())
                             elif isinstance(form_values[i], str):
                                 if form_values[i].isspace() or form_values[i] == '':
                                     empty_required_fields.append(k)
                             elif form_values[i] == '':
                                 empty_required_fields.append(k)
-                        # Ignore empty fields
+                        # Ignore non-required empty fields
                         if field_value not in ['', None]:
                             v['value'] = field_value
                             # Organize item inside the output dictionary
@@ -255,7 +270,7 @@ class ConverterForms(html.Div):
 
                     # If required fields missing return alert
                     if len(empty_required_fields) > 0:
-                        return fileoption_is_open, not req_is_open
+                        return fileoption_is_open, not req_is_open, alert_children
 
                     # Make temporary files on server side
                     # JSON
@@ -268,8 +283,8 @@ class ConverterForms(html.Div):
                     with open(exported_file_path, 'w') as outfile:
                         yaml.dump(output, outfile, default_flow_style=False)
 
-                    return not fileoption_is_open, req_is_open
-            return fileoption_is_open, req_is_open
+                    return not fileoption_is_open, req_is_open, []
+            return fileoption_is_open, req_is_open, []
 
         @self.parent_app.server.route('/downloads/<path:filename>')
         def download_file(filename):
