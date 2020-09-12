@@ -381,15 +381,22 @@ class SchemaFormContainer(html.Div):
             """Updates forms values (except links)"""
 
             curr_data = [v['value'] for v in self.data.values() if v['compound_id']['data_type'] != 'link']
-            output = []
-            for i, v in enumerate(curr_data):
-                # find a way to generalize this to not depend on a specific trigger
-                if states[i] is not None and trigger == 'refresh_trigger':
-                    output.append(states[i])
-                else:
-                    output.append(v)
-            output.append(1)
-            return output
+            if trigger != 'refresh_trigger':
+                output = curr_data
+                output.append(1)
+
+                return output
+            else:
+                output = []
+                for i, v in enumerate(curr_data):
+                    # find a way to generalize this to not depend on a specific trigger
+                    if states[i] is not None:
+                        output.append(states[i])
+                    else:
+                        output.append(v)
+                output.append(1)
+
+                return output
 
         @self.parent_app.callback(
             self.update_forms_links_callback_outputs,
