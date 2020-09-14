@@ -7,6 +7,7 @@ from dash_cool_components import KeyedFileBrowser
 import os
 from pathlib import Path
 from flask import current_app as app
+import dash
 
 
 def make_file_picker(id_suffix):
@@ -182,9 +183,13 @@ class FileBrowserComponent(html.Div):
             [State("collapse_file_browser_" + id_suffix, "is_open")],
         )
         def toggle_collapse(n, path, is_open):
+
+            ctx = dash.callback_context
+            trigger_source = ctx.triggered[0]['prop_id'].split('.')[0]
+
             if path is None:
                 path = ''
-            if n:
+            if trigger_source == f'button_file_browser_{self.id_suffix}':
                 return not is_open, path
             return is_open, path
 
