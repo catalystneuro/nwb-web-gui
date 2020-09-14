@@ -3,11 +3,10 @@ import dash_html_components as html
 import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output, State
 from datetime import datetime
-#from file_explorer import FileExplorer
 from dash_cool_components import KeyedFileBrowser
 import os
 from pathlib import Path
-#from nwb_web_gui import FILES_PATH
+from flask import current_app as app
 
 
 def make_file_picker(id_suffix):
@@ -106,7 +105,6 @@ def make_json_file_buttons(id_suffix):
 
 def make_filebrowser_modal(parent_app, modal_id="modal-filebrowser"):
     """File Explorer Example"""
-    file_schema = [{'key': 'nwb_files/example_file.nwb', 'modified': datetime.utcnow(), 'size': 1.5 * 1024 * 1024}]
     explorer = FileBrowserComponent(
         parent_app=parent_app,
         id_suffix=modal_id
@@ -136,8 +134,9 @@ class FileBrowserComponent(html.Div):
         super().__init__([])
         self.parent_app = parent_app
         self.id_suffix = id_suffix
+
         if root_dir is None:
-            self.root_dir = '/home/vinicius/Área de Trabalho/Trabalhos/nwb-web-gui/files'
+            self.root_dir = app.config['EXPLORER_PATH']
         else:
             self.root_dir = root_dir
 
@@ -207,13 +206,15 @@ class FileBrowserComponent(html.Div):
         return explorer
 
     def make_dict_from_dir(self):
-        """
-        Creates a nested dictionary that represents the folder structure of rootdir
-        ref: https://code.activestate.com/recipes/577879-create-a-nested-dictionary-from-oswalk/
-        """
-        keys_list = []
 
+        keys_list = []
+        paths_list = []
         for path, dirs, files in os.walk(self.root_dir):
+            curr_path = path + '/'
+            if curr_path[0] == '/':
+                curr_path = curr_path[1:]
+            if curr_path not in paths_list:
+                paths_list.append(curr_path)
             if len(files) > 0:
                 for file in files:
                     aux_dict = {}
@@ -228,11 +229,20 @@ class FileBrowserComponent(html.Div):
                     aux_dict['size'] = size
 
                     keys_list.append(aux_dict)
-            elif len(files) == 0 and len(dirs) == 0:
-                aux_dict = {}
-                aux_dict['key'] = path + '/'
-                aux_dict['modified'] = None
-                aux_dict['size'] = 0
-                keys_list.append(aux_dict)
+
+        for path in paths_list:
+            aux_dict = dict()
+            aux_dict['key'] = str(path).replace("\\", '/')
+            aux_dict['modified'] = None
+            aux_dict['size'] = 0
+            keys_list.append(aux_dict)
+
+        # Simplify file explorer to start on the base path defined on config
+        spliter = Path(self.root_dir).parent.name
+        for e in keys_list:
+            splited = e['key'].split('nwb-web-gui')[1]
+            if splited.startswith('/'):
+                splited = splited[1:]
+                e['key'] = splited
 
         self.paths_tree = keys_list

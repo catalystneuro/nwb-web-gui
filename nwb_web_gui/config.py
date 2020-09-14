@@ -1,0 +1,1 @@
+EXPLORER_PATH = '/home/vinicius/Área de Trabalho/Trabalhos/nwb-web-gui/files'

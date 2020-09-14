@@ -4,6 +4,7 @@ from flask import Flask
 def init_app():
     """Construct core Flask application with embedded Dash app."""
     app = Flask(__name__, instance_relative_config=False)
+    app.config.from_pyfile('config.py')
     app.config.update(
         SEND_FILE_MAX_AGE_DEFAULT=0,
     )
