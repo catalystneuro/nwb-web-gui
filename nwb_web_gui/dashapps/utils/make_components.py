@@ -195,7 +195,7 @@ class FileBrowserComponent(html.Div):
                 dbc.Col(
                     KeyedFileBrowser(
                         id='keyedfilebrowser-' + self.id_suffix,
-                        value=dir_schema
+                        files=dir_schema
                     ),
                 ),
                 style={'justify-content': 'left'}

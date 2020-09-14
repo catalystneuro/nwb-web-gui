@@ -319,6 +319,10 @@ class ConverterForms(html.Div):
                 else:
                     ConverterForms._create_nested_dict(v, output[k], master_key_name)
             else:
-                output[k] = v
+                if isinstance(v, list):
+                    element = [e['displayValue'] for e in v]
+                else:
+                    element = v
+                output[k] = element
 
         return output

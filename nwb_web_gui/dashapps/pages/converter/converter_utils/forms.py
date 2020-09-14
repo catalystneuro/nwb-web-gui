@@ -356,6 +356,8 @@ class SchemaFormContainer(html.Div):
             if v['compound_id']['data_type'] != 'link':
                 if v['compound_id']['data_type'] == 'boolean':
                     self.update_forms_values_callback_outputs.append(Output(v['compound_id'], 'checked'))
+                elif v['compound_id']['data_type'] == 'tags':
+                    self.update_forms_values_callback_outputs.append(Output(v['compound_id'], 'injectedTags'))
                 else:
                     self.update_forms_values_callback_outputs.append(Output(v['compound_id'], 'value'))
         self.update_forms_values_callback_outputs.append(Output(id + '-trigger-update-links-values', 'children'))
@@ -382,7 +384,17 @@ class SchemaFormContainer(html.Div):
 
             states = states[1:]
 
-            curr_data = [v['value'] for v in self.data.values() if v['compound_id']['data_type'] != 'link']
+            #curr_data = [v['value'] for v in self.data.values() if v['compound_id']['data_type'] != 'link']
+
+            curr_data = list()
+            for v in self.data.values():
+                if v['compound_id']['data_type'] != 'link':
+                    if isinstance(v['value'], list):
+                        element = [{"index": i, "displayValue": e} for i, e in enumerate(v['value'])]
+                    else:
+                        element = v['value']
+                    curr_data.append(element)
+
             if trigger != 'refresh_trigger':
                 output = curr_data
                 output.append(1)
