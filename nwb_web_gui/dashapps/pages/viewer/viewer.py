@@ -1,5 +1,5 @@
 from nwb_web_gui.dashapps.utils.make_components import make_file_picker, FileBrowserComponent
-
+from flask import current_app as app
 import dash_core_components as dcc
 import dash_html_components as html
 import dash_bootstrap_components as dbc
@@ -30,7 +30,7 @@ class Viewer(html.Div):
         self.nwb_file = None
 
         # Viewer page layout
-        direxplorer = FileBrowserComponent(parent_app=parent_app, id_suffix='viewer')
+        self.direxplorer = FileBrowserComponent(parent_app=parent_app, id_suffix='viewer')
 
         self.children = [
             dbc.Toast(
@@ -40,7 +40,7 @@ class Viewer(html.Div):
                 duration=5000
             ),
             html.Br(),
-            direxplorer,
+            self.direxplorer,
             html.Br(),
             html.Div(id='voila_div', style={'justify-content': 'center', 'text-align': 'center'}),
         ]
@@ -52,10 +52,17 @@ class Viewer(html.Div):
                 Output("toast_loadedfile_viewer", "children"),
                 Output('voila_div', 'children')
             ],
-            [Input('submit_file_browser_viewer', component_property='n_clicks')],
-            [State('chosen_file_viewer', 'value')]
+            [Input('submit-filebrowser-viewer', component_property='n_clicks')],
+            [State('chosen-filebrowser-viewer', 'value')]
         )
         def submit_nwb(click, input_value):
+
+            if not any(d['key'] == input_value for d in self.direxplorer.paths_tree):
+                # If not selected from explorer
+                nwb_path = Path(input_value)
+            else:
+                # If selected from explorer get absolute path from config
+                nwb_path = Path(app.config['EXPLORER_PATH']).parent / Path(input_value)
 
             style = {
                 "position": "fixed", "top": 180, "left": 10, "width": 350,
@@ -64,8 +71,9 @@ class Viewer(html.Div):
             ctx = dash.callback_context
             source = ctx.triggered[0]['prop_id'].split('.')[0]
 
-            if source == 'submit_file_browser_viewer':
-                nwb_path = Path(input_value)
+            if source == 'submit-filebrowser-viewer':
+                #nwb_path = Path(input_value)
+
                 if nwb_path.is_file() and str(nwb_path).endswith('.nwb'):
                     self.nwb_path = nwb_path
                     voila_address = self.run_explorer()

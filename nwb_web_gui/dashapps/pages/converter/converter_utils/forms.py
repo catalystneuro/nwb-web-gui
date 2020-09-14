@@ -375,7 +375,7 @@ class SchemaFormContainer(html.Div):
                 Input(self.id + '-external-trigger-update-forms-values', 'children'),
                 Input({'type': 'internal-trigger-update-forms-values', 'index': ALL}, 'children')
             ],
-            [State(v['compound_id'], 'value') for v in self.data.values() if (v['compound_id']['data_type'] != 'link' and v['compound_id']['data_type'] != 'boolean')] + 
+            [State(v['compound_id'], 'value') for v in self.data.values() if (v['compound_id']['data_type'] != 'link' and v['compound_id']['data_type'] != 'boolean')] +
             [State(v['compound_id'], 'checked') for v in self.data.values() if (v['compound_id']['data_type'] != 'link' and v['compound_id']['data_type'] == 'boolean')]
 
         )
@@ -383,8 +383,6 @@ class SchemaFormContainer(html.Div):
             """Updates forms values (except links)"""
 
             states = states[1:]
-
-            #curr_data = [v['value'] for v in self.data.values() if v['compound_id']['data_type'] != 'link']
 
             curr_data = list()
             for v in self.data.values():

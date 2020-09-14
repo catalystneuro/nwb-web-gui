@@ -211,7 +211,7 @@ class FileBrowserComponent(html.Div):
         paths_list = []
         for path, dirs, files in os.walk(self.root_dir):
             curr_path = path + '/'
-            if curr_path[0] == '/':
+            if curr_path.startswith('/'):
                 curr_path = curr_path[1:]
             if curr_path not in paths_list:
                 paths_list.append(curr_path)
