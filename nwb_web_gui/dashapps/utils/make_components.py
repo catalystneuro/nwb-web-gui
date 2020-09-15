@@ -6,7 +6,6 @@ from datetime import datetime
 from dash_cool_components import KeyedFileBrowser
 import os
 from pathlib import Path
-from flask import current_app as app
 import dash
 
 
@@ -137,7 +136,7 @@ class FileBrowserComponent(html.Div):
         self.id_suffix = id_suffix
 
         if root_dir is None:
-            self.root_dir = app.config['EXPLORER_PATH']
+            self.root_dir = parent_app.server.config['EXPLORER_PATH']
         else:
             self.root_dir = root_dir
 
