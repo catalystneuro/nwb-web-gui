@@ -30,7 +30,7 @@ class Viewer(html.Div):
         self.nwb_file = None
 
         # Viewer page layout
-        self.direxplorer = FileBrowserComponent(parent_app=parent_app, id_suffix='viewer')
+        self.filebrowser = FileBrowserComponent(parent_app=parent_app, id_suffix='viewer')
 
         self.children = [
             dbc.Toast(
@@ -40,7 +40,7 @@ class Viewer(html.Div):
                 duration=5000
             ),
             html.Br(),
-            self.direxplorer,
+            self.filebrowser,
             html.Br(),
             html.Div(id='voila_div', style={'justify-content': 'center', 'text-align': 'center'}),
         ]
@@ -57,7 +57,7 @@ class Viewer(html.Div):
         )
         def submit_nwb(click, input_value):
 
-            if not any(d['key'] == input_value for d in self.direxplorer.paths_tree):
+            if not any(d['key'] == input_value for d in self.filebrowser.paths_tree):
                 # If not selected from explorer
                 nwb_path = Path(input_value)
             else:

@@ -243,11 +243,12 @@ class FileBrowserComponent(html.Div):
             keys_list.append(aux_dict)
 
         # Simplify file explorer to start on the base path defined on config
-        spliter = Path(self.root_dir).parent.name
+        # splitter = Path(self.root_dir).parent.name
+        splitter = Path(self.root_dir).name
         for e in keys_list:
-            splited = e['key'].split('nwb-web-gui')[1]
-            if splited.startswith('/'):
-                splited = splited[1:]
-                e['key'] = splited
+            splitted = e['key'].split(splitter)[1]
+            if splitted.startswith('/'):
+                splitted = splitted[1:]
+                e['key'] = splitted
 
         self.paths_tree = keys_list
