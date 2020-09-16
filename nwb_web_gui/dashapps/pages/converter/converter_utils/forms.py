@@ -361,7 +361,7 @@ class SchemaFormContainer(html.Div):
                 elif v['compound_id']['data_type'] == 'tags':
                     self.update_forms_values_callback_outputs.append(Output(v['compound_id'], 'injectedTags'))
                 elif v['compound_id']['data_type'] == 'datetime':
-                    self.update_forms_values_callback_outputs.append(Output(v['compound_id'], 'defaultValue')) # this may change soon
+                    self.update_forms_values_callback_outputs.append(Output(v['compound_id'], 'defaultValue'))
                 else:
                     self.update_forms_values_callback_outputs.append(Output(v['compound_id'], 'value'))
         self.update_forms_values_callback_outputs.append(Output(id + '-trigger-update-links-values', 'children'))
