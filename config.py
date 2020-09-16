@@ -21,5 +21,5 @@ class ConfigDev(Config):
     TESTING = True
     DATABASE_URI = 'DEV_DATABASE_URI'
 
-    # EXPLORER_PATH = '/home/vinicius/Área de Trabalho/Trabalhos/nwb-web-gui/files'
-    EXPLORER_PATH = r'C:\Users\Luiz\Desktop\data_app'
+    EXPLORER_PATH = '/home/vinicius/Área de Trabalho/Trabalhos/nwb-web-gui/files'
+    #EXPLORER_PATH = r'C:\Users\Luiz\Desktop\data_app'

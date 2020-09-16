@@ -7,6 +7,7 @@ from dash_cool_components import TagInput, DateTimePicker
 from nwb_web_gui.dashapps.utils.make_components import make_filebrowser_modal
 import numpy as np
 import warnings
+import json
 
 
 class SchemaFormItem(dbc.FormGroup):
@@ -92,7 +93,6 @@ class SchemaFormItem(dbc.FormGroup):
             compound_id['data_type'] = 'datetime'
             field_input = DateTimePicker(
                 id=compound_id,
-                style={"border": "solid 1px", "border-color": "#ced4da", "border-radius": "5px", "color": '#545057'}
             )
 
         elif 'format' in value and value['format'] == 'long':
@@ -196,6 +196,8 @@ class SchemaFormItem(dbc.FormGroup):
 
     def register_filebrowser_callbacks(self, modal_id, button_id, trigger_id):
         """Register callbacks for filebroswer component"""
+        # trigger_id = {type: internal-trigger-update-form-values, index: index_class}
+
         @self.parent.container.parent_app.callback(
             Output(modal_id, 'is_open'),
             [
@@ -358,6 +360,8 @@ class SchemaFormContainer(html.Div):
                     self.update_forms_values_callback_outputs.append(Output(v['compound_id'], 'checked'))
                 elif v['compound_id']['data_type'] == 'tags':
                     self.update_forms_values_callback_outputs.append(Output(v['compound_id'], 'injectedTags'))
+                elif v['compound_id']['data_type'] == 'datetime':
+                    self.update_forms_values_callback_outputs.append(Output(v['compound_id'], 'defaultValue')) # this may change soon
                 else:
                     self.update_forms_values_callback_outputs.append(Output(v['compound_id'], 'value'))
         self.update_forms_values_callback_outputs.append(Output(id + '-trigger-update-links-values', 'children'))
@@ -379,11 +383,11 @@ class SchemaFormContainer(html.Div):
             [State(v['compound_id'], 'checked') for v in self.data.values() if (v['compound_id']['data_type'] != 'link' and v['compound_id']['data_type'] == 'boolean')]
 
         )
-        def update_forms_values(trigger, *states):
+        def update_forms_values(trigger, trigger_all, *states):
             """Updates forms values (except links)"""
 
-            states = states[1:]
-
+            #if trigger_source == self.id + '-trigger-update-links-values':
+            #states = states
             curr_data = list()
             for v in self.data.values():
                 if v['compound_id']['data_type'] != 'link':
@@ -409,6 +413,7 @@ class SchemaFormContainer(html.Div):
                 output.append(1)
 
                 return output
+
 
         @self.parent_app.callback(
             self.update_forms_links_callback_outputs,
