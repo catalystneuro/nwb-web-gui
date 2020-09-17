@@ -29,6 +29,11 @@ class ConverterForms(html.Div):
         with open(metadata_schema_path, 'r') as inp:
             self.metadata_json_schema = json.load(inp)
 
+        # Fill form
+        metadata_data_path = examples_path / 'metadata_example_0.json'
+        with open(metadata_data_path, 'r') as inp:
+            self.metadata_json_data = json.load(inp)
+
         # Source data Form
         self.source_forms = SchemaFormContainer(
             id='sourcedata',
@@ -36,18 +41,14 @@ class ConverterForms(html.Div):
             parent_app=self.parent_app
         )
 
-        # Metadata Form
-        self.metadata_forms = SchemaFormContainer(
-            id='metadata',
-            schema=self.metadata_json_schema,
-            parent_app=self.parent_app
-        )
+        self.metadata_forms = None
+
 
         # Fill form
-        metadata_data_path = examples_path / 'metadata_example_0.json'
-        with open(metadata_data_path, 'r') as inp:
-            self.metadata_json_data = json.load(inp)
-        self.metadata_forms.update_data(data=self.metadata_json_data)
+        #metadata_data_path = examples_path / 'metadata_example_0.json'
+        #with open(metadata_data_path, 'r') as inp:
+            #self.metadata_json_data = json.load(inp)
+        #self.metadata_forms.update_data(data=self.metadata_json_data)
 
         self.children = [
             dbc.Container([
@@ -131,7 +132,7 @@ class ConverterForms(html.Div):
                     )
                 ]),
                 dbc.Row(
-                    [dbc.Col(self.metadata_forms, width={'size': 12})],
+                    [dbc.Col(id='metadata-col', width={'size': 12})],
                     style={'margin-top': '1%'}
                 ),
                 html.Div(id='hidden', style={'display': 'none'}),
@@ -158,12 +159,29 @@ class ConverterForms(html.Div):
                     readOnly=True,
                     style={'font-size': '16px'}
                 ),
-                html.Br()
+                html.Br(),
             ], style={'min-height': '110vh'})
         ]
 
         @self.parent_app.callback(
-            Output('metadata-external-trigger-update-forms-values', 'children'),
+            Output('metadata-col', 'children'),
+            [Input('get_metadata_btn', 'n_clicks')]
+        )
+        def get_metadata(click):
+            if click and self.metadata_forms is None:
+                # Metadata Form
+                self.metadata_forms = SchemaFormContainer(
+                    id='metadata',
+                    schema=self.metadata_json_schema,
+                    parent_app=self.parent_app
+                )
+                self.metadata_forms.update_data(data=self.metadata_json_data)
+                return self.metadata_forms
+            else:
+                return self.metadata_forms
+
+        @self.parent_app.callback(
+            Output({'type': 'external-trigger-update-forms-values', 'index': 'metadata-external-trigger-update-forms-values'}, 'children'),
             [Input('button_load_metadata', 'contents'), Input('button_refresh', 'n_clicks')],
             [State('button_load_metadata', 'filename')]
         )
@@ -193,6 +211,7 @@ class ConverterForms(html.Div):
                     self.metadata_forms.update_data(data=self.metadata_json_data)
                 # Trigger update of React components
                 output = str(np.random.rand())
+
                 return output
             elif trigger_source == 'button_refresh':
                 output = 'refresh_trigger'
@@ -200,7 +219,95 @@ class ConverterForms(html.Div):
             else:
                 output = []
                 return output
+        
+        @self.parent_app.callback(
+            [
+                Output("popover_export_metadata", "is_open"),
+                Output('alert_required', 'is_open'),
+                Output('alert_required', 'children'),
+            ],
+            [Input('button_export_metadata', 'n_clicks')],
+            [
+                State("popover_export_metadata", "is_open"), 
+                State('alert_required', 'is_open'),
+                State({'type': 'metadata-input', 'data_type': 'boolean','index': ALL}, 'checked'),
+                State({'type': 'metadata-input', 'data_type': 'string','index': ALL}, 'value'),
+                State({'type': 'metadata-input', 'data_type': 'datetime','index': ALL}, 'value'),
+                State({'type': 'metadata-input', 'data_type': 'tags','index': ALL}, 'value'),
+                State({'type': 'metadata-input', 'data_type': 'link','index': ALL}, 'value'),
+                State({'type': 'metadata-input', 'data_type': 'name','index': ALL}, 'value'),
+                State({'type': 'metadata-input', 'data_type': 'number','index': ALL}, 'value'),
+                State({'type': 'metadata-input', 'data_type': ALL,'index': ALL}, 'id'),
+            ] 
+        )
+        def export_metadata(click, fileoption_is_open, req_is_open, boolean_values, string_values, datetime_values, tags_values, link_values, name_values, number_values, ids):
+            ctx = dash.callback_context
+            trigger_source = ctx.triggered[0]['prop_id'].split('.')[0]
 
+            datetime_counter = 0
+            string_counter = 0
+            tags_counter = 0
+            link_counter = 0
+            names_counter = 0
+            number_counter = 0
+            empty_required_fields = []
+
+            dicts_list = []
+            output = dict()
+            if click:
+                for counter, e in enumerate(ids):
+                    for i, (k, v) in enumerate(self.metadata_forms.data.items()):
+                        if e['index'] == k:
+                            if e['data_type'] == 'datetime':
+                                field_value = datetime_values[datetime_counter]
+                                datetime_counter += 1
+                            elif e['data_type'] == 'string':
+                                field_value = string_values[string_counter]
+                                string_counter += 1
+                            elif e['data_type'] == 'name':
+                                field_value = name_values[names_counter]
+                                names_counter += 1
+                            elif e['data_type'] == 'number':
+                                field_value = number_values[number_counter]
+                                number_counter += 1
+                            elif e['data_type'] == 'tags':
+                                field_value = tags_values[tags_counter]
+                                tags_counter += 1
+                            elif e['data_type'] == 'link':
+                                field_value = link_values[link_counter]
+                                link_counter += 1
+
+                            if v['required']:
+                                if field_value is None or (isinstance(field_value, str) and field_value.isspace()) or field_value == '':
+                                    raise_alarm = True
+                                else:
+                                    raise_alarm = False
+
+                            if field_value not in ['', None]:
+                                v['value'] = field_value
+                                splited_keys = k.split('-')
+                                master_key_name = splited_keys[0]
+                                field_name = splited_keys[-1]
+
+                                for element in reversed(splited_keys):
+                                    if element == field_name:
+                                        curr_dict = {field_name: v['value']}
+                                    else:
+                                        curr_dict = {element: curr_dict}
+                                    if element == master_key_name:
+                                        dicts_list.append(curr_dict)
+
+                    for e in dicts_list:
+                        master_key_name = list(e.keys())[0]
+                        output = ConverterForms._create_nested_dict(data=e, output=output, master_key_name=master_key_name)
+
+                    exported_file_path = self.downloads_path / 'exported_metadata.json'
+                    with open(exported_file_path, 'w') as outfile:
+                        json.dump(output, outfile, indent=4)
+
+
+            return fileoption_is_open, req_is_open, []
+        '''
         @self.parent_app.callback(
             [
                 Output("popover_export_metadata", "is_open"),
@@ -209,7 +316,7 @@ class ConverterForms(html.Div):
             ],
             [Input('button_export_metadata', 'n_clicks')],
             [State("popover_export_metadata", "is_open"), State('alert_required', 'is_open')] +
-            [State(v['compound_id'], 'value') for v in self.metadata_forms.data.values()]
+            [State(v['compound_id'], 'value') for v in self.metadata_forms.data.values()] # probably use ALL here
         )
         def export_metadata(click, fileoption_is_open, req_is_open, *form_values):
             """
@@ -286,6 +393,7 @@ class ConverterForms(html.Div):
 
                     return not fileoption_is_open, req_is_open, []
             return fileoption_is_open, req_is_open, []
+        '''
 
         @self.parent_app.server.route('/downloads/<path:filename>')
         def download_file(filename):

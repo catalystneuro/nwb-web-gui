@@ -334,7 +334,7 @@ class SchemaFormContainer(html.Div):
 
         # Hidden componentes that serve to trigger callbacks
         self.children_triggers = [
-            html.Div(id=id + '-external-trigger-update-forms-values', style={'display': 'none'}),
+            html.Div(id={'type': 'external-trigger-update-forms-values', 'index': id + '-external-trigger-update-forms-values'}, style={'display': 'none'}),
             html.Div(id=id + '-trigger-update-links-values', style={'display': 'none'}),
             html.Div(id=id + '-output-placeholder-links-values', style={'display': 'none'})
         ]
@@ -376,7 +376,7 @@ class SchemaFormContainer(html.Div):
         @self.parent_app.callback(
             self.update_forms_values_callback_outputs,
             [
-                Input(self.id + '-external-trigger-update-forms-values', 'children'),
+                Input({'type': 'external-trigger-update-forms-values', 'index': ALL}, 'children'),
                 Input({'type': 'internal-trigger-update-forms-values', 'index': ALL}, 'children')
             ],
             [State(v['compound_id'], 'value') for v in self.data.values() if (v['compound_id']['data_type'] != 'link' and v['compound_id']['data_type'] != 'boolean')] +
@@ -386,8 +386,6 @@ class SchemaFormContainer(html.Div):
         def update_forms_values(trigger, trigger_all, *states):
             """Updates forms values (except links)"""
 
-            #if trigger_source == self.id + '-trigger-update-links-values':
-            #states = states
             curr_data = list()
             for v in self.data.values():
                 if v['compound_id']['data_type'] != 'link':
@@ -397,7 +395,7 @@ class SchemaFormContainer(html.Div):
                         element = v['value']
                     curr_data.append(element)
 
-            if trigger != 'refresh_trigger':
+            if 'refresh_trigger' not in trigger:
                 output = curr_data
                 output.append(1)
 
@@ -421,6 +419,7 @@ class SchemaFormContainer(html.Div):
             [State(v['compound_id'], 'value') for v in self.data.values() if v['compound_id']['data_type'] == 'name']
         )
         def update_forms_links(trigger, *name_change):
+
             """
             Updates forms values for links (dropdown options) when names change.
             If a field has a valid value for the 'target' property, this function
