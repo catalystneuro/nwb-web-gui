@@ -43,13 +43,6 @@ class ConverterForms(html.Div):
 
         self.metadata_forms = None
 
-
-        # Fill form
-        #metadata_data_path = examples_path / 'metadata_example_0.json'
-        #with open(metadata_data_path, 'r') as inp:
-            #self.metadata_json_data = json.load(inp)
-        #self.metadata_forms.update_data(data=self.metadata_json_data)
-
         self.children = [
             dbc.Container([
                 # sdm.Drawer(
@@ -76,7 +69,7 @@ class ConverterForms(html.Div):
                     html.Br(),
                     dbc.Col(self.source_forms, width={'size': 12}),
                     dbc.Col(
-                        dbc.Button('Get Metadata Form', id='get_metadata_btn', color='dark'),
+                        html.A(dbc.Button('Get Metadata Form', id='get_metadata_btn', color='dark'), href='/converter/'),
                         style={'justify-content': 'left', 'text-align': 'left', 'margin-top': '1%'},
                         width={'size': 4}
                     )
@@ -230,17 +223,20 @@ class ConverterForms(html.Div):
             [
                 State("popover_export_metadata", "is_open"), 
                 State('alert_required', 'is_open'),
-                State({'type': 'metadata-input', 'data_type': 'boolean','index': ALL}, 'checked'),
-                State({'type': 'metadata-input', 'data_type': 'string','index': ALL}, 'value'),
-                State({'type': 'metadata-input', 'data_type': 'datetime','index': ALL}, 'value'),
-                State({'type': 'metadata-input', 'data_type': 'tags','index': ALL}, 'value'),
-                State({'type': 'metadata-input', 'data_type': 'link','index': ALL}, 'value'),
-                State({'type': 'metadata-input', 'data_type': 'name','index': ALL}, 'value'),
-                State({'type': 'metadata-input', 'data_type': 'number','index': ALL}, 'value'),
-                State({'type': 'metadata-input', 'data_type': ALL,'index': ALL}, 'id'),
+                State({'type': 'metadata-input', 'data_type': 'boolean', 'index': ALL}, 'checked'),
+                State({'type': 'metadata-input', 'data_type': 'string', 'index': ALL}, 'value'),
+                State({'type': 'metadata-input', 'data_type': 'datetime', 'index': ALL}, 'value'),
+                State({'type': 'metadata-input', 'data_type': 'tags', 'index': ALL}, 'value'),
+                State({'type': 'metadata-input', 'data_type': 'link', 'index': ALL}, 'value'),
+                State({'type': 'metadata-input', 'data_type': 'name', 'index': ALL}, 'value'),
+                State({'type': 'metadata-input', 'data_type': 'number', 'index': ALL}, 'value'),
+                State({'type': 'metadata-input', 'data_type': ALL, 'index': ALL}, 'id'),
             ] 
         )
-        def export_metadata(click, fileoption_is_open, req_is_open, boolean_values, string_values, datetime_values, tags_values, link_values, name_values, number_values, ids):
+        def export_metadata(click, fileoption_is_open, req_is_open, 
+                            boolean_values, string_values, datetime_values, 
+                            tags_values, link_values, name_values, number_values, ids):
+
             ctx = dash.callback_context
             trigger_source = ctx.triggered[0]['prop_id'].split('.')[0]
 
