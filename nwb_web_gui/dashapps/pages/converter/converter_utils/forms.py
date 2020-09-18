@@ -124,7 +124,8 @@ class SchemaFormItem(dbc.FormGroup):
                 display=value['format']
             )
             # Create internal trigger component and add it to parent Container
-            trigger_id = {'type': 'internal-trigger-update-forms-values', 'index': compound_id['index']}
+            trigger_id = {'type': 'internal-trigger-update-forms-values', 'parent': self.parent.container.id, 'index': compound_id['index']}
+            #print(trigger_id)
             trigger = html.Div(id=trigger_id, style={'display': 'none'})
             self.parent.container.children_triggers.append(trigger)
 
@@ -379,7 +380,7 @@ class SchemaFormContainer(html.Div):
             self.update_forms_values_callback_outputs,
             [
                 Input({'type': 'external-trigger-update-forms-values', 'index': ALL}, 'children'),
-                Input({'type': 'internal-trigger-update-forms-values', 'index': ALL}, 'children')
+                Input({'type': 'internal-trigger-update-forms-values', 'parent': self.id, 'index': ALL}, 'children')
             ],
             [State(v['compound_id'], 'value') for v in self.data.values() if (v['compound_id']['data_type'] != 'link' and v['compound_id']['data_type'] != 'boolean')] +
             [State(v['compound_id'], 'checked') for v in self.data.values() if (v['compound_id']['data_type'] != 'link' and v['compound_id']['data_type'] == 'boolean')]
@@ -403,7 +404,6 @@ class SchemaFormContainer(html.Div):
             if 'refresh_trigger' not in trigger:
                 output = curr_data
                 output.append(1)
-
                 return output
             else:
                 output = []
