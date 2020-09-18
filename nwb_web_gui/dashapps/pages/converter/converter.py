@@ -174,11 +174,19 @@ class ConverterForms(html.Div):
                 return self.metadata_forms
 
         @self.parent_app.callback(
+            Output({'type': 'external-trigger-update-links-values', 'index': 'metadata-external-trigger-update-links-values'}, 'children'),
+            [Input('button_refresh', 'n_clicks')]
+        )
+        def refresh_forms_links(click):
+            if click:
+                return str(np.random.rand())
+
+        @self.parent_app.callback(
             Output({'type': 'external-trigger-update-forms-values', 'index': 'metadata-external-trigger-update-forms-values'}, 'children'),
-            [Input('button_load_metadata', 'contents'), Input('button_refresh', 'n_clicks')],
+            [Input('button_load_metadata', 'contents')],
             [State('button_load_metadata', 'filename')]
         )
-        def update_forms_values_metadata(contents, refresh, filename):
+        def update_forms_values_metadata(contents, filename):
             """
             Updates forms values (except links) when:
             - Forms are created (receives metadata dict from Converter)
@@ -187,31 +195,28 @@ class ConverterForms(html.Div):
             ctx = dash.callback_context
             trigger_source = ctx.triggered[0]['prop_id'].split('.')[0]
 
-            if trigger_source == 'button_load_metadata':
-                content_type, content_string = contents.split(',')
-                filename_extension = filename.split('.')[-1]
-
-                # Update SchemaFormContainer internal data dictionary
-                if filename_extension == 'json':
-                    bs4decode = base64.b64decode(content_string)
-                    json_string = bs4decode.decode('utf8').replace("'", '"')
-                    self.metadata_json_data = json.loads(json_string)
-                    self.metadata_forms.update_data(data=self.metadata_json_data)
-                elif filename_extension in ['yaml', 'yml']:
-                    bs4decode = base64.b64decode(content_string)
-                    yaml_data = yaml.load(bs4decode, Loader=yaml.BaseLoader)
-                    self.metadata_json_data = yaml_data
-                    self.metadata_forms.update_data(data=self.metadata_json_data)
-                # Trigger update of React components
-                output = str(np.random.rand())
-
-                return output
-            elif trigger_source == 'button_refresh':
-                output = 'refresh_trigger'
-                return output
-            else:
+            if trigger_source != 'button_load_metadata':
                 output = []
                 return output
+
+            content_type, content_string = contents.split(',')
+            filename_extension = filename.split('.')[-1]
+
+            # Update SchemaFormContainer internal data dictionary
+            if filename_extension == 'json':
+                bs4decode = base64.b64decode(content_string)
+                json_string = bs4decode.decode('utf8').replace("'", '"')
+                self.metadata_json_data = json.loads(json_string)
+                self.metadata_forms.update_data(data=self.metadata_json_data)
+            elif filename_extension in ['yaml', 'yml']:
+                bs4decode = base64.b64decode(content_string)
+                yaml_data = yaml.load(bs4decode, Loader=yaml.BaseLoader)
+                self.metadata_json_data = yaml_data
+                self.metadata_forms.update_data(data=self.metadata_json_data)
+            # Trigger update of React components
+            output = str(np.random.rand())
+
+            return output   
 
         @self.parent_app.callback(
             [
