@@ -120,7 +120,8 @@ class SchemaFormItem(dbc.FormGroup):
             modal_id = "modal-filebrowser-" + compound_id['index']
             modal = make_filebrowser_modal(
                 parent_app=self.parent.container.parent_app,
-                modal_id=modal_id
+                modal_id=modal_id,
+                display=value['format']
             )
             # Create internal trigger component and add it to parent Container
             trigger_id = {'type': 'internal-trigger-update-forms-values', 'index': compound_id['index']}
@@ -198,6 +199,7 @@ class SchemaFormItem(dbc.FormGroup):
         """Register callbacks for filebroswer component"""
         # trigger_id = {type: internal-trigger-update-form-values, index: index_class}
 
+
         @self.parent.container.parent_app.callback(
             Output(modal_id, 'is_open'),
             [
@@ -214,7 +216,7 @@ class SchemaFormItem(dbc.FormGroup):
                 return is_open
 
         @self.parent.container.parent_app.callback(
-            Output(trigger_id, 'children'),
+            [Output(trigger_id, 'children'), Output(f'{modal_id}-close', 'n_clicks')],
             [Input('submit-filebrowser-' + modal_id, 'n_clicks')],
             [State('chosen-filebrowser-' + modal_id, 'value')]
         )
@@ -227,8 +229,8 @@ class SchemaFormItem(dbc.FormGroup):
                 # Update Container internal dictionary value
                 self.parent.container.data[trigger_id['index']]['value'] = chosen_path
                 # Triggers components update
-                return str(np.random.rand())
-            return ''
+                return str(np.random.rand()), 1
+            return '', None
 
 
 class SchemaForm(dbc.Card):
@@ -385,6 +387,9 @@ class SchemaFormContainer(html.Div):
         )
         def update_forms_values(trigger, trigger_all, *states):
             """Updates forms values (except links)"""
+
+            ctx = dash.callback_context
+            trigger_source = ctx.triggered[0]['prop_id'].split('.')[0]
 
             curr_data = list()
             for v in self.data.values():

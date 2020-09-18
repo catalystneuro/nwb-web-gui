@@ -233,9 +233,10 @@ class ConverterForms(html.Div):
                 State({'type': 'metadata-input', 'data_type': ALL, 'index': ALL}, 'id'),
             ] 
         )
-        def export_metadata(click, fileoption_is_open, req_is_open, 
-                            boolean_values, string_values, datetime_values, 
-                            tags_values, link_values, name_values, number_values, ids):
+        def export_metadata(click, fileoption_is_open, req_is_open,
+                            boolean_values, string_values, datetime_values,
+                            tags_values, link_values, name_values,
+                            number_values, ids):
 
             ctx = dash.callback_context
             trigger_source = ctx.triggered[0]['prop_id'].split('.')[0]

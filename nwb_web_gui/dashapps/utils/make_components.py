@@ -103,11 +103,12 @@ def make_json_file_buttons(id_suffix):
     return json_buttons
 
 
-def make_filebrowser_modal(parent_app, modal_id="modal-filebrowser"):
+def make_filebrowser_modal(parent_app, modal_id="modal-filebrowser", display=None):
     """File Explorer Example"""
     explorer = FileBrowserComponent(
         parent_app=parent_app,
-        id_suffix=modal_id
+        id_suffix=modal_id,
+        display=display
     )
 
     modal = dbc.Container(
@@ -130,7 +131,7 @@ def make_filebrowser_modal(parent_app, modal_id="modal-filebrowser"):
 
 
 class FileBrowserComponent(html.Div):
-    def __init__(self, parent_app, id_suffix, root_dir=None):
+    def __init__(self, parent_app, id_suffix, root_dir=None, display=None):
         super().__init__([])
         self.parent_app = parent_app
         self.id_suffix = id_suffix
@@ -140,7 +141,7 @@ class FileBrowserComponent(html.Div):
         else:
             self.root_dir = root_dir
 
-        self.make_dict_from_dir()
+        self.make_dict_from_dir(display=display)
 
         # Button part
         input_group = dbc.InputGroup([
@@ -209,7 +210,7 @@ class FileBrowserComponent(html.Div):
 
         return explorer
 
-    def make_dict_from_dir(self):
+    def make_dict_from_dir(self, display):
 
         keys_list = []
         paths_list = []
@@ -219,7 +220,7 @@ class FileBrowserComponent(html.Div):
                 curr_path = curr_path[1:]
             if curr_path not in paths_list:
                 paths_list.append(curr_path)
-            if len(files) > 0:
+            if len(files) > 0 and display != 'directory':
                 for file in files:
                     aux_dict = {}
                     file_path = Path(path) / file
@@ -234,6 +235,7 @@ class FileBrowserComponent(html.Div):
 
                     keys_list.append(aux_dict)
 
+        splitter = Path(self.root_dir).parent.name
         for path in paths_list:
             aux_dict = dict()
             aux_dict['key'] = str(path).replace("\\", '/')
@@ -242,7 +244,6 @@ class FileBrowserComponent(html.Div):
             keys_list.append(aux_dict)
 
         # Simplify file explorer to start on the base path defined on config
-        splitter = Path(self.root_dir).parent.name
         for e in keys_list:
             splitted = e['key'].split(splitter, maxsplit=1)[1]
             if splitted.startswith('/'):
