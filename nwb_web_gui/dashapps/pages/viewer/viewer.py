@@ -3,7 +3,7 @@ from flask import current_app as app
 import dash_core_components as dcc
 import dash_html_components as html
 import dash_bootstrap_components as dbc
-from dash.dependencies import Input, Output, State
+from dash.dependencies import Input, Output, State, ALL, MATCH
 import dash
 from pathlib import Path
 from pynwb import NWBHDF5IO
@@ -43,6 +43,7 @@ class Viewer(html.Div):
             self.filebrowser,
             html.Br(),
             html.Div(id='voila_div', style={'justify-content': 'center', 'text-align': 'center'}),
+
         ]
 
         @self.parent_app.callback(

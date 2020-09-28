@@ -120,10 +120,11 @@ class SchemaFormItem(dbc.FormGroup):
             modal_id = "modal-filebrowser-" + compound_id['index']
             modal = make_filebrowser_modal(
                 parent_app=self.parent.container.parent_app,
-                modal_id=modal_id
+                modal_id=modal_id,
+                display=value['format']
             )
             # Create internal trigger component and add it to parent Container
-            trigger_id = {'type': 'internal-trigger-update-forms-values', 'index': compound_id['index']}
+            trigger_id = {'type': 'internal-trigger-update-forms-values', 'parent': self.parent.container.id, 'index': compound_id['index']}
             trigger = html.Div(id=trigger_id, style={'display': 'none'})
             self.parent.container.children_triggers.append(trigger)
 
@@ -198,6 +199,7 @@ class SchemaFormItem(dbc.FormGroup):
         """Register callbacks for filebroswer component"""
         # trigger_id = {type: internal-trigger-update-form-values, index: index_class}
 
+
         @self.parent.container.parent_app.callback(
             Output(modal_id, 'is_open'),
             [
@@ -214,7 +216,7 @@ class SchemaFormItem(dbc.FormGroup):
                 return is_open
 
         @self.parent.container.parent_app.callback(
-            Output(trigger_id, 'children'),
+            [Output(trigger_id, 'children'), Output(f'{modal_id}-close', 'n_clicks')],
             [Input('submit-filebrowser-' + modal_id, 'n_clicks')],
             [State('chosen-filebrowser-' + modal_id, 'value')]
         )
@@ -227,8 +229,8 @@ class SchemaFormItem(dbc.FormGroup):
                 # Update Container internal dictionary value
                 self.parent.container.data[trigger_id['index']]['value'] = chosen_path
                 # Triggers components update
-                return str(np.random.rand())
-            return ''
+                return str(np.random.rand()), 1
+            return '', None
 
 
 class SchemaForm(dbc.Card):
@@ -334,7 +336,8 @@ class SchemaFormContainer(html.Div):
 
         # Hidden componentes that serve to trigger callbacks
         self.children_triggers = [
-            html.Div(id=id + '-external-trigger-update-forms-values', style={'display': 'none'}),
+            html.Div(id={'type': 'external-trigger-update-forms-values', 'index': id + '-external-trigger-update-forms-values'}, style={'display': 'none'}),
+            html.Div(id={'type': 'external-trigger-update-links-values', 'index': f'{id}-external-trigger-update-links-values'}),
             html.Div(id=id + '-trigger-update-links-values', style={'display': 'none'}),
             html.Div(id=id + '-output-placeholder-links-values', style={'display': 'none'})
         ]
@@ -376,8 +379,8 @@ class SchemaFormContainer(html.Div):
         @self.parent_app.callback(
             self.update_forms_values_callback_outputs,
             [
-                Input(self.id + '-external-trigger-update-forms-values', 'children'),
-                Input({'type': 'internal-trigger-update-forms-values', 'index': ALL}, 'children')
+                Input({'type': 'external-trigger-update-forms-values', 'index': ALL}, 'children'),
+                Input({'type': 'internal-trigger-update-forms-values', 'parent': self.id, 'index': ALL}, 'children')
             ],
             [State(v['compound_id'], 'value') for v in self.data.values() if (v['compound_id']['data_type'] != 'link' and v['compound_id']['data_type'] != 'boolean')] +
             [State(v['compound_id'], 'checked') for v in self.data.values() if (v['compound_id']['data_type'] != 'link' and v['compound_id']['data_type'] == 'boolean')]
@@ -386,8 +389,9 @@ class SchemaFormContainer(html.Div):
         def update_forms_values(trigger, trigger_all, *states):
             """Updates forms values (except links)"""
 
-            #if trigger_source == self.id + '-trigger-update-links-values':
-            #states = states
+            ctx = dash.callback_context
+            trigger_source = ctx.triggered[0]['prop_id'].split('.')[0]
+
             curr_data = list()
             for v in self.data.values():
                 if v['compound_id']['data_type'] != 'link':
@@ -397,30 +401,19 @@ class SchemaFormContainer(html.Div):
                         element = v['value']
                     curr_data.append(element)
 
-            if trigger != 'refresh_trigger':
-                output = curr_data
-                output.append(1)
-
-                return output
-            else:
-                output = []
-                for i, v in enumerate(curr_data):
-                    # find a way to generalize this to not depend on a specific trigger
-                    if states[i] is not None:
-                        output.append(states[i])
-                    else:
-                        output.append(v)
-                output.append(1)
-
-                return output
+            curr_data.append(1)
+            return curr_data
 
 
         @self.parent_app.callback(
             self.update_forms_links_callback_outputs,
-            [Input(self.id + '-trigger-update-links-values', 'children')],
+            [
+                Input(self.id + '-trigger-update-links-values', 'children'),
+                Input({'type': 'external-trigger-update-links-values', 'index': ALL}, 'children')
+            ],
             [State(v['compound_id'], 'value') for v in self.data.values() if v['compound_id']['data_type'] == 'name']
         )
-        def update_forms_links(trigger, *name_change):
+        def update_forms_links(trigger, external_trigger, *name_change):
             """
             Updates forms values for links (dropdown options) when names change.
             If a field has a valid value for the 'target' property, this function
@@ -455,34 +448,39 @@ class SchemaFormContainer(html.Div):
             ctx = dash.callback_context
             trigger_source = ctx.triggered[0]['prop_id'].split('.')[0]
 
-            if trigger_source == self.id + '-trigger-update-links-values':
-                # Update changed names on backend mapping dictionary
-                i = 0
-                for k, v in self.data.items():
-                    if v['compound_id']['data_type'] == 'name':
-                        self.data[k]['value'] = name_change[i]
-                        i += 1
+            if 'index' in trigger_source:
+                trigger_source = json.loads(trigger_source)['index']
 
-                # Get specific options for each link dropdown
-                list_options = []
-                list_values = []
-                for k, v in self.data.items():
-                    if v['target'] is not None:
-                        target_class = v['target']
-                        options = [
-                            {'label': v['value'], 'value': v['value']}
-                            for v in self.data.values() if
-                            (v['owner_class'] == target_class and 'name' in v['compound_id']['index'])
-                        ]
-                        list_values.append(options[0]['value'])
-                        list_options.append(options)
+            if trigger_source != self.id + '-trigger-update-links-values' and trigger_source != f'{self.id}-external-trigger-update-links-values':
+                return ['' for _ in self.update_forms_links_callback_outputs]
 
-                for sublist in list_options[:]:
-                    for e in sublist[:]:
-                        if e['value'] is None:
-                            sublist.remove(e)
+            # Update changed names on backend mapping dictionary
+            i = 0
+            for k, v in self.data.items():
+                if v['compound_id']['data_type'] == 'name':
+                    self.data[k]['value'] = name_change[i]
+                    i += 1
 
-                return list_options + list_values + [1]
+            # Get specific options for each link dropdown
+            list_options = []
+            list_values = []
+            for k, v in self.data.items():
+                if v['target'] is not None:
+                    target_class = v['target']
+                    options = [
+                        {'label': v['value'], 'value': v['value']}
+                        for v in self.data.values() if
+                        (v['owner_class'] == target_class and 'name' in v['compound_id']['index'])
+                    ]
+                    list_values.append(options[0]['value'])
+                    list_options.append(options)
+
+            for sublist in list_options[:]:
+                for e in sublist[:]:
+                    if e['value'] is None:
+                        sublist.remove(e)
+
+            return list_options + list_values + [1]
 
     def update_data(self, data, key=None):
         """Update data in the internal mapping dictionary of this Container"""
