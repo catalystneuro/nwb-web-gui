@@ -5,13 +5,14 @@ from tifffile import imread, TiffFile
 from pathlib import Path, PureWindowsPath
 import numpy as np
 import json
+from nwbwidgets.ophys import compute_outline
 
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import dash_core_components as dcc
 import dash_html_components as html
 import dash_bootstrap_components as dbc
-from dash.dependencies import Input, Output, State
+from dash.dependencies import Input, Output, State, ALL
 import dash
 
 from textwrap import dedent as d
@@ -139,7 +140,28 @@ class TimeControllerComponent(html.Div):
         #     group_frame = []
 
 
-class TiffImageSeriesComponent(dcc.Graph):
+class TiffImageSeriesDiv(html.Div):
+    """Div containing tiff image graph and pixelmask button"""
+    def __init__(self, id, parent_app, imageseries, path_external_file=None, pixel_mask=None,
+                 foreign_time_window_controller=None):
+        super().__init__()
+
+        self.graph = TiffImageSeriesGraphComponent(id=id, parent_app=parent_app, imageseries=imageseries, path_external_file=path_external_file, pixel_mask=pixel_mask,foreign_time_window_controller=foreign_time_window_controller)
+        self.pixelmask_btn = dbc.Button('Pixel Mask', id={'type': 'pixelmask_button', 'index': f'mask_btn_{id}'})
+
+        self.children = dbc.Row([
+            dbc.Col(
+                self.graph,
+                width={'size': 12}
+            ),
+            dbc.Col(
+                self.pixelmask_btn,
+                width={'size': 12}
+            ),
+        ], style={'justify-content': 'center', 'text-align': 'center'})
+
+
+class TiffImageSeriesGraphComponent(dcc.Graph):
     """Component that renders specific frame of a Tiff file"""
     def __init__(self, parent_app, imageseries, path_external_file=None, pixel_mask=None,
                  foreign_time_window_controller=None, id='tiff_image_series'):
@@ -187,7 +209,6 @@ class TiffImageSeriesComponent(dcc.Graph):
         )
 
         self.figure = self.out_fig
-        
 
     def update_image(self, pos, nwb, relative_path):
         """Update tiff image frame"""
@@ -200,13 +221,37 @@ class TiffImageSeriesComponent(dcc.Graph):
             self.tiff = TiffFile(path_external_file)
             self.n_samples = len(self.tiff.pages)
             self.page = self.tiff.pages[0]
-            self.n_y, self.n_x = self.page.shape
+            n_y, n_x = self.page.shape
+            self.pixel_mask = nwb.processing['ophys'].data_interfaces['image_segmentation'].plane_segmentations['plane_segmentation'].pixel_mask[:]
+
+            mask_matrix = np.zeros((n_y, n_x))
+            for px in self.pixel_mask:
+                mask_matrix[px[1], px[0]] = 1
+
+            self.mask_x_coords, self.mask_y_coords = compute_outline(image_mask=mask_matrix, threshold=0.9)
 
         self.image = imread(path_external_file, key=frame_number)
         self.out_fig.data[0].z = self.image
 
-    def add_pixel_mask(self):
-        pass
+    def update_pixelmask(self):
+        """ Update pixel mask on self figure """
+
+        if len(self.out_fig.data) == 1:
+            trace = go.Scatter(
+                x=self.mask_x_coords,
+                y=self.mask_y_coords,
+                fill='toself',
+                mode='lines',
+                line={"color": "rgb(219, 59, 59)", "width": 4},
+            )
+            self.out_fig.add_trace(trace)
+        else:
+            if self.out_fig.data[1].x == self.mask_x_coords and self.out_fig.data[1].y == self.mask_y_coords:
+                self.out_fig.data[1].x = []
+                self.out_fig.data[1].y = []
+            else:
+                self.out_fig.data[1].x = self.mask_x_coords
+                self.out_fig.data[1].y = self.mask_y_coords
 
 
 class AllenDashboard(html.Div):
@@ -259,9 +304,8 @@ class AllenDashboard(html.Div):
                     html.Div(
                         id='div-photon-series',
                         style={'width': '29%', 'display': 'inline-block'}
-                    )
+                    ),
                 ]),
-                html.Div(id='hidden')
             ])
         ]
 
@@ -326,18 +370,6 @@ class AllenDashboard(html.Div):
                     }
                 }]
             )
-            '''
-            graph = dcc.Graph(
-                    id='figure_traces',
-                    figure=self.traces,
-                    config={
-                        'displayModeBar': False,
-                        'edits': {
-                            'shapePosition': True
-                        }
-                    }
-                ),
-            '''
 
             return {'display': 'inline-block'}, self.traces
 
@@ -367,10 +399,11 @@ class AllenDashboard(html.Div):
             [Output(component_id='figure_photon_series', component_property='figure')],
             [
                 Input(component_id='figure_traces', component_property='relayoutData'),
-                Input('figure_traces', 'figure')
+                Input('figure_traces', 'figure'),
+                Input({'type': 'pixelmask_button', 'index': ALL}, 'n_clicks')
             ]
         )
-        def change_frame(relayoutData, figure):
+        def change_frame(relayoutData, figure, click):
             """
             Update tiff frame with change on:
               - Figure data
@@ -380,14 +413,18 @@ class AllenDashboard(html.Div):
             ctx = dash.callback_context
             trigger_source = ctx.triggered[0]['prop_id'].split('.')[1]
 
+            if trigger_source == 'n_clicks' and click and click[0] is not None:
+                self.photon_series.graph.update_pixelmask()
+                return [self.photon_series.graph.out_fig]
+                
             if relayoutData is not None and "shapes[0].x0" in relayoutData and trigger_source == 'relayoutData':
                 pos = relayoutData["shapes[0].x0"]
             else:
                 pos = self.start_frame_x
 
-            self.photon_series.update_image(pos, self.nwb, self.path_nwb)
+            self.photon_series.graph.update_image(pos, self.nwb, self.path_nwb)
 
-            return [self.photon_series.out_fig]
+            return [self.photon_series.graph.out_fig]
 
     def render_dashboard(self):
         io = pynwb.NWBHDF5IO(self.path_nwb, 'r')
@@ -470,7 +507,7 @@ class AllenDashboard(html.Div):
         path_external = get_fix_path(path_external)
 
         # Two photon imaging
-        self.photon_series = TiffImageSeriesComponent(
+        self.photon_series = TiffImageSeriesDiv(
             id='figure_photon_series',
             parent_app=self.parent_app,
             imageseries=self.nwb.acquisition['raw_ophys'],
@@ -478,7 +515,8 @@ class AllenDashboard(html.Div):
             pixel_mask=self.nwb.processing['ophys'].data_interfaces['image_segmentation'].plane_segmentations['plane_segmentation'].pixel_mask[:],
             foreign_time_window_controller=self.controller_time,
         )
-        self.photon_series.out_fig.update_layout(
+
+        self.photon_series.graph.out_fig.update_layout(
             showlegend=False,
             margin=dict(l=10, r=10, t=70, b=70),
             # width=300, height=300,
