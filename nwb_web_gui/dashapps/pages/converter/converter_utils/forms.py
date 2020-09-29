@@ -258,7 +258,10 @@ class SchemaForm(dbc.Card):
             self.definitions = dict()
 
         header_text = schema.get('title', self.id.split('-')[-1])
-        self.header = dbc.CardHeader([html.H4(header_text, className="title_" + key)])
+        self.header = dbc.CardHeader(
+            [html.H4(header_text, className="title_" + key)],
+            style={'padding': '10px'}
+        )
         self.body = dbc.CardBody([])
         self.children = [self.header, self.body]
 

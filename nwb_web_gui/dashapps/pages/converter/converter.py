@@ -1,9 +1,8 @@
 import dash
 import dash_html_components as html
 import dash_core_components as dcc
-from dash.dependencies import Input, Output, State, ALL, MATCH
+from dash.dependencies import Input, Output, State, ALL
 import dash_bootstrap_components as dbc
-import sd_material_ui as sdm
 import numpy as np
 import json
 import yaml
@@ -14,25 +13,36 @@ import flask
 
 
 class ConverterForms(html.Div):
-    def __init__(self, parent_app):
+    def __init__(self, parent_app, converter):
+        """
+        Forms to interface user input with NWB converters.
+
+        INPUT:
+        ------
+        parent_app : running Dash app
+        converter : NWB converter class
+        """
         super().__init__([])
         self.parent_app = parent_app
+        self.converter = converter
 
         examples_path = Path(__file__).parent.absolute() / 'example_schemas'
         self.downloads_path = Path(__file__).parent.parent.parent.parent.parent.absolute() / 'downloads'
 
-        source_schema_path = examples_path / 'schema_source.json'
-        with open(source_schema_path, 'r') as inp:
-            self.source_json_schema = json.load(inp)
+        self.source_json_schema = converter.get_input_schema()
 
-        metadata_schema_path = examples_path / 'schema_metadata_all.json'
-        with open(metadata_schema_path, 'r') as inp:
-            self.metadata_json_schema = json.load(inp)
+        # source_schema_path = examples_path / 'schema_source.json'
+        # with open(source_schema_path, 'r') as inp:
+        #     self.source_json_schema = json.load(inp)
 
-        # Fill form
-        metadata_data_path = examples_path / 'metadata_example_0.json'
-        with open(metadata_data_path, 'r') as inp:
-            self.metadata_json_data = json.load(inp)
+        # metadata_schema_path = examples_path / 'schema_metadata_all.json'
+        # with open(metadata_schema_path, 'r') as inp:
+        #     self.metadata_json_schema = json.load(inp)
+        #
+        # # Fill form
+        # metadata_data_path = examples_path / 'metadata_example_0.json'
+        # with open(metadata_data_path, 'r') as inp:
+        #     self.metadata_json_data = json.load(inp)
 
         # Source data Form
         self.source_forms = SchemaFormContainer(
@@ -45,26 +55,6 @@ class ConverterForms(html.Div):
 
         self.children = [
             dbc.Container([
-                # sdm.Drawer(
-                #     id='left-drawer',
-                #     open=True,
-                #     children=[
-                #         html.H4(children='Source Data'),
-                #         html.Ul(children=[
-                #             html.Li(children=['Source Files']),
-                #             html.Li(children=['Conversion Options'])
-                #         ]),
-                #         html.H4(children='Metadata'),
-                #         html.Ul(children=[
-                #             html.Li(children=['NWBFile']),
-                #             html.Li(children=['Subject']),
-                #             html.Li(children=['Ecephys']),
-                #             html.Li(children=['Ophys']),
-                #             html.Li(children=['Behavior'])
-                #         ]),
-                #         html.H4(children='Conversion')
-                #     ]
-                # ),
                 dbc.Row([
                     html.Br(),
                     dbc.Col(self.source_forms, width={'size': 12}),
@@ -125,7 +115,7 @@ class ConverterForms(html.Div):
                     )
                 ]),
                 dbc.Row(
-                    [dbc.Col(id='metadata-col', width={'size': 12})],
+                    dbc.Col(id='metadata-col', width={'size': 12}),
                     style={'margin-top': '1%'}
                 ),
                 html.Div(id='hidden', style={'display': 'none'}),
@@ -161,8 +151,20 @@ class ConverterForms(html.Div):
             [Input('get_metadata_btn', 'n_clicks')]
         )
         def get_metadata(click):
-            if click and self.metadata_forms is None:
-                # Metadata Form
+            if click:
+                # Get metadata schema from converter
+                self.metadata_json_schema = self.converter.get_metadata_schema(
+                    source_paths=None,
+                    conversion_options=None
+                )
+
+                # Get metadata data from converter
+                self.metadata_json_data = self.converter.get_metadata(
+                    source_paths=None,
+                    conversion_options=None
+                )
+
+                # Make metadata Form and fill with data
                 self.metadata_forms = SchemaFormContainer(
                     id='metadata',
                     schema=self.metadata_json_schema,
@@ -216,7 +218,7 @@ class ConverterForms(html.Div):
             # Trigger update of React components
             output = str(np.random.rand())
 
-            return output   
+            return output
 
         @self.parent_app.callback(
             [
@@ -226,7 +228,7 @@ class ConverterForms(html.Div):
             ],
             [Input('button_export_metadata', 'n_clicks')],
             [
-                State("popover_export_metadata", "is_open"), 
+                State("popover_export_metadata", "is_open"),
                 State('alert_required', 'is_open'),
                 State({'type': 'metadata-input', 'data_type': 'boolean', 'index': ALL}, 'checked'),
                 State({'type': 'metadata-input', 'data_type': 'string', 'index': ALL}, 'value'),
@@ -236,7 +238,7 @@ class ConverterForms(html.Div):
                 State({'type': 'metadata-input', 'data_type': 'name', 'index': ALL}, 'value'),
                 State({'type': 'metadata-input', 'data_type': 'number', 'index': ALL}, 'value'),
                 State({'type': 'metadata-input', 'data_type': ALL, 'index': ALL}, 'id'),
-            ] 
+            ]
         )
         def export_metadata(click, fileoption_is_open, req_is_open,
                             boolean_values, string_values, datetime_values,
