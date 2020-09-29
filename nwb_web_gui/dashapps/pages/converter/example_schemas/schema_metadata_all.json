@@ -12,7 +12,7 @@
     "NWBFile": {
       "type": "object",
       "additionalProperties": false,
-      "title": "pynwb.file.NWBFile",
+      "tag": "pynwb.file.NWBFile",
       "required": ["session_description", "identifier", "session_start_time"],
       "properties": {
         "session_description": {
@@ -99,7 +99,7 @@
 
     "Subject": {
       "type": "object",
-      "title": "pynwb.file.Subject",
+      "tag": "pynwb.file.Subject",
       "required": ["subjectd_id"],
       "properties": {
         "subject_id": {
@@ -144,7 +144,7 @@
         "Device2": {"$ref": "#/definitions/Device"},
         "ElectricalSeries1": {"$ref": "#/definitions/ElectricalSeries"},
         "ElectrodeGroup1": {
-          "title": "pynwb.ecephys.ElectrodeGroup",
+          "tag": "pynwb.ecephys.ElectrodeGroup",
           "type": "object",
           "required": ["name", "description", "location", "device"],
           "properties": {
@@ -178,13 +178,18 @@
         "Device1": {"$ref": "#/definitions/Device"},
         "TwoPhotonSeries1": {"$ref": "#/definitions/TwoPhotonSeries"},
         "DFOverF1": {
+          "tag": "pynwb.ophys.DFOverF",
+          "title": "DFOverF",
           "type": "object",
-          "title": "pynwb.ophys.DFOverF",
           "required": ["name"],
           "properties": {
-            "name": {"type": "string"},
+            "name": {
+              "type": "string",
+              "description": "the name of this container"
+            },
             "roi_response_series": {
               "type": "array",
+              "description": "RoiResponseSeries to store in this interface",
               "items": [
                 {"$ref":  "#/definitions/RoiResponseSeries"},
                 {"$ref":  "#/definitions/RoiResponseSeries"}
@@ -193,13 +198,18 @@
           }
         },
         "Fluorescence1": {
+          "tag": "pynwb.ophys.Fluorescence",
+          "title": "Fluorescence",
           "type": "object",
-          "title": "pynwb.ophys.Fluorescence",
           "required": ["name"],
           "properties": {
-            "name": {"type": "string"},
+            "name": {
+              "type": "string",
+              "description": "the name of this container"
+            },
             "roi_response_series": {
               "type": "array",
+              "description": "RoiResponseSeries to store in this interface",
               "items": [
                 {"$ref":  "#/definitions/RoiResponseSeries"},
                 {"$ref":  "#/definitions/RoiResponseSeries"}
@@ -207,8 +217,9 @@
             }
           }
         },
-        "ImagingPlane": {
-          "title": "pynwb.ophys.ImagingPlane",
+        "ImagingPlane1": {
+          "tag": "pynwb.ophys.ImagingPlane",
+          "title": "ImagingPlane",
           "type": "object",
           "required": ["name", "optical_channel", "description", "device", "excitation_lambda", "indicator", "location"],
           "properties": {
@@ -222,6 +233,7 @@
             },
             "device": {
               "type": "string",
+              "description": "the device that was used to record",
               "target": "pynwb.device.Device"
             },
             "excitation_lambda": {
@@ -242,15 +254,75 @@
             },
             "optical_channels": {
               "type": "array",
-              "description": "One of possibly many groups storing channel-specific data.",
+              "description": "One of possibly many groups storing channel-specific data",
               "items": [
                 {"$ref":  "#/definitions/OpticalChannel"},
                 {"$ref":  "#/definitions/OpticalChannel"}
               ]
             }
           }
+        },
+        "ImageSegmentation1": {
+          "tag": "pynwb.ophys.ImageSegmentation",
+          "title": "ImageSegmentation",
+          "type": "object",
+          "required": ["name", "plane_segmentations"],
+          "properties": {
+            "name":  {
+              "type": "string",
+              "description": "the name of this container"
+            },
+            "plane_segmentations": {
+              "type": "array",
+              "description": "PlaneSegmentation to store in this interface",
+              "items": {"$ref":  "#/definitions/PlaneSegmentation"},
+            }
+          }
         }
       }
+    },
+
+    "Behavior": {
+      "tag": "Behavior",
+      "title": "Behavior",
+    	"type": "object",
+    	"required": [],
+    	"properties": {
+    		"Position1": {
+          "tag": "pynwb.behavior.Position",
+          "title": "Position",
+    			"type": "object",
+    			"required": [],
+    			"properties": {
+    				"name": {
+              "type": "string",
+              "description": "the name of this container"
+            },
+            "spatial_series": {
+              "type": "array",
+              "description": "SpatialSeries to store in this interface",
+              "items": {"$ref": "#/definitions/SpatialSeries"},
+            }
+    			}
+    		},
+        "BehavioralEvents1": {
+          "tag": "pynwb.behavior.BehavioralEvents",
+          "title": "BehavioralEvents",
+          "type": "object",
+          "required": [],
+          "properties": {
+            "name": {
+              "type": "string",
+              "description": "the name of this container"
+            },
+            "time_series": {
+              "type": "array",
+              "description": " TimeSeries to store in this interface",
+              "items": {"$ref": "#definitions/TimeSeries"},
+            }
+          }
+        }
+    	}
     }
 
   },
@@ -258,7 +330,7 @@
   "definitions": {
     "Device": {
       "type": "object",
-      "title": "pynwb.device.Device",
+      "tag": "pynwb.device.Device",
       "required": ["name"],
       "properties": {
         "name": {
@@ -277,17 +349,14 @@
     },
 
     "TimeSeries": {
-      "title": "pynwb.base.TimeSeries",
+      "tag": "pynwb.base.TimeSeries",
+      "title": "TimeSeries", 
       "type": "object",
-      "required": ["name", "description"],
+      "required": ["name"],
       "properties": {
         "name": {
           "type": "string",
           "description": "The name of this TimeSeries dataset"
-        },
-        "description": {
-          "type": "string",
-          "description": "Description of this TimeSeries dataset"
         },
         "unit":{
           "type": "string",
@@ -301,12 +370,21 @@
           "type": "number",
           "description": "Scalar to multiply each element in data to convert it to the specified unit",
           "default": 1.0
+        },
+        "comments": {
+          "type": "string",
+          "description": "Human-readable comments about this TimeSeries dataset"
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of this TimeSeries dataset"
         }
       }
     },
 
     "ElectricalSeries": {
-      "title": "pynwb.ecephys.ElectricalSeries",
+      "tag": "pynwb.ecephys.ElectricalSeries",
+      "title": "ElectricalSeries",
       "type": "object",
       "required": ["name", "description"],
       "properties": {
@@ -339,7 +417,8 @@
     },
 
     "OpticalChannel": {
-      "title": "pynwb.ophys.OpticalChannel",
+      "tag": "pynwb.ophys.OpticalChannel",
+      "title": "OpticalChannel",
       "type": "object",
       "required": ["name", "description", "emission_lambda"],
       "properties": {
@@ -351,15 +430,38 @@
           "type": "string",
           "description": "Any notes or comments about the channel"
         },
-        "emissiond-lambda": {
+        "emission_lambda": {
           "type": "number",
           "description": "Emission wavelength for channel, in nm"
         }
       }
     },
 
+    "PlaneSegmentation": {
+      "tag": "pynwb.ophys.ImageSegmentation",
+      "title": "PlaneSegmentation",
+      "type": "object",
+      "required": ["name", "description", "imaging_plane"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "name of PlaneSegmentation"
+        },
+        "description": {
+          "type": "string",
+          "default": "Description of image plane, recording wavelength, depth, etc."
+        },
+        "imaging_plane": {
+          "type": "string",
+          "description": "the ImagingPlane this ROI applies to",
+          "target": "pynwb.ophys.ImagingPlane"
+        }
+      }
+    },
+
     "RoiResponseSeries": {
-      "title": "pynwb.ophys.RoiResponseSeries",
+      "tag": "pynwb.ophys.RoiResponseSeries",
+      "title": "RoiResponseSeries",
       "type": "object",
       "required": ["name"],
       "properties": {
@@ -387,12 +489,16 @@
           "type": "number",
           "description": "Scalar to multiply each element in data to convert it to the specified unit",
           "default": 1.0
+        },
+        "comments": {
+          "type": "string",
+          "description": "Human-readable comments about this TimeSeries dataset"
         }
       }
     },
 
     "TwoPhotonSeries": {
-      "title": "pynwb.ophys.TwoPhotonSeries",
+      "tag": "pynwb.ophys.TwoPhotonSeries",
       "type": "object",
       "required": ["name", "description"],
       "properties": {
@@ -421,6 +527,44 @@
           "type": "number",
           "description": "Scalar to multiply each element in data to convert it to the specified unit",
           "default": 1.0
+        },
+        "comments": {
+          "type": "string",
+          "description": "Human-readable comments about this TimeSeries dataset"
+        }
+      }
+    },
+
+    "SpatialSeries": {
+      "tag": "pynwb.behavior.SpatialSeries",
+      "title": "SpatialSeries",
+      "type": "object",
+      "required": ["name", "description", "reference_frame"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "The name of this TimeSeries dataset"
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of this TimeSeries dataset"
+        },
+        "reference_frame": {
+          "type": "string",
+          "description": "description defining what the zero-position is"
+        },
+        "resolution": {
+          "type": "number",
+          "description": "The smallest meaningful difference (in specified unit) between values in data"
+        },
+        "conversion": {
+          "type": "number",
+          "description": "Scalar to multiply each element in data to convert it to the specified unit",
+          "default": 1.0
+        },
+        "comments": {
+          "type": "string",
+          "description": "Human-readable comments about this TimeSeries dataset"
         }
       }
     }

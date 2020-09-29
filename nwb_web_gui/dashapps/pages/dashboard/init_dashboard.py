@@ -1,6 +1,6 @@
 import dash
 import dash_html_components as html
-from nwb_web_gui.dashapps.pages.dashboard.dashboard import Dashboard
+from nwb_web_gui.dashapps.pages.dashboard.dashboards.allen_dash import AllenDashboard
 import dash_bootstrap_components as dbc
 from nwb_web_gui.dashapps.components.navbar import render_navbar
 
@@ -16,6 +16,6 @@ def init_dashboard(server):
 
     navbar = render_navbar()
     # Create Dash Layout
-    dash_app.layout = html.Div([navbar, Dashboard(parent_app=dash_app)])
+    dash_app.layout = html.Div([navbar, AllenDashboard(parent_app=dash_app)])
 
     return dash_app.server
