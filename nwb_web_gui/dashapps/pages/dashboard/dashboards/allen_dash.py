@@ -147,6 +147,7 @@ class TiffImageSeriesComponent(dcc.Graph):
         self.parent_app = parent_app
         self.imageseries = imageseries
         self.pixel_mask = pixel_mask
+
         if foreign_time_window_controller is not None:
             self.time_window_controller = foreign_time_window_controller
         else:
@@ -162,19 +163,20 @@ class TiffImageSeriesComponent(dcc.Graph):
 
         # Make figure component
         if path_external_file is not None:
-            tiff = TiffFile(path_external_file)
-            n_samples = len(tiff.pages)
-            page = tiff.pages[0]
-            n_y, n_x = page.shape
+            self.tiff = TiffFile(path_external_file)
+            self.n_samples = len(self.tiff.pages)
+            self.page = self.tiff.pages[0]
+            self.n_y, self.n_x = page.shape
 
             # Read first frame
-            image = imread(path_external_file, key=0)
+            self.image = imread(path_external_file, key=0)
         else:
-            image = []
+            self.image = []
+            self.tiff = None
 
         self.out_fig = go.Figure(
             data=go.Heatmap(
-                z=image,
+                z=self.image,
                 colorscale='gray',
                 showscale=False,
             )
@@ -185,6 +187,26 @@ class TiffImageSeriesComponent(dcc.Graph):
         )
 
         self.figure = self.out_fig
+        
+
+    def update_image(self, pos, nwb, relative_path):
+        """Update tiff image frame"""
+
+        frame_number = int(pos * nwb.acquisition['raw_ophys'].rate)
+        path_external = str(Path(relative_path).parent / Path(nwb.acquisition['raw_ophys'].external_file[0]))
+        path_external_file = get_fix_path(path_external)
+
+        if self.tiff is None:
+            self.tiff = TiffFile(path_external_file)
+            self.n_samples = len(self.tiff.pages)
+            self.page = self.tiff.pages[0]
+            self.n_y, self.n_x = self.page.shape
+
+        self.image = imread(path_external_file, key=frame_number)
+        self.out_fig.data[0].z = self.image
+
+    def add_pixel_mask(self):
+        pass
 
 
 class AllenDashboard(html.Div):
@@ -222,7 +244,17 @@ class AllenDashboard(html.Div):
                 html.Div([
                     html.Div(
                         id='div-figure-traces',
-                        style={'width': '69%', 'display': 'inline-block'}
+                        children = dcc.Graph(
+                            id='figure_traces',
+                            figure={},
+                            config={
+                                'displayModeBar': False,
+                                'edits': {
+                                    'shapePosition': True
+                                }
+                            }
+                        ),
+                        style={'width': '69%', 'display': 'none'}
                     ),
                     html.Div(
                         id='div-photon-series',
@@ -234,7 +266,7 @@ class AllenDashboard(html.Div):
         ]
 
         @self.parent_app.callback(
-            Output(component_id='div-figure-traces', component_property='children'),
+            [Output(component_id='div-figure-traces', component_property='style'), Output('figure_traces', 'figure')],
             [
                 Input(component_id='slider_start_time', component_property='value'),
                 Input(component_id='input_duration', component_property='value')
@@ -294,6 +326,7 @@ class AllenDashboard(html.Div):
                     }
                 }]
             )
+            '''
             graph = dcc.Graph(
                     id='figure_traces',
                     figure=self.traces,
@@ -304,8 +337,9 @@ class AllenDashboard(html.Div):
                         }
                     }
                 ),
+            '''
 
-            return graph
+            return {'display': 'inline-block'}, self.traces
 
         @self.parent_app.callback(
             [
@@ -331,20 +365,27 @@ class AllenDashboard(html.Div):
 
         @self.parent_app.callback(
             [Output(component_id='figure_photon_series', component_property='figure')],
-            [Input(component_id='figure_traces', component_property='relayoutData')])
-        def change_frame(relayoutData):
+            [
+                Input(component_id='figure_traces', component_property='relayoutData'),
+                Input('figure_traces', 'figure')
+            ]
+        )
+        def change_frame(relayoutData, figure):
+            """
+            Update tiff frame with change on:
+              - Figure data
+              - Frame selector position
+            """
 
-            if relayoutData is not None and "shapes[0].x0" in relayoutData:
+            ctx = dash.callback_context
+            trigger_source = ctx.triggered[0]['prop_id'].split('.')[1]
+
+            if relayoutData is not None and "shapes[0].x0" in relayoutData and trigger_source == 'relayoutData':
                 pos = relayoutData["shapes[0].x0"]
             else:
                 pos = self.start_frame_x
 
-            frame_number = int(pos * self.nwb.acquisition['raw_ophys'].rate)
-            path_external = str(Path(self.path_nwb).parent / Path(self.nwb.acquisition['raw_ophys'].external_file[0]))
-            path_external_file = get_fix_path(path_external)
-
-            image = imread(path_external_file, key=frame_number)
-            self.photon_series.out_fig.data[0].z = image
+            self.photon_series.update_image(pos, self.nwb, self.path_nwb)
 
             return [self.photon_series.out_fig]
 
