@@ -324,10 +324,7 @@
             "time_series": {
               "type": "array",
               "description": " TimeSeries to store in this interface",
-              "items": [
-                {"$ref": "#definitions/TimeSeries"},
-                {"$ref": "#definitions/TimeSeries"}
-              ]
+              "items": {"$ref": "#definitions/TimeSeries"},
             }
           }
         }
