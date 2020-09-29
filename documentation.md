@@ -263,10 +263,7 @@ ImagingPlane:
   "properties": {
     "optical_channels": {
       "type": "array",
-      "items": [
-        {"$ref":  "#/definitions/OpticalChannel"},
-        {"$ref":  "#/definitions/OpticalChannel"}
-      ]
+      "items": {"$ref":  "#/definitions/OpticalChannel"}
     }
   }
 }
