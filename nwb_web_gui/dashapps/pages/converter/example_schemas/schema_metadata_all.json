@@ -304,10 +304,7 @@
             "spatial_series": {
               "type": "array",
               "description": "SpatialSeries to store in this interface",
-              "items": [
-                {"$ref": "#/definitions/SpatialSeries"},
-                {"$ref": "#/definitions/SpatialSeries"}
-              ]
+              "items": {"$ref": "#/definitions/SpatialSeries"},
             }
     			}
     		},
