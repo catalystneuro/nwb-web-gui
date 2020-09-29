@@ -275,10 +275,7 @@
             "plane_segmentations": {
               "type": "array",
               "description": "PlaneSegmentation to store in this interface",
-              "items": [
-                {"$ref":  "#/definitions/PlaneSegmentation"},
-                {"$ref":  "#/definitions/PlaneSegmentation"}
-              ]
+              "items": {"$ref":  "#/definitions/PlaneSegmentation"},
             }
           }
         }
@@ -304,10 +301,7 @@
             "spatial_series": {
               "type": "array",
               "description": "SpatialSeries to store in this interface",
-              "items": [
-                {"$ref": "#/definitions/SpatialSeries"},
-                {"$ref": "#/definitions/SpatialSeries"}
-              ]
+              "items": {"$ref": "#/definitions/SpatialSeries"},
             }
     			}
     		},
@@ -324,10 +318,7 @@
             "time_series": {
               "type": "array",
               "description": " TimeSeries to store in this interface",
-              "items": [
-                {"$ref": "#definitions/TimeSeries"},
-                {"$ref": "#definitions/TimeSeries"}
-              ]
+              "items": {"$ref": "#definitions/TimeSeries"},
             }
           }
         }
