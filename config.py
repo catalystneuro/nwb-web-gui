@@ -7,6 +7,8 @@ class Config:
     TEMPLATES_FOLDER = 'templates'
     SEND_FILE_MAX_AGE_DEFAULT = 0
 
+    NWB_CONVERTER = 'example'
+
 
 class ConfigProduction(Config):
     FLASK_ENV = 'production'
@@ -21,5 +23,5 @@ class ConfigDev(Config):
     TESTING = True
     DATABASE_URI = 'DEV_DATABASE_URI'
 
-    EXPLORER_PATH = '/home/vinicius/Área de Trabalho/Trabalhos/nwb-web-gui/files'
-    #EXPLORER_PATH = r'C:\Users\Luiz\Desktop\data_app'
+    # EXPLORER_PATH = '/home/vinicius/Área de Trabalho/Trabalhos/nwb-web-gui/files'
+    EXPLORER_PATH = r'C:\Users\Luiz\Desktop\data_app'
