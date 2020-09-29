@@ -275,10 +275,7 @@
             "plane_segmentations": {
               "type": "array",
               "description": "PlaneSegmentation to store in this interface",
-              "items": [
-                {"$ref":  "#/definitions/PlaneSegmentation"},
-                {"$ref":  "#/definitions/PlaneSegmentation"}
-              ]
+              "items": {"$ref":  "#/definitions/PlaneSegmentation"},
             }
           }
         }
