@@ -293,11 +293,12 @@ class SchemaForm(dbc.Card):
                 # If field is an array of subforms, e.g. ImagingPlane.optical_channels
                 if isinstance(v['items'], list):
                     value = []
-                    for i, iv in enumerate(v["items"]):
-                        template_name = iv["$ref"].split('/')[-1]
+                    for index in range(v['minItems']):
+                        template_name = v['items'][0]['$ref'].split('/')[-1]
                         schema = self.definitions[template_name]
-                        iform = SchemaForm(schema=schema, key=k + f'-{i}', parent_form=self)
+                        iform = SchemaForm(schema=schema, key=f'{k}-{index}', parent_form=self)
                         value.append(iform)
+
                 # If field is an array of strings, e.g. NWBFile.experimenter
                 elif isinstance(v['items'], dict):
                     value = v
