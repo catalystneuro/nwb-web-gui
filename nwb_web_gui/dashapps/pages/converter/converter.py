@@ -51,20 +51,20 @@ class ConverterForms(html.Div):
                     dbc.Col(self.source_forms, width={'size': 12}),
                     dbc.Col(
                         #html.A(dbc.Button('Get Metadata Form', id='get_metadata_btn', color='dark'), href='/converter/'),
-                        dbc.Button('Get Metadata Tests', id='get_metadata_tests'),
+                        dbc.Button('Get Metadata Form', id='get_metadata_btn'),
                         style={'justify-content': 'left', 'text-align': 'left', 'margin-top': '1%'},
                         width={'size': 4}
                     )
                 ]),
                 dbc.Row([
                     dbc.Col(
-                        dcc.Upload(dbc.Button('Load Metadata', color='dark'), id='button_load_metadata'),
+                        dcc.Upload(dbc.Button('Load Metadata', color='dark'), id='button_load_metadata', style={'display': 'none'}),
                         width={'size': 2},
                         style={'justify-content': 'left', 'text-align': 'left', 'margin-top': '1%'},
                     ),
                     dbc.Col(
                         html.Div([
-                            dbc.Button('Export Metadata', id='button_export_metadata', color='dark'),
+                            dbc.Button('Export Metadata', id='button_export_metadata', color='dark', style={'display': 'none'}),
                             dbc.Popover(
                                 [
                                     dbc.PopoverBody([
@@ -90,7 +90,7 @@ class ConverterForms(html.Div):
                         style={'justify-content': 'left', 'text-align': 'left', 'margin-top': '1%'},
                     ),
                     dbc.Col(
-                        dbc.Button('Refresh', id='button_refresh', color='dark'),
+                        dbc.Button('Refresh', id='button_refresh', color='dark', style={'display': 'none'}),
                         width={'size': 2},
                         style={'justify-content': 'left', 'text-align': 'left', 'margin-top': '1%'},
                     )
@@ -139,9 +139,13 @@ class ConverterForms(html.Div):
         ]
 
         @self.parent_app.callback(
-            Output('metadata-col', 'children'),
-            #[Input('get_metadata_btn', 'n_clicks')]
-            [Input('get_metadata_tests', 'n_clicks')]
+            [
+                Output('metadata-col', 'children'),
+                Output('button_load_metadata', 'style'),
+                Output('button_export_metadata', 'style'),
+                Output('button_refresh', 'style')
+            ],
+            [Input('get_metadata_btn', 'n_clicks')]
         )
         def get_metadata(click):
             if click:
@@ -156,20 +160,17 @@ class ConverterForms(html.Div):
                     source_paths=None,
                     conversion_options=None
                 )
+                if self.metadata_forms.children_forms:
+                    # Clean form children if exists to render new one
+                    self.metadata_forms.children_forms = []
+
                 self.metadata_forms.schema = self.metadata_json_schema
                 self.metadata_forms.construct_children_forms()
-
-                # Make metadata Form and fill with data
-                #self.metadata_forms = SchemaFormContainer(
-                    #id='metadata',
-                    #schema=self.metadata_json_schema,
-                    #parent_app=self.parent_app
-                #)
                 self.metadata_forms.update_data(data=self.metadata_json_data)
 
-                return self.metadata_forms
+                return [self.metadata_forms, {'display': 'block'}, {'display': 'block'}, {'display': 'block'}]
             else:
-                return self.metadata_forms
+                return [self.metadata_forms, {'display': 'none'}, {'display': 'none'}, {'display': 'none'}]
 
         @self.parent_app.callback(
             Output({'type': 'external-trigger-update-links-values', 'index': 'metadata-external-trigger-update-links-values'}, 'children'),
@@ -216,12 +217,12 @@ class ConverterForms(html.Div):
 
             return output
 
-        
         @self.parent_app.callback(
             [
                 Output("popover_export_metadata", "is_open"),
                 Output('alert_required', 'is_open'),
                 Output('alert_required', 'children'),
+                
             ],
             [Input('button_export_metadata', 'n_clicks')],
             [

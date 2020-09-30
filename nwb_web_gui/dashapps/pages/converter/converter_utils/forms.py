@@ -351,30 +351,6 @@ class SchemaFormContainer(html.Div):
         if schema:
             self.construct_children_forms()
 
-
-        """
-        # Create Outputs for the callback that updates Forms values
-        self.update_forms_values_callback_outputs = []
-        for v in self.data.values():
-            if v['compound_id']['data_type'] != 'link':
-                if v['compound_id']['data_type'] == 'boolean':
-                    self.update_forms_values_callback_outputs.append(Output(v['compound_id'], 'checked'))
-                elif v['compound_id']['data_type'] == 'tags':
-                    self.update_forms_values_callback_outputs.append(Output(v['compound_id'], 'injectedTags'))
-                elif v['compound_id']['data_type'] == 'datetime':
-                    self.update_forms_values_callback_outputs.append(Output(v['compound_id'], 'defaultValue'))
-                else:
-                    self.update_forms_values_callback_outputs.append(Output(v['compound_id'], 'value'))
-        self.update_forms_values_callback_outputs.append(Output(id + '-trigger-update-links-values', 'children'))
-
-        # Create Outputs for the callback that updates Links values and options
-        # An extra paceholder is needed for when there is no link fields
-        link_output_options = [Output(v['compound_id'], 'options') for v in self.data.values() if v['compound_id']['data_type'] == 'link']
-        link_output_values = [Output(v['compound_id'], 'value') for v in self.data.values() if v['compound_id']['data_type'] == 'link']
-        link_output_placeholder = [Output(id + '-output-placeholder-links-values', 'children')]
-        self.update_forms_links_callback_outputs = link_output_options + link_output_values + link_output_placeholder
-        """
-
         self.update_forms_links_callback_outputs = [
             Output({'type': 'metadata-input', 'container_id': f"{self.id}", 'data_type': 'link', 'index': ALL}, 'options'),
             Output({'type': 'metadata-input', 'container_id': f"{self.id}", 'data_type': 'link', 'index': ALL}, 'value'),
@@ -490,6 +466,8 @@ class SchemaFormContainer(html.Div):
             output = [list_options, list_values, [1]]
 
             return output
+        
+        
 
     def update_data(self, data, key=None):
         """Update data in the internal mapping dictionary of this Container"""
