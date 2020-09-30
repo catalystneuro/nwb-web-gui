@@ -31,19 +31,6 @@ class ConverterForms(html.Div):
 
         self.source_json_schema = converter.get_input_schema()
 
-        # source_schema_path = examples_path / 'schema_source.json'
-        # with open(source_schema_path, 'r') as inp:
-        #     self.source_json_schema = json.load(inp)
-
-        # metadata_schema_path = examples_path / 'schema_metadata_all.json'
-        # with open(metadata_schema_path, 'r') as inp:
-        #     self.metadata_json_schema = json.load(inp)
-        #
-        # # Fill form
-        # metadata_data_path = examples_path / 'metadata_example_0.json'
-        # with open(metadata_data_path, 'r') as inp:
-        #     self.metadata_json_data = json.load(inp)
-
         # Source data Form
         self.source_forms = SchemaFormContainer(
             id='sourcedata',
@@ -51,7 +38,11 @@ class ConverterForms(html.Div):
             parent_app=self.parent_app
         )
 
-        self.metadata_forms = None
+        self.metadata_forms = SchemaFormContainer(
+            id='metadata',
+            schema=dict(),
+            parent_app=self.parent_app
+        )
 
         self.children = [
             dbc.Container([
@@ -59,7 +50,8 @@ class ConverterForms(html.Div):
                     html.Br(),
                     dbc.Col(self.source_forms, width={'size': 12}),
                     dbc.Col(
-                        html.A(dbc.Button('Get Metadata Form', id='get_metadata_btn', color='dark'), href='/converter/'),
+                        #html.A(dbc.Button('Get Metadata Form', id='get_metadata_btn', color='dark'), href='/converter/'),
+                        dbc.Button('Get Metadata Tests', id='get_metadata_tests'),
                         style={'justify-content': 'left', 'text-align': 'left', 'margin-top': '1%'},
                         width={'size': 4}
                     )
@@ -148,7 +140,8 @@ class ConverterForms(html.Div):
 
         @self.parent_app.callback(
             Output('metadata-col', 'children'),
-            [Input('get_metadata_btn', 'n_clicks')]
+            #[Input('get_metadata_btn', 'n_clicks')]
+            [Input('get_metadata_tests', 'n_clicks')]
         )
         def get_metadata(click):
             if click:
@@ -163,14 +156,17 @@ class ConverterForms(html.Div):
                     source_paths=None,
                     conversion_options=None
                 )
+                self.metadata_forms.schema = self.metadata_json_schema
+                self.metadata_forms.construct_children_forms()
 
                 # Make metadata Form and fill with data
-                self.metadata_forms = SchemaFormContainer(
-                    id='metadata',
-                    schema=self.metadata_json_schema,
-                    parent_app=self.parent_app
-                )
+                #self.metadata_forms = SchemaFormContainer(
+                    #id='metadata',
+                    #schema=self.metadata_json_schema,
+                    #parent_app=self.parent_app
+                #)
                 self.metadata_forms.update_data(data=self.metadata_json_data)
+
                 return self.metadata_forms
             else:
                 return self.metadata_forms
@@ -220,6 +216,7 @@ class ConverterForms(html.Div):
 
             return output
 
+        
         @self.parent_app.callback(
             [
                 Output("popover_export_metadata", "is_open"),
@@ -230,14 +227,14 @@ class ConverterForms(html.Div):
             [
                 State("popover_export_metadata", "is_open"),
                 State('alert_required', 'is_open'),
-                State({'type': 'metadata-input', 'data_type': 'boolean', 'index': ALL}, 'checked'),
-                State({'type': 'metadata-input', 'data_type': 'string', 'index': ALL}, 'value'),
-                State({'type': 'metadata-input', 'data_type': 'datetime', 'index': ALL}, 'value'),
-                State({'type': 'metadata-input', 'data_type': 'tags', 'index': ALL}, 'value'),
-                State({'type': 'metadata-input', 'data_type': 'link', 'index': ALL}, 'value'),
-                State({'type': 'metadata-input', 'data_type': 'name', 'index': ALL}, 'value'),
-                State({'type': 'metadata-input', 'data_type': 'number', 'index': ALL}, 'value'),
-                State({'type': 'metadata-input', 'data_type': ALL, 'index': ALL}, 'id'),
+                State({'type': 'metadata-input', 'container_id': 'metadata', 'data_type': 'boolean', 'index': ALL}, 'checked'),
+                State({'type': 'metadata-input', 'container_id': 'metadata', 'data_type': 'string', 'index': ALL}, 'value'),
+                State({'type': 'metadata-input', 'container_id': 'metadata', 'data_type': 'datetime', 'index': ALL}, 'value'),
+                State({'type': 'metadata-input', 'container_id': 'metadata', 'data_type': 'tags', 'index': ALL}, 'value'),
+                State({'type': 'metadata-input', 'container_id': 'metadata', 'data_type': 'link', 'index': ALL}, 'value'),
+                State({'type': 'metadata-input', 'container_id': 'metadata', 'data_type': 'name', 'index': ALL}, 'value'),
+                State({'type': 'metadata-input', 'container_id': 'metadata', 'data_type': 'number', 'index': ALL}, 'value'),
+                State({'type': 'metadata-input', 'container_id': 'metadata', 'data_type': ALL, 'index': ALL}, 'id'),
             ]
         )
         def export_metadata(click, fileoption_is_open, req_is_open,
@@ -344,6 +341,7 @@ class ConverterForms(html.Div):
                 yaml.dump(output, outfile, default_flow_style=False)
 
             return not fileoption_is_open, req_is_open, []
+
 
         @self.parent_app.server.route('/downloads/<path:filename>')
         def download_file(filename):

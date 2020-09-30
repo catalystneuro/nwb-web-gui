@@ -51,7 +51,8 @@ class SchemaFormItem(dbc.FormGroup):
         compound_id = {
             'type': 'metadata-input',
             'index': input_id,
-            'data_type': ''
+            'data_type': '',
+            'container_id': self.parent.container.id
         }
 
         if isinstance(value, list):
@@ -337,6 +338,7 @@ class SchemaFormContainer(html.Div):
         self.schema = schema
         self.parent_app = parent_app
         self.data = {}
+        self.children_forms = []
 
         # Hidden componentes that serve to trigger callbacks
         self.children_triggers = [
@@ -346,19 +348,11 @@ class SchemaFormContainer(html.Div):
             html.Div(id=id + '-output-placeholder-links-values', style={'display': 'none'})
         ]
 
-        # Construct children forms
-        self.children_forms = []
-        if 'properties' in schema:
-            for form_key, form_value in schema['properties'].items():
-                iform = SchemaForm(
-                    schema=form_value,
-                    key=form_key,
-                    container=self
-                )
-                self.children_forms.append(iform)
+        if schema:
+            self.construct_children_forms()
 
-        self.children = self.children_forms + self.children_triggers
 
+        """
         # Create Outputs for the callback that updates Forms values
         self.update_forms_values_callback_outputs = []
         for v in self.data.values():
@@ -379,6 +373,33 @@ class SchemaFormContainer(html.Div):
         link_output_values = [Output(v['compound_id'], 'value') for v in self.data.values() if v['compound_id']['data_type'] == 'link']
         link_output_placeholder = [Output(id + '-output-placeholder-links-values', 'children')]
         self.update_forms_links_callback_outputs = link_output_options + link_output_values + link_output_placeholder
+        """
+
+        self.update_forms_links_callback_outputs = [
+            Output({'type': 'metadata-input', 'container_id': f"{self.id}", 'data_type': 'link', 'index': ALL}, 'options'),
+            Output({'type': 'metadata-input', 'container_id': f"{self.id}", 'data_type': 'link', 'index': ALL}, 'value'),
+            Output(self.id + '-output-placeholder-links-values', 'children')
+        ]
+
+        self.update_forms_values_callback_outputs = [
+                Output({'type': 'metadata-input', 'container_id': f"{self.id}", 'data_type': 'path', 'index': ALL}, 'value'),
+                Output({'type': 'metadata-input', 'container_id': f"{self.id}", 'data_type': 'boolean', 'index': ALL}, 'checked'),
+                Output({'type': 'metadata-input', 'container_id': f"{self.id}", 'data_type': 'string', 'index': ALL}, 'value'),
+                Output({'type': 'metadata-input', 'container_id': f"{self.id}", 'data_type': 'datetime', 'index': ALL}, 'defaultValue'),
+                Output({'type': 'metadata-input', 'container_id': f"{self.id}", 'data_type': 'tags', 'index': ALL}, 'injectedTags'),
+                Output({'type': 'metadata-input', 'container_id': f"{self.id}", 'data_type': 'name', 'index': ALL}, 'value'),
+                Output({'type': 'metadata-input', 'container_id': f"{self.id}", 'data_type': 'number', 'index': ALL}, 'value'),
+                Output(f'{self.id}-trigger-update-links-values', 'children')
+            ]
+        self.update_forms_values_callback_states = [
+                State({'type': 'metadata-input', 'container_id': f"{self.id}", 'data_type': 'path', 'index': ALL}, 'value'),
+                State({'type': 'metadata-input', 'container_id': f"{self.id}", 'data_type': 'boolean', 'index': ALL}, 'checked'),
+                State({'type': 'metadata-input', 'container_id': f"{self.id}", 'data_type': 'string', 'index': ALL}, 'value'),
+                State({'type': 'metadata-input', 'container_id': f"{self.id}", 'data_type': 'datetime', 'index': ALL}, 'value'),
+                State({'type': 'metadata-input', 'container_id': f"{self.id}", 'data_type': 'tags', 'index': ALL}, 'value'),
+                State({'type': 'metadata-input', 'container_id': f"{self.id}", 'data_type': 'name', 'index': ALL}, 'value'),
+                State({'type': 'metadata-input', 'container_id': f"{self.id}", 'data_type': 'number', 'index': ALL}, 'value'),
+            ]
 
         @self.parent_app.callback(
             self.update_forms_values_callback_outputs,
@@ -386,28 +407,42 @@ class SchemaFormContainer(html.Div):
                 Input({'type': 'external-trigger-update-forms-values', 'index': ALL}, 'children'),
                 Input({'type': 'internal-trigger-update-forms-values', 'parent': self.id, 'index': ALL}, 'children')
             ],
-            [State(v['compound_id'], 'value') for v in self.data.values() if (v['compound_id']['data_type'] != 'link' and v['compound_id']['data_type'] != 'boolean')] +
-            [State(v['compound_id'], 'checked') for v in self.data.values() if (v['compound_id']['data_type'] != 'link' and v['compound_id']['data_type'] == 'boolean')]
+            self.update_forms_values_callback_states
 
         )
         def update_forms_values(trigger, trigger_all, *states):
-            """Updates forms values (except links)"""
 
-            ctx = dash.callback_context
-            trigger_source = ctx.triggered[0]['prop_id'].split('.')[0]
+            output_path = []
+            output_bool = []
+            output_string = []
+            output_date = []
+            output_tags = []
+            output_link = []
+            output_name = []
+            output_number = []
 
             curr_data = list()
             for v in self.data.values():
-                if v['compound_id']['data_type'] != 'link':
-                    if isinstance(v['value'], list):
-                        element = [{"index": i, "displayValue": e} for i, e in enumerate(v['value'])]
-                    else:
-                        element = v['value']
-                    curr_data.append(element)
+                if v['compound_id']['data_type'] == 'path':
+                    output_path.append(v['value'])
+                elif v['compound_id']['data_type'] == 'boolean':
+                    output_bool.append(v['value'])
+                elif v['compound_id']['data_type'] == 'string':
+                    output_string.append(v['value'])
+                elif v['compound_id']['data_type'] == 'datetime':
+                    output_date.append(v['value'])
+                elif v['compound_id']['data_type'] == 'tags':
+                    output_tags.append([{"index": i, "displayValue": e} for i, e in enumerate(v['value'])])
+                elif v['compound_id']['data_type'] == 'link':
+                    pass
+                elif v['compound_id']['data_type'] == 'name':
+                    output_name.append(v['value'])
+                elif v['compound_id']['data_type'] == 'number':
+                    output_number.append(v['value'])
 
-            curr_data.append(1)
-            return curr_data
+            output = [output_path, output_bool, output_string, output_date, output_tags, output_name, output_number, 1]
 
+            return output
 
         @self.parent_app.callback(
             self.update_forms_links_callback_outputs,
@@ -415,54 +450,22 @@ class SchemaFormContainer(html.Div):
                 Input(self.id + '-trigger-update-links-values', 'children'),
                 Input({'type': 'external-trigger-update-links-values', 'index': ALL}, 'children')
             ],
-            [State(v['compound_id'], 'value') for v in self.data.values() if v['compound_id']['data_type'] == 'name']
+            [State({'type': 'metadata-input', 'container_id': f"{self.id}", 'data_type': 'name', 'index': ALL}, 'value')]
         )
-        def update_forms_links(trigger, external_trigger, *name_change):
-            """
-            Updates forms values for links (dropdown options) when names change.
-            If a field has a valid value for the 'target' property, this function
-            will sweep the data internal dictionary in search for field
-            ids ending with '-name' where the 'owner_class' value matches 'target'.
-            The resulting list will populate the dropdown menu of the field.
-
-            Example:
-            data = {
-                'Ecephys-ElectrodeGroup1-device': {
-                    'compound_id': {
-                        'type': 'metadata-input',
-                        'index': 'Ecephys-ElectrodeGroup1-device',
-                        'data_type': 'link'
-                    }
-                    'value': 'device 1',
-                    'owner_class': 'pynwb.ecephys.ElectrodeGroup',
-                    'target': 'pynwb.device.Device'
-                },
-                'Ecephys-Device-name': {
-                    'compound_id': {
-                        'type': 'metadata-input',
-                        'index': 'Ecephys-Device-name',
-                        'data_type': 'string'
-                    }
-                    'value': 'device 1',
-                    'owner_class': 'pynwb.device.Device',
-                    'target': None
-                }
-            }
-            """
+        def update_forms_links(trigger, trigger_all, name_change):
             ctx = dash.callback_context
             trigger_source = ctx.triggered[0]['prop_id'].split('.')[0]
 
             if 'index' in trigger_source:
                 trigger_source = json.loads(trigger_source)['index']
 
-            if trigger_source != self.id + '-trigger-update-links-values' and trigger_source != f'{self.id}-external-trigger-update-links-values':
-                return ['' for _ in self.update_forms_links_callback_outputs]
+            #if trigger_source != self.id + '-trigger-update-links-values' and trigger_source != f'{self.id}-external-trigger-update-links-values':
+                #pass
 
-            # Update changed names on backend mapping dictionary
             i = 0
             for k, v in self.data.items():
                 if v['compound_id']['data_type'] == 'name':
-                    self.data[k]['value'] = name_change[i]
+                    self.data[k]['value'] = name_change[i]  
                     i += 1
 
             # Get specific options for each link dropdown
@@ -484,7 +487,9 @@ class SchemaFormContainer(html.Div):
                     if e['value'] is None:
                         sublist.remove(e)
 
-            return list_options + list_values + [1]
+            output = [list_options, list_values, [1]]
+
+            return output
 
     def update_data(self, data, key=None):
         """Update data in the internal mapping dictionary of this Container"""
@@ -504,3 +509,15 @@ class SchemaFormContainer(html.Div):
             else:
                 component_id = key + '-' + k   # e.g. NWBFile-session_description
                 self.data[component_id]['value'] = v
+
+    def construct_children_forms(self):
+        # Construct children forms
+        if 'properties' in self.schema:
+            for form_key, form_value in self.schema['properties'].items():
+                iform = SchemaForm(
+                    schema=form_value,
+                    key=form_key,
+                    container=self
+                )
+                self.children_forms.append(iform)
+        self.children = self.children_forms + self.children_triggers
