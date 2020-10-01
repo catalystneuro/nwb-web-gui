@@ -1,4 +1,4 @@
-{
+	{
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "metafile.schema.json",
   "title": "Metadata",
@@ -190,8 +190,9 @@
             "roi_response_series": {
               "type": "array",
               "description": "RoiResponseSeries to store in this interface",
+              "minItems": 2,
+              "maxItems": 2,
               "items": [
-                {"$ref":  "#/definitions/RoiResponseSeries"},
                 {"$ref":  "#/definitions/RoiResponseSeries"}
               ]
             }
@@ -210,8 +211,9 @@
             "roi_response_series": {
               "type": "array",
               "description": "RoiResponseSeries to store in this interface",
+              "minItems": 2,
+              "maxItems": 2,
               "items": [
-                {"$ref":  "#/definitions/RoiResponseSeries"},
                 {"$ref":  "#/definitions/RoiResponseSeries"}
               ]
             }
@@ -255,8 +257,9 @@
             "optical_channels": {
               "type": "array",
               "description": "One of possibly many groups storing channel-specific data",
+              "minItems": 2,
+              "maxItems": 2,
               "items": [
-                {"$ref":  "#/definitions/OpticalChannel"},
                 {"$ref":  "#/definitions/OpticalChannel"}
               ]
             }
@@ -275,10 +278,9 @@
             "plane_segmentations": {
               "type": "array",
               "description": "PlaneSegmentation to store in this interface",
-              "items": [
-                {"$ref":  "#/definitions/PlaneSegmentation"},
-                {"$ref":  "#/definitions/PlaneSegmentation"}
-              ]
+              "minItems": 2,
+              "maxItems": 2,
+              "items": [{"$ref":  "#/definitions/PlaneSegmentation"}]
             }
           }
         }
@@ -304,10 +306,9 @@
             "spatial_series": {
               "type": "array",
               "description": "SpatialSeries to store in this interface",
-              "items": [
-                {"$ref": "#/definitions/SpatialSeries"},
-                {"$ref": "#/definitions/SpatialSeries"}
-              ]
+              "minItems": 2,
+              "maxItems": 2,
+              "items": [{"$ref": "#/definitions/SpatialSeries"}]
             }
     			}
     		},
@@ -324,10 +325,9 @@
             "time_series": {
               "type": "array",
               "description": " TimeSeries to store in this interface",
-              "items": [
-                {"$ref": "#definitions/TimeSeries"},
-                {"$ref": "#definitions/TimeSeries"}
-              ]
+              "minItems": 2,
+              "maxItems": 2,
+              "items": [{"$ref": "#definitions/TimeSeries"}]
             }
           }
         }
@@ -359,6 +359,7 @@
 
     "TimeSeries": {
       "tag": "pynwb.base.TimeSeries",
+      "title": "TimeSeries", 
       "type": "object",
       "required": ["name"],
       "properties": {
