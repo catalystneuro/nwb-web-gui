@@ -166,6 +166,10 @@ class ConverterForms(html.Div):
             if not self.export_controller or not trigger:
                 return fileoption_is_open, req_is_open, []
 
+            if self.export_controller and fileoption_is_open:
+                self.export_controller = False
+                return not fileoption_is_open, req_is_open, []
+
             self.export_controller = False
             dicts_list = list()
             output = dict()
@@ -222,7 +226,7 @@ class ConverterForms(html.Div):
 
         @self.parent_app.callback(
             Output('metadata-external-trigger-update-internal-dict', 'children'),
-            [Input('button_export_metadata', 'n_clicks')]
+            [Input('button_export_metadata', 'n_clicks')],
         )
         def update_internal_metadata_to_export(click):
             """Trigger metadata internal dict update and set export controller to true"""
@@ -328,7 +332,6 @@ class ConverterForms(html.Div):
 
             return output
 
- 
         @self.parent_app.server.route('/downloads/<path:filename>')
         def download_file(filename):
 
