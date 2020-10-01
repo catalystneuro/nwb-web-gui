@@ -26,6 +26,7 @@ class ConverterForms(html.Div):
         self.parent_app = parent_app
         self.converter = converter
         self.export_controller = False
+        self.get_metadata_controller = False
 
         examples_path = Path(__file__).parent.absolute() / 'example_schemas'
         self.downloads_path = Path(__file__).parent.parent.parent.parent.parent.absolute() / 'downloads'
@@ -236,32 +237,51 @@ class ConverterForms(html.Div):
                 Output('button_export_metadata', 'style'),
                 Output('button_refresh', 'style')
             ],
+            [Input('sourcedata-output-update-finished-verification', 'children')]
+        )
+        def get_metadata(trigger):
+            """
+            Render Metadata forms based on Source Data Form
+            This function is triggered when sourcedata internal dict is updated
+            and get metadata controller is setted to true.
+            If get metadata controller is not setted to true but the sourcedata internal dict was updated
+            the function will return the current application state
+            """
+
+            if not trigger or not self.get_metadata_controller:
+                return [self.metadata_forms, {'display': 'none'}, {'display': 'none'}, {'display': 'none'}]
+
+            self.get_metadata_controller = False
+            # Get metadata schema from converter
+            self.metadata_json_schema = self.converter.get_metadata_schema(
+                source_paths=None,
+                conversion_options=None
+            )
+
+            # Get metadata data from converter
+            self.metadata_json_data = self.converter.get_metadata(
+                source_paths=None,
+                conversion_options=None
+            )
+            if self.metadata_forms.children_forms:
+                # Clean form children if exists to render new one
+                self.metadata_forms.children_forms = []
+
+            self.metadata_forms.schema = self.metadata_json_schema
+            self.metadata_forms.construct_children_forms()
+            self.metadata_forms.update_data(data=self.metadata_json_data)
+
+            return [self.metadata_forms, {'display': 'block'}, {'display': 'block'}, {'display': 'block'}]
+
+        @self.parent_app.callback(
+            Output('sourcedata-external-trigger-update-internal-dict', 'children'),
             [Input('get_metadata_btn', 'n_clicks')]
         )
-        def get_metadata(click):
+        def update_internal_sourcedata(click):
+            """Update sourcedata internal dictionary to Get Metadata Forms from it"""
             if click:
-                # Get metadata schema from converter
-                self.metadata_json_schema = self.converter.get_metadata_schema(
-                    source_paths=None,
-                    conversion_options=None
-                )
-
-                # Get metadata data from converter
-                self.metadata_json_data = self.converter.get_metadata(
-                    source_paths=None,
-                    conversion_options=None
-                )
-                if self.metadata_forms.children_forms:
-                    # Clean form children if exists to render new one
-                    self.metadata_forms.children_forms = []
-
-                self.metadata_forms.schema = self.metadata_json_schema
-                self.metadata_forms.construct_children_forms()
-                self.metadata_forms.update_data(data=self.metadata_json_data)
-
-                return [self.metadata_forms, {'display': 'block'}, {'display': 'block'}, {'display': 'block'}]
-            else:
-                return [self.metadata_forms, {'display': 'none'}, {'display': 'none'}, {'display': 'none'}]
+                self.get_metadata_controller = True
+                return str(np.random.rand())
 
         @self.parent_app.callback(
             Output({'type': 'external-trigger-update-links-values', 'index': 'metadata-external-trigger-update-links-values'}, 'children'),
