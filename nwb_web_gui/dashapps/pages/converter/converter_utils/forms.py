@@ -344,12 +344,16 @@ class SchemaFormContainer(html.Div):
         self.children_triggers = [
             html.Div(id={'type': 'external-trigger-update-forms-values', 'index': id + '-external-trigger-update-forms-values'}, style={'display': 'none'}),
             html.Div(id={'type': 'external-trigger-update-links-values', 'index': f'{id}-external-trigger-update-links-values'}),
+            html.Div(id=f'{id}-external-trigger-update-internal-dict', style={'display': 'none'}),
+            html.Div(id=f'{id}-output-update-finished-verification', style={'display': 'none'}),
             html.Div(id=id + '-trigger-update-links-values', style={'display': 'none'}),
             html.Div(id=id + '-output-placeholder-links-values', style={'display': 'none'})
         ]
 
         if schema:
             self.construct_children_forms()
+        else:
+            self.children = self.children_triggers
 
         self.update_forms_links_callback_outputs = [
             Output({'type': 'metadata-input', 'container_id': f"{self.id}", 'data_type': 'link', 'index': ALL}, 'options'),
@@ -376,6 +380,69 @@ class SchemaFormContainer(html.Div):
                 State({'type': 'metadata-input', 'container_id': f"{self.id}", 'data_type': 'name', 'index': ALL}, 'value'),
                 State({'type': 'metadata-input', 'container_id': f"{self.id}", 'data_type': 'number', 'index': ALL}, 'value'),
             ]
+
+        @self.parent_app.callback(
+            Output(f'{self.id}-output-update-finished-verification', 'children'),
+            [Input(f'{self.id}-external-trigger-update-internal-dict', 'children')],
+            [
+                State({'type': 'metadata-input', 'container_id': self.id, 'data_type': 'path', 'index': ALL}, 'value'),
+                State({'type': 'metadata-input', 'container_id': self.id, 'data_type': 'boolean', 'index': ALL}, 'checked'),
+                State({'type': 'metadata-input', 'container_id': self.id, 'data_type': 'string', 'index': ALL}, 'value'),
+                State({'type': 'metadata-input', 'container_id': self.id, 'data_type': 'datetime', 'index': ALL}, 'value'),
+                State({'type': 'metadata-input', 'container_id': self.id, 'data_type': 'tags', 'index': ALL}, 'value'),
+                State({'type': 'metadata-input', 'container_id': self.id, 'data_type': 'link', 'index': ALL}, 'value'),
+                State({'type': 'metadata-input', 'container_id': self.id, 'data_type': 'name', 'index': ALL}, 'value'),
+                State({'type': 'metadata-input', 'container_id': self.id, 'data_type': 'number', 'index': ALL}, 'value'),
+                State({'type': 'metadata-input', 'container_id': self.id, 'data_type': ALL, 'index': ALL}, 'id'),
+            ]
+        )
+        def update_internal_dict(trigger, path_values, boolean_values,
+                                 string_values, datetime_values, tags_values,
+                                 link_values, name_values, number_values, ids):
+
+            if trigger is None:
+                return []
+
+            boolean_counter = 0 
+            path_counter = 0
+            datetime_counter = 0
+            string_counter = 0
+            tags_counter = 0
+            link_counter = 0
+            names_counter = 0
+            number_counter = 0
+
+            for e in ids:
+                for k, v in self.data.items():
+                    if e['index'] == k:
+                        if e['data_type'] == 'path':
+                            field_value = path_values[path_counter]
+                            path_counter += 1
+                        elif e['data_type'] == 'boolean':
+                            field_value = boolean_values[boolean_counter]
+                            boolean_counter += 1
+                        elif e['data_type'] == 'datetime':
+                            field_value = datetime_values[datetime_counter]
+                            datetime_counter += 1
+                        elif e['data_type'] == 'string':
+                            field_value = string_values[string_counter]
+                            string_counter += 1
+                        elif e['data_type'] == 'name':
+                            field_value = name_values[names_counter]
+                            names_counter += 1
+                        elif e['data_type'] == 'number':
+                            field_value = number_values[number_counter]
+                            number_counter += 1
+                        elif e['data_type'] == 'tags':
+                            field_value = tags_values[tags_counter]
+                            tags_counter += 1
+                        elif e['data_type'] == 'link':
+                            field_value = link_values[link_counter]
+                            link_counter += 1
+
+                        self.data[k]['value'] = field_value
+
+            return str(np.random.rand())
 
         @self.parent_app.callback(
             self.update_forms_values_callback_outputs,
@@ -466,8 +533,6 @@ class SchemaFormContainer(html.Div):
             output = [list_options, list_values, [1]]
 
             return output
-        
-        
 
     def update_data(self, data, key=None):
         """Update data in the internal mapping dictionary of this Container"""
