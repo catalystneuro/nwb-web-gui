@@ -40,7 +40,7 @@ Ophys:
     roi_response_series:
       0:
         name: Fluorescence1 roi name
-  ImagingPlane:
+  ImagingPlane1:
     name: Ophys ImagingPlane name
     description: Ophys ImagingPlane description
     optical_channels:

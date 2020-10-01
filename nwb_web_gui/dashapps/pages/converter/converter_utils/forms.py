@@ -1,100 +1,24 @@
+import dash
 import dash_html_components as html
 import dash_core_components as dcc
 import dash_bootstrap_components as dbc
+from dash.dependencies import Input, Output, State, ALL, MATCH
+from dash_cool_components import TagInput, DateTimePicker
+from nwb_web_gui.dashapps.utils.make_components import make_filebrowser_modal
+import numpy as np
 import warnings
-from dash_cool_components import KeyedFileBrowser, TagInput, DateTimePicker
+import json
 
 
-class SourceFormItem(dbc.FormGroup):
-    """Custom form group instance"""
-    def __init__(self, label, form_input, add_explorer, explorer_id, add_required):
-        super().__init__([])
-
-        if add_explorer:
-            explorer_btn = dbc.Button(id={'type': 'source_explorer', 'index': explorer_id}, children=[html.I(className="far fa-folder")], style={'background-color': 'transparent', 'color': 'black', 'border': 'none'})
-            if add_required:
-                self.children = dbc.Row([
-                    dbc.Col([label, html.Span('*', style={'color': 'red'})], width={'size': 2}),
-                    dbc.Col(form_input, width={'size': 8}, style={'justify-content': 'center', 'text-align': 'center'}),
-                    dbc.Col(explorer_btn, width={'size': 2}, style={'text-align': 'left'})
-                ])
-            else:
-                self.children = dbc.Row([
-                    dbc.Col(label, width={'size': 2}),
-                    dbc.Col(form_input, width={'size': 8}, style={'justify-content': 'center', 'text-align': 'center'}),
-                    dbc.Col(explorer_btn, width={'size': 2}, style={'text-align': 'left'})
-                ])
-        else:
-            if add_required:
-                self.children = dbc.Row([
-                    dbc.Col([label, html.Span('*', style={'color': 'red'})], width={'size': 2}),
-                    dbc.Col(form_input, width={'size': 10}, style={'justify-content': 'left', 'text-align': 'left'})
-                ])
-            else:
-                self.children = dbc.Row([
-                    dbc.Col(label, width={'size': 2}),
-                    dbc.Col(form_input, width={'size': 10}, style={'justify-content': 'left', 'text-align': 'left'})
-                ])
-
-
-class SourceForm(dbc.Card):
-    def __init__(self, required, fields, parent_name):
-        super().__init__([])
-
-        self.required_fields = required
-        self.parent_name = parent_name
-
-        parent = self.parent_name.replace(' ', '_')
-
-        all_inputs = []
-        for k, v in fields.items():
-            label = dbc.Label(k)
-            input_id = f'input_{parent}_{k}'
-            explorer_id = input_id.replace('input', 'explorer')
-            add_required = k in self.required_fields
-
-            if v['type'] == 'string':
-                form_input = dbc.Input(
-                    id={'type': 'source_string_input', 'index': input_id},
-                    className='string_input',
-                    type='input'
-                )
-            elif v['type'] == 'boolean':
-                form_input = dbc.Checkbox(
-                    id={'type': 'source_boolean_input', 'index': input_id}
-                )
-            if 'format' in v.keys():
-                if v['format'] == 'file' or v['format'] == 'directory':
-                    add_explorer = True
-                    explorer_id = input_id.replace('input', 'explorer')
-                else:
-                    add_explorer = False
-                    explorer_id = ''
-            else:
-                add_explorer = False
-                explorer_id = ''
-
-            form_item = SourceFormItem(label, form_input, add_explorer, explorer_id, add_required)
-            all_inputs.append(form_item)
-
-        form = dbc.Form(all_inputs)
-        self.children = [
-            dbc.CardHeader(self.parent_name.title(), style={'text-align': 'left'}),
-            dbc.CardBody(form)
-        ]
-
-        self.style = {'margin-top': '1%'}
-
-
-class MetadataFormItem(dbc.FormGroup):
-    def __init__(self, label, value, input_id, parent, add_required=False):
+class SchemaFormItem(dbc.FormGroup):
+    def __init__(self, label, value, input_id, parent, required=False):
         super().__init__([])
 
         self.parent = parent
 
-        field_input = self.get_field_input(value=value, input_id=input_id, add_required=add_required)
+        field_input = self.get_field_input(value=value, input_id=input_id, required=required)
 
-        if add_required:
+        if required:
             self.children = [
                 dbc.Row([
                     dbc.Col([label, html.Span('*', style={'color': 'red'})], width={'size': 3}),
@@ -109,23 +33,26 @@ class MetadataFormItem(dbc.FormGroup):
                 ])
             ]
 
-    def get_field_input(self, value, input_id, description=None, add_required=False):
+    def get_field_input(self, value, input_id, description=None, required=False):
         """
         Get component for user interaction. Types:
         - string
         - number
-        - tag input
+        - tag list
         - datetime
         - string choice
         - link choice
-        - list
+        - list of subforms
+        - boolean
+        - path to file or dir
         """
 
-        owner_class = self.parent.pynwb_class
+        owner_class = self.parent.owner_class
         compound_id = {
             'type': 'metadata-input',
             'index': input_id,
-            'data_type': ''
+            'data_type': '',
+            'container_id': self.parent.container.id
         }
 
         if isinstance(value, list):
@@ -135,10 +62,7 @@ class MetadataFormItem(dbc.FormGroup):
 
         elif 'enum' in value:
             input_values = [{'label': e, 'value': e} for e in value['enum']]
-            # if 'default' in value:
-            default = value['default']
-            # else:
-            #     default = ''
+            default = value.get('default', '')
             compound_id['data_type'] = 'choicestring'
             field_input = dcc.Dropdown(
                 id=compound_id,
@@ -170,7 +94,6 @@ class MetadataFormItem(dbc.FormGroup):
             compound_id['data_type'] = 'datetime'
             field_input = DateTimePicker(
                 id=compound_id,
-                style={"border": "solid 1px", "border-color": "#ced4da", "border-radius": "5px", "color": '#545057'}
             )
 
         elif 'format' in value and value['format'] == 'long':
@@ -181,6 +104,51 @@ class MetadataFormItem(dbc.FormGroup):
                 bs_size="lg",
                 style={'font-size': '16px'}
             )
+
+        elif 'format' in value and value['format'] in ['file', 'directory']:
+            compound_id['data_type'] = 'path'
+            input_path = dbc.Input(
+                id=compound_id,
+                className='string_input',
+                type='input'
+            )
+            btn_id = "open-filebrowser-" + compound_id['index']
+            btn_open_filebrowser = dbc.Button(
+                id=btn_id,
+                children=[html.I(className="far fa-folder")],
+                style={'background-color': 'transparent', 'color': 'black', 'border': 'none'}
+            )
+            modal_id = "modal-filebrowser-" + compound_id['index']
+            modal = make_filebrowser_modal(
+                parent_app=self.parent.container.parent_app,
+                modal_id=modal_id,
+                display=value['format']
+            )
+            # Create internal trigger component and add it to parent Container
+            trigger_id = {'type': 'internal-trigger-update-forms-values', 'parent': self.parent.container.id, 'index': compound_id['index']}
+            trigger = html.Div(id=trigger_id, style={'display': 'none'})
+            self.parent.container.children_triggers.append(trigger)
+
+            self.register_filebrowser_callbacks(
+                modal_id=modal_id,
+                button_id=btn_id,
+                trigger_id=trigger_id
+            )
+
+            field_input = html.Div([
+                dbc.InputGroup([
+                    input_path,
+                    dbc.InputGroupAddon(btn_open_filebrowser, addon_type="append"),
+                ]),
+                modal
+            ])
+
+        elif value['type'] == 'boolean':
+            compound_id['data_type'] = 'boolean'
+            field_input = dbc.Checkbox(
+                id=compound_id
+            )
+
         else:
             input_type = value['type']
             if input_type == 'number':
@@ -199,15 +167,15 @@ class MetadataFormItem(dbc.FormGroup):
                 step=step
             )
 
-        # Add field to data_to_field mapping
+        # Add data
         if not isinstance(value, list):
-            self.parent.parent_app.data_to_field.update({
+            self.parent.container.data.update({
                 input_id: {
                     'compound_id': compound_id,
                     'owner_class': str(owner_class),
                     'target': value.get('target', None),
                     'value': None,
-                    'required': add_required
+                    'required': required
                 }
             })
 
@@ -228,38 +196,75 @@ class MetadataFormItem(dbc.FormGroup):
 
         return input_and_tooltip
 
+    def register_filebrowser_callbacks(self, modal_id, button_id, trigger_id):
+        """Register callbacks for filebroswer component"""
+        # trigger_id = {type: internal-trigger-update-form-values, index: index_class}
 
-class MetadataForm(dbc.Card):
-    def __init__(self, schema, key, definitions=None, parent=None, parent_app=None):
+
+        @self.parent.container.parent_app.callback(
+            Output(modal_id, 'is_open'),
+            [
+                Input(button_id, 'n_clicks'),
+                Input(modal_id + "-close", 'n_clicks')
+            ],
+            [State(modal_id, 'is_open')]
+        )
+        def toggle_filebrowser(click_open, click_close, is_open):
+            """Toggle modal open/close"""
+            if click_open or click_close:
+                return not is_open
+            else:
+                return is_open
+
+        @self.parent.container.parent_app.callback(
+            [Output(trigger_id, 'children'), Output(f'{modal_id}-close', 'n_clicks')],
+            [Input('submit-filebrowser-' + modal_id, 'n_clicks')],
+            [State('chosen-filebrowser-' + modal_id, 'value')]
+        )
+        def get_path_values(click, chosen_path):
+            """
+            Get path value from file browser, update Container data and trigger
+            frontend components updates
+            """
+            if click:
+                # Update Container internal dictionary value
+                self.parent.container.data[trigger_id['index']]['value'] = chosen_path
+                # Triggers components update
+                return str(np.random.rand()), 1
+            return '', None
+
+
+class SchemaForm(dbc.Card):
+    """
+    Form generated by JSON Schema.
+    """
+    def __init__(self, schema, key, container=None, parent_form=None):
         super().__init__([])
 
         self.schema = schema
-        self.pynwb_class = schema.get('tag', '')
-        self.parent = parent
-
-        if parent_app is None:
-            self.parent_app = parent.parent_app
-        else:
-            self.parent_app = parent_app
+        self.owner_class = schema.get('tag', '')
+        self.parent_form = parent_form
 
         # Unique Card IDs are composed by parent id + key from json schema
-        if parent is not None and parent.id != 'Metadata':
-            self.id = parent.id + '-' + key
-        else:
+        if parent_form is None:
             self.id = key
-
-        if 'title' in schema:
-            header_text = schema['title']
+            self.container = container
         else:
-            header_text = self.id.split('-')[-1]
-        self.header = dbc.CardHeader([html.H4(header_text, className="title_" + key)])
+            self.id = parent_form.id + '-' + key
+            self.container = parent_form.container
+
+        if 'definitions' in self.container.schema:
+            self.definitions = self.container.schema['definitions']
+        else:
+            self.definitions = dict()
+
+        header_text = schema.get('title', self.id.split('-')[-1])
+        self.header = dbc.CardHeader(
+            [html.H4(header_text, className="title_" + key)],
+            style={'padding': '10px'}
+        )
         self.body = dbc.CardBody([])
         self.children = [self.header, self.body]
-
-        if definitions is None and parent is None:
-            self.definitions = schema['definitions']
-        else:
-            self.definitions = parent.definitions
 
         self.required_fields = schema.get('required', '')
 
@@ -272,34 +277,34 @@ class MetadataForm(dbc.Card):
         for k, v in properties.items():
             required = k in self.required_fields
 
-            # If item is a pynwb object or reference to an object on definitions,
-            # e.g. NWBFile, make subform
+            # If item is an object or reference to an object on definitions, make subform
             if 'type' in v and v['type'] == 'object':
-                item = MetadataForm(schema=v, key=k, parent=self)
+                item = SchemaForm(schema=v, key=k, parent_form=self)
                 self.body.children.append(item)
                 continue
             elif "$ref" in v:
                 template_name = v["$ref"].split('/')[-1]
                 schema = self.definitions[template_name]
-                item = MetadataForm(schema=schema, key=k, parent=self)
+                item = SchemaForm(schema=schema, key=k, parent_form=self)
                 self.body.children.append(item)
                 continue
 
-            # If item is a pynwb field
+            # If item is a field
             if 'type' in v and (v['type'] == 'array'):
                 # If field is an array of subforms, e.g. ImagingPlane.optical_channels
                 if isinstance(v['items'], list):
                     value = []
-                    for i, iv in enumerate(v["items"]):
-                        template_name = iv["$ref"].split('/')[-1]
+                    for index in range(v['minItems']):
+                        template_name = v['items'][0]['$ref'].split('/')[-1]
                         schema = self.definitions[template_name]
-                        iform = MetadataForm(schema=schema, key=k + f'-{i}', parent=self)
+                        iform = SchemaForm(schema=schema, key=f'{k}-{index}', parent_form=self)
                         value.append(iform)
+
                 # If field is an array of strings, e.g. NWBFile.experimenter
                 elif isinstance(v['items'], dict):
                     value = v
             # If field is a simple input field, e.g. description
-            elif 'type' in v and (v['type'] == 'string' or v['type'] == 'number'):
+            elif 'type' in v and v['type'] in ['string', 'number', 'boolean']:
                 value = v
             # If field is something not yet implemented
             else:
@@ -308,17 +313,229 @@ class MetadataForm(dbc.Card):
 
             label = dbc.Label(k)
             input_id = f'{self.id}-{k}'
-            item = MetadataFormItem(
+            item = SchemaFormItem(
                 label=label,
                 value=value,
                 input_id=input_id,
                 parent=self,
-                add_required=required
+                required=required
             )
             self.body.children.append(item)
 
-    def update_form_dict_values(self, data, key=None):
-        """Update data in the internal mapping dictionary"""
+
+class SchemaFormContainer(html.Div):
+    """
+    Root Container for Schema Forms
+
+    IDs exposed for external trigger of update functions:
+    id + '-external-trigger-update-forms-values'
+    id + '-external-trigger-update-links-values'
+    """
+    def __init__(self, id, schema, parent_app):
+        super().__init__([])
+
+        self.id = id
+        self.schema = schema
+        self.parent_app = parent_app
+        self.data = {}
+        self.children_forms = []
+
+        # Hidden componentes that serve to trigger callbacks
+        self.children_triggers = [
+            html.Div(id={'type': 'external-trigger-update-forms-values', 'index': id + '-external-trigger-update-forms-values'}, style={'display': 'none'}),
+            html.Div(id={'type': 'external-trigger-update-links-values', 'index': f'{id}-external-trigger-update-links-values'}),
+            html.Div(id=f'{id}-external-trigger-update-internal-dict', style={'display': 'none'}),
+            html.Div(id=f'{id}-output-update-finished-verification', style={'display': 'none'}),
+            html.Div(id=id + '-trigger-update-links-values', style={'display': 'none'}),
+            html.Div(id=id + '-output-placeholder-links-values', style={'display': 'none'})
+        ]
+
+        if schema:
+            self.construct_children_forms()
+        else:
+            self.children = self.children_triggers
+
+        self.update_forms_links_callback_outputs = [
+            Output({'type': 'metadata-input', 'container_id': f"{self.id}", 'data_type': 'link', 'index': ALL}, 'options'),
+            Output({'type': 'metadata-input', 'container_id': f"{self.id}", 'data_type': 'link', 'index': ALL}, 'value'),
+            Output(self.id + '-output-placeholder-links-values', 'children')
+        ]
+
+        self.update_forms_values_callback_outputs = [
+                Output({'type': 'metadata-input', 'container_id': f"{self.id}", 'data_type': 'path', 'index': ALL}, 'value'),
+                Output({'type': 'metadata-input', 'container_id': f"{self.id}", 'data_type': 'boolean', 'index': ALL}, 'checked'),
+                Output({'type': 'metadata-input', 'container_id': f"{self.id}", 'data_type': 'string', 'index': ALL}, 'value'),
+                Output({'type': 'metadata-input', 'container_id': f"{self.id}", 'data_type': 'datetime', 'index': ALL}, 'defaultValue'),
+                Output({'type': 'metadata-input', 'container_id': f"{self.id}", 'data_type': 'tags', 'index': ALL}, 'injectedTags'),
+                Output({'type': 'metadata-input', 'container_id': f"{self.id}", 'data_type': 'name', 'index': ALL}, 'value'),
+                Output({'type': 'metadata-input', 'container_id': f"{self.id}", 'data_type': 'number', 'index': ALL}, 'value'),
+                Output(f'{self.id}-trigger-update-links-values', 'children')
+            ]
+        self.update_forms_values_callback_states = [
+                State({'type': 'metadata-input', 'container_id': f"{self.id}", 'data_type': 'path', 'index': ALL}, 'value'),
+                State({'type': 'metadata-input', 'container_id': f"{self.id}", 'data_type': 'boolean', 'index': ALL}, 'checked'),
+                State({'type': 'metadata-input', 'container_id': f"{self.id}", 'data_type': 'string', 'index': ALL}, 'value'),
+                State({'type': 'metadata-input', 'container_id': f"{self.id}", 'data_type': 'datetime', 'index': ALL}, 'value'),
+                State({'type': 'metadata-input', 'container_id': f"{self.id}", 'data_type': 'tags', 'index': ALL}, 'value'),
+                State({'type': 'metadata-input', 'container_id': f"{self.id}", 'data_type': 'name', 'index': ALL}, 'value'),
+                State({'type': 'metadata-input', 'container_id': f"{self.id}", 'data_type': 'number', 'index': ALL}, 'value'),
+            ]
+
+        @self.parent_app.callback(
+            Output(f'{self.id}-output-update-finished-verification', 'children'),
+            [Input(f'{self.id}-external-trigger-update-internal-dict', 'children')],
+            [
+                State({'type': 'metadata-input', 'container_id': self.id, 'data_type': 'path', 'index': ALL}, 'value'),
+                State({'type': 'metadata-input', 'container_id': self.id, 'data_type': 'boolean', 'index': ALL}, 'checked'),
+                State({'type': 'metadata-input', 'container_id': self.id, 'data_type': 'string', 'index': ALL}, 'value'),
+                State({'type': 'metadata-input', 'container_id': self.id, 'data_type': 'datetime', 'index': ALL}, 'value'),
+                State({'type': 'metadata-input', 'container_id': self.id, 'data_type': 'tags', 'index': ALL}, 'value'),
+                State({'type': 'metadata-input', 'container_id': self.id, 'data_type': 'link', 'index': ALL}, 'value'),
+                State({'type': 'metadata-input', 'container_id': self.id, 'data_type': 'name', 'index': ALL}, 'value'),
+                State({'type': 'metadata-input', 'container_id': self.id, 'data_type': 'number', 'index': ALL}, 'value'),
+                State({'type': 'metadata-input', 'container_id': self.id, 'data_type': ALL, 'index': ALL}, 'id'),
+            ]
+        )
+        def update_internal_dict(trigger, path_values, boolean_values,
+                                 string_values, datetime_values, tags_values,
+                                 link_values, name_values, number_values, ids):
+
+            if trigger is None:
+                return []
+
+            boolean_counter = 0 
+            path_counter = 0
+            datetime_counter = 0
+            string_counter = 0
+            tags_counter = 0
+            link_counter = 0
+            names_counter = 0
+            number_counter = 0
+
+            for e in ids:
+                for k, v in self.data.items():
+                    if e['index'] == k:
+                        if e['data_type'] == 'path':
+                            field_value = path_values[path_counter]
+                            path_counter += 1
+                        elif e['data_type'] == 'boolean':
+                            field_value = boolean_values[boolean_counter]
+                            boolean_counter += 1
+                        elif e['data_type'] == 'datetime':
+                            field_value = datetime_values[datetime_counter]
+                            datetime_counter += 1
+                        elif e['data_type'] == 'string':
+                            field_value = string_values[string_counter]
+                            string_counter += 1
+                        elif e['data_type'] == 'name':
+                            field_value = name_values[names_counter]
+                            names_counter += 1
+                        elif e['data_type'] == 'number':
+                            field_value = number_values[number_counter]
+                            number_counter += 1
+                        elif e['data_type'] == 'tags':
+                            field_value = tags_values[tags_counter]
+                            tags_counter += 1
+                        elif e['data_type'] == 'link':
+                            field_value = link_values[link_counter]
+                            link_counter += 1
+
+                        self.data[k]['value'] = field_value
+
+            return str(np.random.rand())
+
+        @self.parent_app.callback(
+            self.update_forms_values_callback_outputs,
+            [
+                Input({'type': 'external-trigger-update-forms-values', 'index': ALL}, 'children'),
+                Input({'type': 'internal-trigger-update-forms-values', 'parent': self.id, 'index': ALL}, 'children')
+            ],
+            self.update_forms_values_callback_states
+
+        )
+        def update_forms_values(trigger, trigger_all, *states):
+
+            output_path = []
+            output_bool = []
+            output_string = []
+            output_date = []
+            output_tags = []
+            output_link = []
+            output_name = []
+            output_number = []
+
+            curr_data = list()
+            for v in self.data.values():
+                if v['compound_id']['data_type'] == 'path':
+                    output_path.append(v['value'])
+                elif v['compound_id']['data_type'] == 'boolean':
+                    output_bool.append(v['value'])
+                elif v['compound_id']['data_type'] == 'string':
+                    output_string.append(v['value'])
+                elif v['compound_id']['data_type'] == 'datetime':
+                    output_date.append(v['value'])
+                elif v['compound_id']['data_type'] == 'tags':
+                    output_tags.append([{"index": i, "displayValue": e} for i, e in enumerate(v['value'])])
+                elif v['compound_id']['data_type'] == 'link':
+                    pass
+                elif v['compound_id']['data_type'] == 'name':
+                    output_name.append(v['value'])
+                elif v['compound_id']['data_type'] == 'number':
+                    output_number.append(v['value'])
+
+            output = [output_path, output_bool, output_string, output_date, output_tags, output_name, output_number, 1]
+
+            return output
+
+        @self.parent_app.callback(
+            self.update_forms_links_callback_outputs,
+            [
+                Input(self.id + '-trigger-update-links-values', 'children'),
+                Input({'type': 'external-trigger-update-links-values', 'index': ALL}, 'children')
+            ],
+            [State({'type': 'metadata-input', 'container_id': f"{self.id}", 'data_type': 'name', 'index': ALL}, 'value')]
+        )
+        def update_forms_links(trigger, trigger_all, name_change):
+            ctx = dash.callback_context
+            trigger_source = ctx.triggered[0]['prop_id'].split('.')[0]
+
+            if 'index' in trigger_source:
+                trigger_source = json.loads(trigger_source)['index']
+
+            #if trigger_source != self.id + '-trigger-update-links-values' and trigger_source != f'{self.id}-external-trigger-update-links-values':
+                #pass
+
+            i = 0
+            for k, v in self.data.items():
+                if v['compound_id']['data_type'] == 'name':
+                    self.data[k]['value'] = name_change[i]  
+                    i += 1
+
+            # Get specific options for each link dropdown
+            list_options = []
+            list_values = []
+            for k, v in self.data.items():
+                if v['target'] is not None:
+                    target_class = v['target']
+                    options = [
+                        {'label': v['value'], 'value': v['value']}
+                        for v in self.data.values() if
+                        (v['owner_class'] == target_class and 'name' in v['compound_id']['index'])
+                    ]
+                    list_values.append(options[0]['value'])
+                    list_options.append(options)
+
+            for sublist in list_options[:]:
+                for e in sublist[:]:
+                    if e['value'] is None:
+                        sublist.remove(e)
+
+            output = [list_options, list_values, [1]]
+
+            return output
+
+    def update_data(self, data, key=None):
+        """Update data in the internal mapping dictionary of this Container"""
         if key is None:
             key = ''
 
@@ -330,8 +547,20 @@ class MetadataForm(dbc.Card):
                     inner_key = f'{key}-{k}'
                 else:
                     inner_key = k
-                self.update_form_dict_values(data=v, key=inner_key)
-            # If value is a string, number or list
+                self.update_data(data=v, key=inner_key)
+            # If value is a string, number, list or boolean
             else:
                 component_id = key + '-' + k   # e.g. NWBFile-session_description
-                self.parent_app.data_to_field[component_id]['value'] = v
+                self.data[component_id]['value'] = v
+
+    def construct_children_forms(self):
+        # Construct children forms
+        if 'properties' in self.schema:
+            for form_key, form_value in self.schema['properties'].items():
+                iform = SchemaForm(
+                    schema=form_value,
+                    key=form_key,
+                    container=self
+                )
+                self.children_forms.append(iform)
+        self.children = self.children_forms + self.children_triggers

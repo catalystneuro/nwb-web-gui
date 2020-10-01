@@ -1,25 +1,11 @@
 {
-		"source_data": [
-				{
-						"name": "raw_data",
-						"path": "path/to/file",
-						"type": "file"
-				},
-				{
-					  "name": "processed_data",
-						"path": "path/to/dir",
-						"type": "dir"
-				},
-				{
-						"name": "ref_image",
-						"path": "path/to/file",
-						"type": "file"
-				}
-		],
-
-		"conversion_options": [
-				{"name": "add_raw", "value": true},
-				{"name": "add_processed", "value": true},
-				{"name": "add_behavior", "value": true}
-		]
+	"source_data": {
+		"raw_data": "path_to/raw.rhd",
+		"processed_data": "path_to/processed_data/"
+	},
+	"conversion_options": {
+		"add_raw": true,
+		"add_processed": true,
+		"add_behavior": true
+	}
 }
