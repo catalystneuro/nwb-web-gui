@@ -93,52 +93,6 @@ class TimeControllerComponent(html.Div):
 
             return duration_tmax, slider_tmax
 
-        # # Frame controller
-        # if frame:
-        #     slider_frame = dcc.Slider(
-        #         id="slider_frame",
-        #         min=tmin, max=tmax, value=tstart, step=0.05,
-        #     )
-        #     group_frame = dbc.FormGroup(
-        #         [
-        #             dbc.Label('frame (s): ', id='slider_frame_label'),
-        #             dbc.Col(slider_frame)
-        #         ],
-        #     )
-        #
-        #     @self.parent_app.callback(
-        #         [
-        #             Output(component_id='slider_frame', component_property='min'),
-        #             Output(component_id='slider_frame', component_property='max'),
-        #             Output(component_id='slider_frame', component_property='value')
-        #         ],
-        #         [
-        #             Input(component_id='slider_start_time', component_property='value'),
-        #             Input(component_id='input_duration', component_property='value')
-        #         ]
-        #     )
-        #     def update_slider_frame_value(select_start_time, select_duration):
-        #         """Updates Frame slider controller value"""
-        #         tmin = select_start_time
-        #         tmax = select_start_time + select_duration
-        #         tframe = (2 * select_start_time + select_duration) / 2
-        #
-        #         return (
-        #             tmin,
-        #             tmax,
-        #             tframe,
-        #         )
-        #
-        #     @self.parent_app.callback(
-        #         Output(component_id='slider_frame_label', component_property='children'),
-        #         [Input(component_id='slider_frame', component_property='value')]
-        #     )
-        #     def update_slider_frame_label(select_frame):
-        #         """Updates Frame slider controller label"""
-        #         return 'frame (s): ' + str(select_frame)
-        # else:
-        #     group_frame = []
-
 
 class TiffImageSeriesDiv(html.Div):
     """Div containing tiff image graph and pixelmask button"""
@@ -151,14 +105,15 @@ class TiffImageSeriesDiv(html.Div):
 
         self.children = dbc.Row([
             dbc.Col(
-                self.graph,
-                width={'size': 12}
+                dbc.Card([
+                    dbc.CardBody([
+                        self.graph, 
+                        self.pixelmask_btn
+                    ], style={'justify-content': 'center', 'text-align': 'center'}),
+                ]),
+                width={'size': 12},
             ),
-            dbc.Col(
-                self.pixelmask_btn,
-                width={'size': 12}
-            ),
-        ], style={'justify-content': 'center', 'text-align': 'center'})
+        ])
 
 
 class TiffImageSeriesGraphComponent(dcc.Graph):
@@ -280,34 +235,47 @@ class AllenDashboard(html.Div):
             dbc.Container([
                 html.Br(),
                 self.filebrowser,
-                html.Hr(),
-                html.Div(
-                    id='div-controller',
-                    children=self.controller_time,
-                    style={'display': 'none'}
-                ),
-                html.Div([
-                    html.Div(
-                        id='div-figure-traces',
-                        children = dcc.Graph(
-                            id='figure_traces',
-                            figure={},
-                            config={
-                                'displayModeBar': False,
-                                'edits': {
-                                    'shapePosition': True
-                                }
-                            }
+                html.Br(),
+                dbc.Row(
+                    dbc.Col(
+                        id='div-controller',
+                        children= dbc.Card(
+                            self.controller_time, 
+                            style={'margin-bottom': '10px', 'padding': '10px'}
                         ),
-                        style={'width': '69%', 'display': 'none'}
+                        style={'display': 'none'},
+                        width={'size': 12},
                     ),
-                    html.Div(
+                ),
+                dbc.Row([
+                    dbc.Col(
+                        id='div-figure-traces',
+                        children = dbc.Card(
+                            dcc.Graph(
+                                id='figure_traces',
+                                figure={},
+                                config={
+                                    'displayModeBar': False,
+                                    'edits': {
+                                        'shapePosition': True
+                                    }
+                                }
+                            ),
+                            style={'padding': '30px'}
+                        ),
+                        style={'display': 'none'},
+                        width={'size': 8}
+                    ),
+                    dbc.Col(
                         id='div-photon-series',
-                        style={'width': '29%', 'display': 'inline-block'}
+                        style={'display': 'inline-block'},
+                        width={'size': 4}
                     ),
                 ]),
             ])
         ]
+
+        self.style = {'background-color': '#f0f0f0', 'min-height': '100vh'}
 
         @self.parent_app.callback(
             [Output(component_id='div-figure-traces', component_property='style'), Output('figure_traces', 'figure')],
@@ -416,7 +384,7 @@ class AllenDashboard(html.Div):
             if trigger_source == 'n_clicks' and click and click[0] is not None:
                 self.photon_series.graph.update_pixelmask()
                 return [self.photon_series.graph.out_fig]
-                
+
             if relayoutData is not None and "shapes[0].x0" in relayoutData and trigger_source == 'relayoutData':
                 pos = relayoutData["shapes[0].x0"]
             else:
@@ -441,8 +409,8 @@ class AllenDashboard(html.Div):
             go.Scattergl(
                 x=[0],
                 y=[0],
-                line={"color": "black", "width": 1},
-                mode='lines'
+                line={"color": "#151733", "width": 1},
+                mode='lines',
             ),
             row=1, col=1
         )
@@ -453,7 +421,7 @@ class AllenDashboard(html.Div):
             go.Scattergl(
                 x=[0],
                 y=[0],
-                line={"color": "black", "width": 1},
+                line={"color": "#151733", "width": 1},
                 mode='lines'),
             row=3, col=1
         )

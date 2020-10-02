@@ -45,6 +45,7 @@ class ConverterForms(html.Div):
             schema=dict(),
             parent_app=self.parent_app
         )
+        self.style = {'background-color': '#f0f0f0', 'min-height': '100vh'}
 
         self.children = [
             dbc.Container([
