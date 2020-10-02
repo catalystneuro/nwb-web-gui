@@ -111,7 +111,6 @@ class ConverterForms(html.Div):
                     dbc.Col(id='metadata-col', width={'size': 12}),
                     style={'margin-top': '1%'}
                 ),
-                html.Div(id='hidden', style={'display': 'none'}),
                 dbc.Row(
                     dbc.Col(
                         dbc.InputGroup(
@@ -126,14 +125,15 @@ class ConverterForms(html.Div):
                         ),
                         width={'size': 11}
                     ),
-                    style={'text-align': 'left', 'margin-top': '1%'}
+                    style={'text-align': 'left', 'margin-top': '1%', 'display': 'none'},
+                    id='row_output_conversion'
                 ),
                 dbc.Textarea(
                     id='text-conversion-results',
                     className='string_input',
                     bs_size="lg",
                     readOnly=True,
-                    style={'font-size': '16px'}
+                    style={'font-size': '16px', 'display': 'none'}
                 ),
                 html.Br(),
                 html.Div(id='export-output', style={'display': 'none'}),
@@ -239,21 +239,37 @@ class ConverterForms(html.Div):
                 Output('metadata-col', 'children'),
                 Output('button_load_metadata', 'style'),
                 Output('button_export_metadata', 'style'),
-                Output('button_refresh', 'style')
+                Output('button_refresh', 'style'),
+                Output('row_output_conversion', 'style'),
+                Output('text-conversion-results', 'style')
             ],
-            [Input('sourcedata-output-update-finished-verification', 'children')]
+            [Input('sourcedata-output-update-finished-verification', 'children')],
+            [
+                State('button_load_metadata', 'style'),
+                State('button_export_metadata', 'style'),
+                State('button_refresh', 'style'),
+                State('row_output_conversion', 'style'),
+                State('text-conversion-results', 'style')
+            ]
         )
-        def get_metadata(trigger):
+        def get_metadata(trigger, *styles):
             """
             Render Metadata forms based on Source Data Form
             This function is triggered when sourcedata internal dict is updated
             and get metadata controller is setted to true.
-            If get metadata controller is not setted to true but the sourcedata internal dict was updated
-            the function will return the current application state
+            If get metadata controller is not setted to true but the sourcedata
+            internal dict was updated the function will return the current
+            application state
             """
 
             if not trigger or not self.get_metadata_controller:
-                return [self.metadata_forms, {'display': 'none'}, {'display': 'none'}, {'display': 'none'}]
+                # If metadata forms defined reset to default state
+                if self.metadata_forms.children_forms:
+                    self.metadata_forms.children_forms = []
+                    self.metadata_forms.children = self.metadata_forms.children_triggers
+                    self.metadata_forms.data = dict()
+                    self.metadata_forms.schema = dict()
+                return [self.metadata_forms, styles[0], styles[1], styles[2], styles[3], styles[4]]
 
             self.get_metadata_controller = False
             # Get metadata schema from converter
@@ -275,7 +291,7 @@ class ConverterForms(html.Div):
             self.metadata_forms.construct_children_forms()
             self.metadata_forms.update_data(data=self.metadata_json_data)
 
-            return [self.metadata_forms, {'display': 'block'}, {'display': 'block'}, {'display': 'block'}]
+            return [self.metadata_forms, {'display': 'block'}, {'display': 'block'}, {'display': 'block'}, {'display': 'block'}, {'display': 'block'}]
 
         @self.parent_app.callback(
             Output('sourcedata-external-trigger-update-internal-dict', 'children'),
