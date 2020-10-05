@@ -19,21 +19,20 @@ def init_app():
         # Import NWB converter
         if app.config['NWB_CONVERTER_CLASS'] == 'example':
             from .dashapps.pages.converter.converter_utils.converter_example import ExampleNWBConverter
-            converter = ExampleNWBConverter
+            converter_class = ExampleNWBConverter
         else:
             import importlib
-            Converter = getattr(
+            converter_class = getattr(
                 importlib.import_module(app.config['NWB_CONVERTER_MODULE']),
                 app.config['NWB_CONVERTER_CLASS']
             )
-            converter = Converter
 
         # Import Dash application
         from .dashapps.pages.converter.init_coverter import init_converter
         from .dashapps.pages.viewer.init_viewer import init_viewer
         from .dashapps.pages.dashboard.init_dashboard import init_dashboard
 
-        init_converter(server=app, converter=converter)
+        init_converter(server=app, converter_class=converter_class)
         init_viewer(app)
         init_dashboard(app)
 

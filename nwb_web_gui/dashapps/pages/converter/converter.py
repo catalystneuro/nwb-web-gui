@@ -13,7 +13,7 @@ import flask
 
 
 class ConverterForms(html.Div):
-    def __init__(self, parent_app, converter):
+    def __init__(self, parent_app, converter_class):
         """
         Forms to interface user input with NWB converters.
 
@@ -24,13 +24,13 @@ class ConverterForms(html.Div):
         """
         super().__init__([])
         self.parent_app = parent_app
-        self.converter = converter
+        self.converter_class = converter_class
         self.export_controller = False
         self.get_metadata_controller = False
 
         self.downloads_path = Path(__file__).parent.parent.parent.parent.parent.absolute() / 'downloads'
 
-        self.source_json_schema = converter.get_input_schema()
+        self.source_json_schema = converter_class.get_input_schema()
 
         # Source data Form
         self.source_forms = SchemaFormContainer(
@@ -272,7 +272,10 @@ class ConverterForms(html.Div):
                 return [self.metadata_forms, styles[0], styles[1], styles[2], styles[3], styles[4]]
 
             self.get_metadata_controller = False
+            # Get forms data
+            input_data = AUX_FUNCTION()
             # Get metadata schema from converter
+            self.converter = self.converter_class(input_data=input_data)
             self.metadata_json_schema = self.converter.get_metadata_schema(
                 source_paths=None,
                 conversion_options=None
