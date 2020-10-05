@@ -564,3 +564,74 @@ class SchemaFormContainer(html.Div):
                 )
                 self.children_forms.append(iform)
         self.children = self.children_forms + self.children_triggers
+
+    def data_to_nested(self):
+        """
+        Read internal class dict (containing ids, values, etc) and convert to nested
+        dict (data format)
+
+        Returns:
+            alert_children [list | None]: Alerts children if required fields empty or None if no required fields empty
+            output [dict]: Output dict w/ data
+        """
+
+        dicts_list = list()
+        output = dict()
+        empty_required_fields = list()
+        alert_children = [
+                html.H4("There are missing required fields:", className="alert-heading"),
+                html.Hr()
+            ]
+
+        for k, v in self.data.items():
+            field_value = v['value']
+            if v['required'] and (field_value is None or (isinstance(field_value, str) and field_value.isspace()) or field_value == ''):
+                empty_required_fields.append(k)
+                alert_children.append(html.A(
+                        k,
+                        href="#" + 'wrapper-' + v['compound_id']['index'] + '-' + v['compound_id']['type'],
+                        className="alert-link"
+                    ))
+                alert_children.append(html.Hr())
+            if field_value not in ['', None]:
+                splited_keys = k.split('-')
+                master_key_name = splited_keys[0]
+                field_name = splited_keys[-1]
+
+                for element in reversed(splited_keys):
+                    if element == field_name:
+                        curr_dict = {field_name: v['value']}
+                    else:
+                        curr_dict = {element: curr_dict}
+                    if element == master_key_name:
+                        dicts_list.append(curr_dict)
+
+        for e in dicts_list:
+            master_key_name = list(e.keys())[0]
+            output = SchemaFormContainer._create_nested_dict(data=e, output=output, master_key_name=master_key_name)
+
+        if len(empty_required_fields) > 0:
+            return alert_children, output
+        else:
+            return None, output
+
+    @staticmethod
+    def _create_nested_dict(data, output, master_key_name):
+        for k, v in data.items():
+            if isinstance(v, dict):
+                if k == master_key_name and k not in output:
+                    output[k] = {}
+                    SchemaFormContainer._create_nested_dict(v, output[k], master_key_name)
+                elif k != master_key_name and k not in output:
+                    output[k] = {}
+                    SchemaFormContainer._create_nested_dict(v, output[k], master_key_name)
+                else:
+                    SchemaFormContainer._create_nested_dict(v, output[k], master_key_name)
+            else:
+                if isinstance(v, list):
+                    element = [e['displayValue'] for e in v]
+                else:
+                    element = v
+                output[k] = element
+
+        return output

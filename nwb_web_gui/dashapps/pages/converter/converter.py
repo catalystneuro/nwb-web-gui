@@ -170,46 +170,11 @@ class ConverterForms(html.Div):
                 self.export_controller = False
                 return not fileoption_is_open, req_is_open, []
 
-            self.export_controller = False
-            dicts_list = list()
-            output = dict()
-            empty_required_fields = list()
-            alert_children = [
-                html.H4("There are missing required fields:", className="alert-heading"),
-                html.Hr()
-            ]
-
-            for k, v in self.metadata_forms.data.items():
-                field_value = v['value']
-                if v['required'] and (field_value is None or (isinstance(field_value, str) and field_value.isspace()) or field_value == ''):
-                    empty_required_fields.append(k)
-                    alert_children.append(html.A(
-                        k,
-                        href="#" + 'wrapper-' + v['compound_id']['index'] + '-' + v['compound_id']['type'],
-                        className="alert-link"
-                    ))
-                    alert_children.append(html.Hr())
-
-                if field_value not in ['', None]:
-                    splited_keys = k.split('-')
-                    master_key_name = splited_keys[0]
-                    field_name = splited_keys[-1]
-
-                    for element in reversed(splited_keys):
-                        if element == field_name:
-                            curr_dict = {field_name: v['value']}
-                        else:
-                            curr_dict = {element: curr_dict}
-                        if element == master_key_name:
-                            dicts_list.append(curr_dict)
-
-            for e in dicts_list:
-                master_key_name = list(e.keys())[0]
-                output = ConverterForms._create_nested_dict(data=e, output=output, master_key_name=master_key_name)
+            alerts, output = self.metadata_forms.data_to_nested()
 
             # If required fields missing return alert
-            if len(empty_required_fields) > 0:
-                return fileoption_is_open, not req_is_open, alert_children
+            if alerts is not None:
+                return fileoption_is_open, not req_is_open, alerts
 
             # Make temporary files on server side
             # JSON
@@ -270,6 +235,8 @@ class ConverterForms(html.Div):
                     self.metadata_forms.data = dict()
                     self.metadata_forms.schema = dict()
                 return [self.metadata_forms, styles[0], styles[1], styles[2], styles[3], styles[4]]
+
+            alerts, source_data = self.source_forms.data_to_nested()
 
             self.get_metadata_controller = False
             # Get metadata schema from converter
@@ -366,24 +333,3 @@ class ConverterForms(html.Div):
             if click:
                 return "This will call NWBConverter.run_conversion() and print results."
             return ""
-
-    @staticmethod
-    def _create_nested_dict(data, output, master_key_name):
-        for k, v in data.items():
-            if isinstance(v, dict):
-                if k == master_key_name and k not in output:
-                    output[k] = {}
-                    ConverterForms._create_nested_dict(v, output[k], master_key_name)
-                elif k != master_key_name and k not in output:
-                    output[k] = {}
-                    ConverterForms._create_nested_dict(v, output[k], master_key_name)
-                else:
-                    ConverterForms._create_nested_dict(v, output[k], master_key_name)
-            else:
-                if isinstance(v, list):
-                    element = [e['displayValue'] for e in v]
-                else:
-                    element = v
-                output[k] = element
-
-        return output

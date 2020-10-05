@@ -28,8 +28,8 @@ class ConfigDev(Config):
     TESTING = True
     DATABASE_URI = 'DEV_DATABASE_URI'
 
-    # EXPLORER_PATH = '/home/vinicius/Área de Trabalho/Trabalhos/nwb-web-gui/files'
-    EXPLORER_PATH = r'C:\Users\Luiz\Desktop\data_app'
+    EXPLORER_PATH = '/home/vinicius/Área de Trabalho/Trabalhos/nwb-web-gui/files'
+    #EXPLORER_PATH = r'C:\Users\Luiz\Desktop\data_app'
 
     # The following variables are recovered by the app from ENV variables
     # In Development, we get them from a .ini file and set the ENV vars

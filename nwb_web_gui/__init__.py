@@ -19,7 +19,7 @@ def init_app():
         # Import NWB converter
         if app.config['NWB_CONVERTER_CLASS'] == 'example':
             from .dashapps.pages.converter.converter_utils.converter_example import ExampleNWBConverter
-            converter = ExampleNWBConverter
+            converter = ExampleNWBConverter()
         else:
             import importlib
             Converter = getattr(
