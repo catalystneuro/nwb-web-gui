@@ -29,7 +29,7 @@ class TimeControllerComponent(html.Div):
         self.tmax = tmax
         self.tmax_duration = tmax
 
-        # Start controller
+        # Start controller'
         if start:
             self.slider_start = dcc.Slider(
                 id="slider_start_time",
@@ -38,8 +38,18 @@ class TimeControllerComponent(html.Div):
 
             group_start = dbc.FormGroup(
                 [
-                    dbc.Label('start (s): ' + str(tstart), id='slider_start_label'),
-                    dbc.Col(self.slider_start)
+                    dbc.Row(
+                        dbc.Col(
+                            dbc.Label('start (s): ' + str(tstart), id='slider_start_label'),
+                            width={'size':12},
+                        ),
+                    ),
+                    dbc.Row(
+                        dbc.Col(
+                            self.slider_start, 
+                            width={'size': 12},
+                        )
+                    )
                 ],
             )
 
@@ -61,8 +71,18 @@ class TimeControllerComponent(html.Div):
 
             group_duration = dbc.FormGroup(
                 [
-                    dbc.Label('duration (s):'),
-                    dbc.Col(self.input_duration)
+                    dbc.Row(
+                        dbc.Col(
+                            dbc.Label('duration (s):'), 
+                            width={'size': 12}
+                        )
+                    ),
+                    dbc.Row(
+                        dbc.Col(
+                            self.input_duration,
+                            width={'size':12},
+                        )
+                    )
                 ],
             )
 
@@ -197,7 +217,7 @@ class TiffImageSeriesGraphComponent(dcc.Graph):
                 y=self.mask_y_coords,
                 fill='toself',
                 mode='lines',
-                line={"color": "rgb(219, 59, 59)", "width": 4},
+                line={"color": "rgb(219, 59, 59)", "width": 2},
             )
             self.out_fig.add_trace(trace)
         else:
@@ -241,7 +261,7 @@ class AllenDashboard(html.Div):
                         id='div-controller',
                         children= dbc.Card(
                             self.controller_time, 
-                            style={'margin-bottom': '10px', 'padding': '10px'}
+                            style={'margin-bottom': '10px', 'max-height': '95px'}
                         ),
                         style={'display': 'none'},
                         width={'size': 12},
@@ -403,6 +423,7 @@ class AllenDashboard(html.Div):
         # Create traces figure
         self.traces = make_subplots(rows=3, cols=1, row_heights=[0.4, 0.2, 0.4],
                                     shared_xaxes=False, vertical_spacing=0.02)
+
         # Electrophysiology
         self.ecephys_trace = self.nwb.processing['ecephys'].data_interfaces['filtered_membrane_voltage']
         self.traces.add_trace(
@@ -489,6 +510,7 @@ class AllenDashboard(html.Div):
             margin=dict(l=10, r=10, t=70, b=70),
             # width=300, height=300,
         )
+
 
     def update_spike_traces(self, time_window):
         """Updates list of go.Scatter objects at spike times"""
