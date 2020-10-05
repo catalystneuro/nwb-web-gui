@@ -28,7 +28,6 @@ class ConverterForms(html.Div):
         self.export_controller = False
         self.get_metadata_controller = False
 
-        examples_path = Path(__file__).parent.absolute() / 'example_schemas'
         self.downloads_path = Path(__file__).parent.parent.parent.parent.parent.absolute() / 'downloads'
 
         self.source_json_schema = converter.get_input_schema()
