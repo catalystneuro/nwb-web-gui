@@ -276,16 +276,10 @@ class ConverterForms(html.Div):
             input_data = AUX_FUNCTION()
             # Get metadata schema from converter
             self.converter = self.converter_class(input_data=input_data)
-            self.metadata_json_schema = self.converter.get_metadata_schema(
-                source_paths=None,
-                conversion_options=None
-            )
+            self.metadata_json_schema = self.converter.get_metadata_schema()
 
             # Get metadata data from converter
-            self.metadata_json_data = self.converter.get_metadata(
-                source_paths=None,
-                conversion_options=None
-            )
+            self.metadata_json_data = self.converter.get_metadata()
             if self.metadata_forms.children_forms:
                 # Clean form children if exists to render new one
                 self.metadata_forms.children_forms = []
