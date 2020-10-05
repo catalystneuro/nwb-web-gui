@@ -13,7 +13,7 @@ import flask
 
 
 class ConverterForms(html.Div):
-    def __init__(self, parent_app, converter):
+    def __init__(self, parent_app, converter_class):
         """
         Forms to interface user input with NWB converters.
 
@@ -24,13 +24,13 @@ class ConverterForms(html.Div):
         """
         super().__init__([])
         self.parent_app = parent_app
-        self.converter = converter
+        self.converter_class = converter_class
         self.export_controller = False
         self.get_metadata_controller = False
 
         self.downloads_path = Path(__file__).parent.parent.parent.parent.parent.absolute() / 'downloads'
 
-        self.source_json_schema = converter.get_input_schema()
+        self.source_json_schema = converter_class.get_input_schema()
 
         # Source data Form
         self.source_forms = SchemaFormContainer(
@@ -239,17 +239,14 @@ class ConverterForms(html.Div):
             alerts, source_data = self.source_forms.data_to_nested()
 
             self.get_metadata_controller = False
+            # Get forms data
+            input_data = AUX_FUNCTION()
             # Get metadata schema from converter
-            self.metadata_json_schema = self.converter.get_metadata_schema(
-                source_paths=None,
-                conversion_options=None
-            )
+            self.converter = self.converter_class(input_data=input_data)
+            self.metadata_json_schema = self.converter.get_metadata_schema()
 
             # Get metadata data from converter
-            self.metadata_json_data = self.converter.get_metadata(
-                source_paths=None,
-                conversion_options=None
-            )
+            self.metadata_json_data = self.converter.get_metadata()
             if self.metadata_forms.children_forms:
                 # Clean form children if exists to render new one
                 self.metadata_forms.children_forms = []
