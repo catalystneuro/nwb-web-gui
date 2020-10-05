@@ -240,7 +240,7 @@ class ConverterForms(html.Div):
 
             self.get_metadata_controller = False
             # Get forms data
-            input_data = AUX_FUNCTION()
+            input_data = source_data
             # Get metadata schema from converter
             self.converter = self.converter_class(input_data=input_data)
             self.metadata_json_schema = self.converter.get_metadata_schema()
