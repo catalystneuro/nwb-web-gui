@@ -146,7 +146,8 @@ class SchemaFormItem(dbc.FormGroup):
         elif value['type'] == 'boolean':
             compound_id['data_type'] = 'boolean'
             field_input = dbc.Checkbox(
-                id=compound_id
+                id=compound_id,
+                checked=value['default']
             )
 
         else:
@@ -199,7 +200,6 @@ class SchemaFormItem(dbc.FormGroup):
     def register_filebrowser_callbacks(self, modal_id, button_id, trigger_id):
         """Register callbacks for filebroswer component"""
         # trigger_id = {type: internal-trigger-update-form-values, index: index_class}
-
 
         @self.parent.container.parent_app.callback(
             Output(modal_id, 'is_open'),
@@ -362,24 +362,24 @@ class SchemaFormContainer(html.Div):
         ]
 
         self.update_forms_values_callback_outputs = [
-                Output({'type': 'metadata-input', 'container_id': f"{self.id}", 'data_type': 'path', 'index': ALL}, 'value'),
-                Output({'type': 'metadata-input', 'container_id': f"{self.id}", 'data_type': 'boolean', 'index': ALL}, 'checked'),
-                Output({'type': 'metadata-input', 'container_id': f"{self.id}", 'data_type': 'string', 'index': ALL}, 'value'),
-                Output({'type': 'metadata-input', 'container_id': f"{self.id}", 'data_type': 'datetime', 'index': ALL}, 'defaultValue'),
-                Output({'type': 'metadata-input', 'container_id': f"{self.id}", 'data_type': 'tags', 'index': ALL}, 'injectedTags'),
-                Output({'type': 'metadata-input', 'container_id': f"{self.id}", 'data_type': 'name', 'index': ALL}, 'value'),
-                Output({'type': 'metadata-input', 'container_id': f"{self.id}", 'data_type': 'number', 'index': ALL}, 'value'),
-                Output(f'{self.id}-trigger-update-links-values', 'children')
-            ]
+            Output({'type': 'metadata-input', 'container_id': f"{self.id}", 'data_type': 'path', 'index': ALL}, 'value'),
+            Output({'type': 'metadata-input', 'container_id': f"{self.id}", 'data_type': 'boolean', 'index': ALL}, 'checked'),
+            Output({'type': 'metadata-input', 'container_id': f"{self.id}", 'data_type': 'string', 'index': ALL}, 'value'),
+            Output({'type': 'metadata-input', 'container_id': f"{self.id}", 'data_type': 'datetime', 'index': ALL}, 'defaultValue'),
+            Output({'type': 'metadata-input', 'container_id': f"{self.id}", 'data_type': 'tags', 'index': ALL}, 'injectedTags'),
+            Output({'type': 'metadata-input', 'container_id': f"{self.id}", 'data_type': 'name', 'index': ALL}, 'value'),
+            Output({'type': 'metadata-input', 'container_id': f"{self.id}", 'data_type': 'number', 'index': ALL}, 'value'),
+            Output(f'{self.id}-trigger-update-links-values', 'children')
+        ]
         self.update_forms_values_callback_states = [
-                State({'type': 'metadata-input', 'container_id': f"{self.id}", 'data_type': 'path', 'index': ALL}, 'value'),
-                State({'type': 'metadata-input', 'container_id': f"{self.id}", 'data_type': 'boolean', 'index': ALL}, 'checked'),
-                State({'type': 'metadata-input', 'container_id': f"{self.id}", 'data_type': 'string', 'index': ALL}, 'value'),
-                State({'type': 'metadata-input', 'container_id': f"{self.id}", 'data_type': 'datetime', 'index': ALL}, 'value'),
-                State({'type': 'metadata-input', 'container_id': f"{self.id}", 'data_type': 'tags', 'index': ALL}, 'value'),
-                State({'type': 'metadata-input', 'container_id': f"{self.id}", 'data_type': 'name', 'index': ALL}, 'value'),
-                State({'type': 'metadata-input', 'container_id': f"{self.id}", 'data_type': 'number', 'index': ALL}, 'value'),
-            ]
+            State({'type': 'metadata-input', 'container_id': f"{self.id}", 'data_type': 'path', 'index': ALL}, 'value'),
+            State({'type': 'metadata-input', 'container_id': f"{self.id}", 'data_type': 'boolean', 'index': ALL}, 'checked'),
+            State({'type': 'metadata-input', 'container_id': f"{self.id}", 'data_type': 'string', 'index': ALL}, 'value'),
+            State({'type': 'metadata-input', 'container_id': f"{self.id}", 'data_type': 'datetime', 'index': ALL}, 'value'),
+            State({'type': 'metadata-input', 'container_id': f"{self.id}", 'data_type': 'tags', 'index': ALL}, 'value'),
+            State({'type': 'metadata-input', 'container_id': f"{self.id}", 'data_type': 'name', 'index': ALL}, 'value'),
+            State({'type': 'metadata-input', 'container_id': f"{self.id}", 'data_type': 'number', 'index': ALL}, 'value'),
+        ]
 
         @self.parent_app.callback(
             Output(f'{self.id}-output-update-finished-verification', 'children'),
@@ -403,7 +403,7 @@ class SchemaFormContainer(html.Div):
             if trigger is None:
                 return []
 
-            boolean_counter = 0 
+            boolean_counter = 0
             path_counter = 0
             datetime_counter = 0
             string_counter = 0
@@ -454,6 +454,16 @@ class SchemaFormContainer(html.Div):
 
         )
         def update_forms_values(trigger, trigger_all, *states):
+            ctx = dash.callback_context
+            trigger_source = ctx.triggered[0]['prop_id'].split('.')[0]
+
+            print('trigger:')
+            print(trigger)
+            print('trigger_all:')
+            print(trigger_all)
+            print('context:')
+            print(trigger_source)
+            print()
 
             output_path = []
             output_bool = []
@@ -508,7 +518,7 @@ class SchemaFormContainer(html.Div):
             i = 0
             for k, v in self.data.items():
                 if v['compound_id']['data_type'] == 'name':
-                    self.data[k]['value'] = name_change[i]  
+                    self.data[k]['value'] = name_change[i]
                     i += 1
 
             # Get specific options for each link dropdown
@@ -579,19 +589,19 @@ class SchemaFormContainer(html.Div):
         output = dict()
         empty_required_fields = list()
         alert_children = [
-                html.H4("There are missing required fields:", className="alert-heading"),
-                html.Hr()
-            ]
+            html.H4("There are missing required fields:", className="alert-heading"),
+            html.Hr()
+        ]
 
         for k, v in self.data.items():
             field_value = v['value']
             if v['required'] and (field_value is None or (isinstance(field_value, str) and field_value.isspace()) or field_value == ''):
                 empty_required_fields.append(k)
                 alert_children.append(html.A(
-                        k,
-                        href="#" + 'wrapper-' + v['compound_id']['index'] + '-' + v['compound_id']['type'],
-                        className="alert-link"
-                    ))
+                    k,
+                    href="#" + 'wrapper-' + v['compound_id']['index'] + '-' + v['compound_id']['type'],
+                    className="alert-link"
+                ))
                 alert_children.append(html.Hr())
             if field_value not in ['', None]:
                 splited_keys = k.split('-')

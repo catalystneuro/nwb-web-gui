@@ -236,17 +236,22 @@ class ConverterForms(html.Div):
                     self.metadata_forms.schema = dict()
                 return [self.metadata_forms, styles[0], styles[1], styles[2], styles[3], styles[4]]
 
+            # Get forms data
             alerts, source_data = self.source_forms.data_to_nested()
+            print('input data')
+            print(source_data)
 
             self.get_metadata_controller = False
-            # Get forms data
-            input_data = source_data
+
             # Get metadata schema from converter
-            self.converter = self.converter_class(input_data=input_data)
+            self.converter = self.converter_class(input_data=source_data)
             self.metadata_json_schema = self.converter.get_metadata_schema()
 
             # Get metadata data from converter
             self.metadata_json_data = self.converter.get_metadata()
+            print('METADATA')
+            print(self.metadata_json_data)
+
             if self.metadata_forms.children_forms:
                 # Clean form children if exists to render new one
                 self.metadata_forms.children_forms = []
