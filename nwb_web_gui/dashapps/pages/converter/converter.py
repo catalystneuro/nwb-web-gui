@@ -137,7 +137,8 @@ class ConverterForms(html.Div):
                 ),
                 html.Br(),
                 html.Div(id='export-output', style={'display': 'none'}),
-                html.Div(id='export-input', style={'display':'none'})
+                html.Div(id='export-input', style={'display':'none'}),
+                dbc.Button(id='get_metadata_done', style={'display': 'none'})
             ], style={'min-height': '110vh'})
         ]
 
@@ -206,7 +207,8 @@ class ConverterForms(html.Div):
                 Output('button_export_metadata', 'style'),
                 Output('button_refresh', 'style'),
                 Output('row_output_conversion', 'style'),
-                Output('text-conversion-results', 'style')
+                Output('text-conversion-results', 'style'),
+                Output('get_metadata_done', 'n_clicks')
             ],
             [Input('sourcedata-output-update-finished-verification', 'children')],
             [
@@ -234,12 +236,12 @@ class ConverterForms(html.Div):
                     self.metadata_forms.children = self.metadata_forms.children_triggers
                     self.metadata_forms.data = dict()
                     self.metadata_forms.schema = dict()
-                return [self.metadata_forms, styles[0], styles[1], styles[2], styles[3], styles[4]]
+                return [self.metadata_forms, styles[0], styles[1], styles[2], styles[3], styles[4], None]
 
             # Get forms data
             alerts, source_data = self.source_forms.data_to_nested()
-            print('input data')
-            print(source_data)
+            #print('input data')
+            #print(source_data)
 
             self.get_metadata_controller = False
 
@@ -249,8 +251,8 @@ class ConverterForms(html.Div):
 
             # Get metadata data from converter
             self.metadata_json_data = self.converter.get_metadata()
-            print('METADATA')
-            print(self.metadata_json_data)
+            #print('METADATA')
+            #print(self.metadata_json_data)
 
             if self.metadata_forms.children_forms:
                 # Clean form children if exists to render new one
@@ -260,7 +262,7 @@ class ConverterForms(html.Div):
             self.metadata_forms.construct_children_forms()
             self.metadata_forms.update_data(data=self.metadata_json_data)
 
-            return [self.metadata_forms, {'display': 'block'}, {'display': 'block'}, {'display': 'block'}, {'display': 'block'}, {'display': 'block'}]
+            return [self.metadata_forms, {'display': 'block'}, {'display': 'block'}, {'display': 'block'}, {'display': 'block'}, {'display': 'block'}, 1]
 
         @self.parent_app.callback(
             Output('sourcedata-external-trigger-update-internal-dict', 'children'),
@@ -282,10 +284,13 @@ class ConverterForms(html.Div):
 
         @self.parent_app.callback(
             Output({'type': 'external-trigger-update-forms-values', 'index': 'metadata-external-trigger-update-forms-values'}, 'children'),
-            [Input('button_load_metadata', 'contents')],
+            [
+                Input('button_load_metadata', 'contents'),
+                Input('get_metadata_done', 'n_clicks')
+            ],
             [State('button_load_metadata', 'filename')]
         )
-        def update_forms_values_metadata(contents, filename):
+        def update_forms_values_metadata(contents, click, filename):
             """
             Updates forms values (except links) when:
             - Forms are created (receives metadata dict from Converter)
@@ -294,8 +299,12 @@ class ConverterForms(html.Div):
             ctx = dash.callback_context
             trigger_source = ctx.triggered[0]['prop_id'].split('.')[0]
 
-            if trigger_source != 'button_load_metadata':
+            if trigger_source != 'button_load_metadata' and click is None:
                 output = []
+                return output
+
+            if trigger_source != 'button_load_metadata' and click is not None:
+                output = str(np.random.rand())
                 return output
 
             content_type, content_string = contents.split(',')

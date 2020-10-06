@@ -55,6 +55,8 @@ class SchemaFormItem(dbc.FormGroup):
             'container_id': self.parent.container.id
         }
 
+        default = None
+
         if isinstance(value, list):
             compound_id['data_type'] = 'list'
             field_input = html.Div(value)  # id=compound_id)
@@ -145,6 +147,7 @@ class SchemaFormItem(dbc.FormGroup):
 
         elif value['type'] == 'boolean':
             compound_id['data_type'] = 'boolean'
+            default = value['default']
             field_input = dbc.Checkbox(
                 id=compound_id,
                 checked=value['default']
@@ -170,15 +173,27 @@ class SchemaFormItem(dbc.FormGroup):
 
         # Add data
         if not isinstance(value, list):
-            self.parent.container.data.update({
-                input_id: {
-                    'compound_id': compound_id,
-                    'owner_class': str(owner_class),
-                    'target': value.get('target', None),
-                    'value': None,
-                    'required': required
-                }
-            })
+            if default is None:
+                self.parent.container.data.update({
+                    input_id: {
+                        'compound_id': compound_id,
+                        'owner_class': str(owner_class),
+                        'target': value.get('target', None),
+                        'value': None,
+                        'required': required
+                    }
+                })
+            else:
+                self.parent.container.data.update({
+                    input_id: {
+                        'compound_id': compound_id,
+                        'owner_class': str(owner_class),
+                        'target': value.get('target', None),
+                        'value': default,
+                        'required': required
+                    }
+                })
+
 
         # Add tooltip to input field
         if description is None:
@@ -456,14 +471,14 @@ class SchemaFormContainer(html.Div):
         def update_forms_values(trigger, trigger_all, *states):
             ctx = dash.callback_context
             trigger_source = ctx.triggered[0]['prop_id'].split('.')[0]
+            context = json.loads(trigger_source)
 
-            print('trigger:')
-            print(trigger)
-            print('trigger_all:')
-            print(trigger_all)
-            print('context:')
-            print(trigger_source)
-            print()
+            if context['type'] == 'external-trigger-update-forms-values' and all((trg is None) or trg == [] for trg in trigger):
+                raise dash.exceptions.PreventUpdate
+
+            if context['type'] == 'internal-trigger-update-forms-values' and all((trg is None) or trg == [] or trg == '' for trg in trigger_all):
+                raise dash.exceptions.PreventUpdate
+
 
             output_path = []
             output_bool = []
@@ -511,9 +526,6 @@ class SchemaFormContainer(html.Div):
 
             if 'index' in trigger_source:
                 trigger_source = json.loads(trigger_source)['index']
-
-            #if trigger_source != self.id + '-trigger-update-links-values' and trigger_source != f'{self.id}-external-trigger-update-links-values':
-                #pass
 
             i = 0
             for k, v in self.data.items():
