@@ -44,7 +44,7 @@ NWBFile:
 </tr>
 </table>
 
-![](nwb_web_gui/static/documentation_singlestring.JPG)
+![](doc_images/documentation_singlestring.JPG)
 
 
 ### Numeric field
@@ -82,7 +82,7 @@ ImagingPlane:
 </tr>
 </table>
 
-![](nwb_web_gui/static/documentation_numeric.JPG)
+![](doc_images/documentation_numeric.JPG)
 
 
 ### Datetime field
@@ -122,7 +122,7 @@ NWBFile:
 </tr>
 </table>
 
-![](nwb_web_gui/static/documentation_datetime.JPG)
+![](doc_images/documentation_datetime.JPG)
 
 
 ### Tags field
@@ -164,7 +164,7 @@ NWBFile:
 </tr>
 </table>
 
-![](nwb_web_gui/static/documentation_tags.JPG)
+![](doc_images/documentation_tags.JPG)
 
 
 ### String choice field
@@ -205,7 +205,7 @@ Subject:
 </tr>
 </table>
 
-![](nwb_web_gui/static/documentation_stringchoice.JPG)
+![](doc_images/documentation_stringchoice.JPG)
 
 
 ### Link choice field
@@ -245,7 +245,7 @@ ImagingPlane:
 </tr>
 </table>
 
-![](nwb_web_gui/static/documentation_linkchoice.JPG)
+![](doc_images/documentation_linkchoice.JPG)
 
 
 ### Subform list field
@@ -305,7 +305,7 @@ ImagingPlane:
 </tr>
 </table>
 
-![](nwb_web_gui/static/documentation_subformlist.JPG)
+![](doc_images/documentation_subformlist.JPG)
 
 ## Callback Definitions
   
@@ -313,13 +313,13 @@ ImagingPlane:
 The Schema Form Container is the "exposed" container containing a Form object and all the callbacks to handle with the Form data.
 This callbacks can be triggered from external objects
   
-![](SchemaContainerDiagram.jpg)
+![](doc_images/SchemaContainerDiagram.jpg)
 
 ### Converter
 The Converter class have the callbacks to handle with multiple forms and and specific rules of this application.
   
-![](ConverterDiagram.jpg)
+![](doc_images/ConverterDiagram.jpg)
 
 ## Callbacks Flowchart Example
   
-![](Get_Metadata_and_Export_Diagram.jpg)
+![](doc_images/Get_Metadata_and_Export_Diagram.jpg)
