@@ -306,3 +306,20 @@ ImagingPlane:
 </table>
 
 ![](nwb_web_gui/static/documentation_subformlist.JPG)
+
+## Callback Definitions
+  
+### Schema Form Container
+The Schema Form Container is the "exposed" container containing a Form object and all the callbacks to handle with the Form data.
+This callbacks can be triggered from external objects
+  
+![](documentation/SchemaContainerActions.jpg)
+
+### Converter
+The Converter class have the callbacks to handle with multiple forms and and specific rules of this application.
+  
+![](documentation/ConverterActions.jpg)
+
+## Callbacks Flowchart Example
+  
+![](documentation/Get_Metadata_and_Export_Diagram.jpg)
