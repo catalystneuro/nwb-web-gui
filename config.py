@@ -42,5 +42,9 @@ class ConfigDev(Config):
         os.environ['NWB_CONVERTER_MODULE'] = parser['NWB_CONVERTER']['NWB_CONVERTER_MODULE']
         os.environ['NWB_CONVERTER_CLASS'] = parser['NWB_CONVERTER']['NWB_CONVERTER_CLASS']
 
+    if 'NWB_DASHBOARD' in parser.sections():
+        os.environ['NWB_DASHBOARD_MODULE'] = parser['NWB_DASHBOARD']['NWB_DASHBOARD_MODULE']
+        os.environ['NWB_DASHBOARD_CLASS'] = parser['NWB_DASHBOARD']['NWB_DASHBOARD_CLASS']
+
     if 'SECRETS' in parser.sections():
         os.environ['SECRET_KEY'] = parser['SECRETS']['SECRET_KEY']

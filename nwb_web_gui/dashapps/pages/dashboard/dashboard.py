@@ -1,4 +1,4 @@
-from nwb_web_gui.dashapps.utils.dashboards.allen_dash import AllenDashboard
+# from nwb_web_gui.dashapps.utils.dashboards.allen_dash import AllenDashboard
 from nwb_web_gui.dashapps.utils.make_components import make_file_picker,  FileBrowserComponent
 
 import dash_core_components as dcc
@@ -9,6 +9,7 @@ import dash
 
 from pynwb import NWBHDF5IO
 from pathlib import Path
+import importlib
 
 
 class Dashboard(html.Div):
@@ -20,7 +21,12 @@ class Dashboard(html.Div):
         #filepicker = make_file_picker(id_suffix='dashboard')
         direxplorer = FileBrowserComponent(parent_app=parent_app, id_suffix='dashboard')
 
-        dashboard = AllenDashboard(parent_app=self.parent_app, nwb=None)
+        # dashboard = AllenDashboard(parent_app=self.parent_app, nwb=None)
+        self.dashboard_class = getattr(
+            importlib.import_module(parent_app.server.config['NWB_DASHBOARD_MODULE']),
+            parent_app.server.config['NWB_DASHBOARD_CLASS']
+        )
+        dashboard = self.dashboard_class(parent_app=self.parent_app, nwb=None)
 
         self.children = html.Div([
             html.Br(),
@@ -47,7 +53,8 @@ class Dashboard(html.Div):
                     io = NWBHDF5IO(str(nwb_path), mode='r')
                     nwbfile = io.read()
                     # Dashboard
-                    dashboard = AllenDashboard(parent_app=self.parent_app, nwb=nwbfile)
+                    # dashboard = AllenDashboard(parent_app=self.parent_app, nwb=nwbfile)
+                    dashboard = self.dashboard_class(parent_app=self.parent_app, nwb=nwbfile)
                     dashboard.start_dashboard()
                     return 'NWB Loaded', dashboard
                 else:
