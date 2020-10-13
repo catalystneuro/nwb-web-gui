@@ -6,6 +6,7 @@ from dash.dependencies import Input, Output, State, ALL, MATCH
 from dash_cool_components import TagInput, DateTimePicker
 from nwb_web_gui.dashapps.utils.make_components import make_filebrowser_modal
 import numpy as np
+from pathlib import Path
 import warnings
 import json
 
@@ -430,7 +431,9 @@ class SchemaFormContainer(html.Div):
                 for k, v in self.data.items():
                     if e['index'] == k:
                         if e['data_type'] == 'path':
-                            field_value = path_values[path_counter]
+                            root_path = Path(self.parent_app.server.config['DATA_PATH']).parent
+                            path_v = path_values[path_counter] if path_values[path_counter] is not None else ''
+                            field_value = str(root_path / path_v)
                             path_counter += 1
                         elif e['data_type'] == 'boolean':
                             field_value = boolean_values[boolean_counter]
@@ -478,7 +481,6 @@ class SchemaFormContainer(html.Div):
             if context['type'] == 'internal-trigger-update-forms-values' and all((trg is None) or trg == [] or trg == '' for trg in trigger_all):
                 raise dash.exceptions.PreventUpdate
 
-
             output_path = []
             output_bool = []
             output_string = []
@@ -499,7 +501,8 @@ class SchemaFormContainer(html.Div):
                 elif v['compound_id']['data_type'] == 'datetime':
                     output_date.append(v['value'])
                 elif v['compound_id']['data_type'] == 'tags':
-                    output_tags.append([{"index": i, "displayValue": e} for i, e in enumerate(v['value'])])
+                    tags_values = v['value'] if v['value'] is not None else []
+                    output_tags.append([{"index": i, "displayValue": e} for i, e in enumerate(tags_values)])
                 elif v['compound_id']['data_type'] == 'link':
                     pass
                 elif v['compound_id']['data_type'] == 'name':
@@ -507,7 +510,10 @@ class SchemaFormContainer(html.Div):
                 elif v['compound_id']['data_type'] == 'number':
                     output_number.append(v['value'])
 
-            output = [output_path, output_bool, output_string, output_date, output_tags, output_name, output_number, 1]
+            output = [
+                output_path, output_bool, output_string, output_date, output_tags,
+                output_name, output_number, 1
+            ]
 
             return output
 
