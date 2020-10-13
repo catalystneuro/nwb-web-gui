@@ -127,6 +127,7 @@ venv.bak/
 
 # mkdocs documentation
 /site
+*.drawio
 
 # mypy
 .mypy_cache/
