@@ -10,6 +10,7 @@ def init_app():
     # Variables from ENV vars
     app.config['NWB_CONVERTER_MODULE'] = os.environ.get('NWB_CONVERTER_MODULE')
     app.config['NWB_CONVERTER_CLASS'] = os.environ.get('NWB_CONVERTER_CLASS')
+    app.config['DATA_PATH'] = os.environ.get('DATA_PATH')
     app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
 
     with app.app_context():

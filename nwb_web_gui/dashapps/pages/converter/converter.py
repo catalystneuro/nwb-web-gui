@@ -240,8 +240,6 @@ class ConverterForms(html.Div):
 
             # Get forms data
             alerts, source_data = self.source_forms.data_to_nested()
-            #print('input data')
-            #print(source_data)
 
             self.get_metadata_controller = False
 
@@ -251,8 +249,6 @@ class ConverterForms(html.Div):
 
             # Get metadata data from converter
             self.metadata_json_data = self.converter.get_metadata()
-            #print('METADATA')
-            #print(self.metadata_json_data)
 
             if self.metadata_forms.children_forms:
                 # Clean form children if exists to render new one
