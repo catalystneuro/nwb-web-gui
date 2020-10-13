@@ -194,7 +194,6 @@ class SchemaFormItem(dbc.FormGroup):
                     }
                 })
 
-
         # Add tooltip to input field
         if description is None:
             description = value.get('description', '')
@@ -309,9 +308,9 @@ class SchemaForm(dbc.Card):
                 # If field is an array of subforms, e.g. ImagingPlane.optical_channels
                 if isinstance(v['items'], list):
                     value = []
+                    template_name = v['items'][0]['$ref'].split('/')[-1]
+                    schema = self.definitions[template_name]
                     for index in range(v['minItems']):
-                        template_name = v['items'][0]['$ref'].split('/')[-1]
-                        schema = self.definitions[template_name]
                         iform = SchemaForm(schema=schema, key=f'{k}-{index}', parent_form=self)
                         value.append(iform)
 
