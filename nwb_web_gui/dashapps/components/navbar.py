@@ -43,10 +43,6 @@ def render_navbar():
                             id="nav_nwb_viewer", children="NWB Viewer", href="/viewer",
                             style={"font-size": "120%", "font-weight": "normal"}, className='nav-link'
                         )),
-                        dbc.NavItem(html.A(
-                            id="nav_nwb_dashboard", children="Dashboard", href="/dashboard",
-                            style={"font-size": "120%", "font-weight": "normal"}, className='nav-link'
-                        )),
                     ])
                 ],
                 horizontal='end',
