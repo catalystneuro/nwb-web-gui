@@ -109,7 +109,7 @@ class ConverterForms(html.Div):
                 ]),
                 dbc.Row(
                     dbc.Col(id='metadata-col', width={'size': 12}),
-                    style={'margin-top': '1%'}
+                    style={'margin-top': '1%', 'margin-bottom': '10px'}
                 ),
                 dbc.Row(
                     dbc.Col(

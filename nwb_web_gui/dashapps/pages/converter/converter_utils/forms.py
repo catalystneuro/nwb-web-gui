@@ -283,6 +283,8 @@ class SchemaForm(dbc.Card):
 
         self.required_fields = schema.get('required', '')
 
+        self.style = {'padding': '0px', 'margin-top': '10px'}
+
         # Construct form
         if 'properties' in schema:
             self.make_form(properties=schema['properties'])
@@ -358,7 +360,7 @@ class SchemaFormContainer(html.Div):
         # Hidden componentes that serve to trigger callbacks
         self.children_triggers = [
             html.Div(id={'type': 'external-trigger-update-forms-values', 'index': id + '-external-trigger-update-forms-values'}, style={'display': 'none'}),
-            html.Div(id={'type': 'external-trigger-update-links-values', 'index': f'{id}-external-trigger-update-links-values'}),
+            html.Div(id={'type': 'external-trigger-update-links-values', 'index': f'{id}-external-trigger-update-links-values'}, style={"display": "none"}),
             html.Div(id=f'{id}-external-trigger-update-internal-dict', style={'display': 'none'}),
             html.Div(id=f'{id}-output-update-finished-verification', style={'display': 'none'}),
             html.Div(id=id + '-trigger-update-links-values', style={'display': 'none'}),
