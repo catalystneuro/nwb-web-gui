@@ -98,3 +98,4 @@ widgetsnbextension==3.5.1
 zarr==2.4.0
 zipp==3.1.0
 dash-cool-components==0.1.2
+dash-bootstrap-components

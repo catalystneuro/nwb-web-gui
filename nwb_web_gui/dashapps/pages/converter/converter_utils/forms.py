@@ -6,6 +6,7 @@ from dash.dependencies import Input, Output, State, ALL, MATCH
 from dash_cool_components import TagInput, DateTimePicker
 from nwb_web_gui.dashapps.utils.make_components import make_filebrowser_modal
 import numpy as np
+from pathlib import Path
 import warnings
 import json
 
@@ -51,8 +52,11 @@ class SchemaFormItem(dbc.FormGroup):
         compound_id = {
             'type': 'metadata-input',
             'index': input_id,
-            'data_type': ''
+            'data_type': '',
+            'container_id': self.parent.container.id
         }
+
+        default = None
 
         if isinstance(value, list):
             compound_id['data_type'] = 'list'
@@ -144,8 +148,10 @@ class SchemaFormItem(dbc.FormGroup):
 
         elif value['type'] == 'boolean':
             compound_id['data_type'] = 'boolean'
+            default = value['default']
             field_input = dbc.Checkbox(
-                id=compound_id
+                id=compound_id,
+                checked=value['default']
             )
 
         else:
@@ -168,15 +174,26 @@ class SchemaFormItem(dbc.FormGroup):
 
         # Add data
         if not isinstance(value, list):
-            self.parent.container.data.update({
-                input_id: {
-                    'compound_id': compound_id,
-                    'owner_class': str(owner_class),
-                    'target': value.get('target', None),
-                    'value': None,
-                    'required': required
-                }
-            })
+            if default is None:
+                self.parent.container.data.update({
+                    input_id: {
+                        'compound_id': compound_id,
+                        'owner_class': str(owner_class),
+                        'target': value.get('target', None),
+                        'value': None,
+                        'required': required
+                    }
+                })
+            else:
+                self.parent.container.data.update({
+                    input_id: {
+                        'compound_id': compound_id,
+                        'owner_class': str(owner_class),
+                        'target': value.get('target', None),
+                        'value': default,
+                        'required': required
+                    }
+                })
 
         # Add tooltip to input field
         if description is None:
@@ -198,7 +215,6 @@ class SchemaFormItem(dbc.FormGroup):
     def register_filebrowser_callbacks(self, modal_id, button_id, trigger_id):
         """Register callbacks for filebroswer component"""
         # trigger_id = {type: internal-trigger-update-form-values, index: index_class}
-
 
         @self.parent.container.parent_app.callback(
             Output(modal_id, 'is_open'),
@@ -267,6 +283,8 @@ class SchemaForm(dbc.Card):
 
         self.required_fields = schema.get('required', '')
 
+        self.style = {'padding': '0px', 'margin-top': '10px'}
+
         # Construct form
         if 'properties' in schema:
             self.make_form(properties=schema['properties'])
@@ -293,17 +311,23 @@ class SchemaForm(dbc.Card):
                 # If field is an array of subforms, e.g. ImagingPlane.optical_channels
                 if isinstance(v['items'], list):
                     value = []
-                    for i, iv in enumerate(v["items"]):
-                        template_name = iv["$ref"].split('/')[-1]
+                    if '$ref' in v['items'][0]:
+                        template_name = v['items'][0]['$ref'].split('/')[-1]
                         schema = self.definitions[template_name]
-                        iform = SchemaForm(schema=schema, key=k + f'-{i}', parent_form=self)
+                    else:
+                        schema = v['items'][0]
+                    for index in range(v['minItems']):
+                        iform = SchemaForm(schema=schema, key=f'{k}-{index}', parent_form=self)
                         value.append(iform)
+
                 # If field is an array of strings, e.g. NWBFile.experimenter
                 elif isinstance(v['items'], dict):
                     value = v
+
             # If field is a simple input field, e.g. description
             elif 'type' in v and v['type'] in ['string', 'number', 'boolean']:
                 value = v
+
             # If field is something not yet implemented
             else:
                 warnings.warn(f'Field input not yet implemented for {k}')
@@ -336,48 +360,113 @@ class SchemaFormContainer(html.Div):
         self.schema = schema
         self.parent_app = parent_app
         self.data = {}
+        self.children_forms = []
 
         # Hidden componentes that serve to trigger callbacks
         self.children_triggers = [
             html.Div(id={'type': 'external-trigger-update-forms-values', 'index': id + '-external-trigger-update-forms-values'}, style={'display': 'none'}),
-            html.Div(id={'type': 'external-trigger-update-links-values', 'index': f'{id}-external-trigger-update-links-values'}),
+            html.Div(id={'type': 'external-trigger-update-links-values', 'index': f'{id}-external-trigger-update-links-values'}, style={"display": "none"}),
+            html.Div(id=f'{id}-external-trigger-update-internal-dict', style={'display': 'none'}),
+            html.Div(id=f'{id}-output-update-finished-verification', style={'display': 'none'}),
             html.Div(id=id + '-trigger-update-links-values', style={'display': 'none'}),
             html.Div(id=id + '-output-placeholder-links-values', style={'display': 'none'})
         ]
 
-        # Construct children forms
-        self.children_forms = []
-        if 'properties' in schema:
-            for form_key, form_value in schema['properties'].items():
-                iform = SchemaForm(
-                    schema=form_value,
-                    key=form_key,
-                    container=self
-                )
-                self.children_forms.append(iform)
+        if schema:
+            self.construct_children_forms()
+        else:
+            self.children = self.children_triggers
 
-        self.children = self.children_forms + self.children_triggers
+        self.update_forms_links_callback_outputs = [
+            Output({'type': 'metadata-input', 'container_id': f"{self.id}", 'data_type': 'link', 'index': ALL}, 'options'),
+            Output({'type': 'metadata-input', 'container_id': f"{self.id}", 'data_type': 'link', 'index': ALL}, 'value'),
+            Output(self.id + '-output-placeholder-links-values', 'children')
+        ]
 
-        # Create Outputs for the callback that updates Forms values
-        self.update_forms_values_callback_outputs = []
-        for v in self.data.values():
-            if v['compound_id']['data_type'] != 'link':
-                if v['compound_id']['data_type'] == 'boolean':
-                    self.update_forms_values_callback_outputs.append(Output(v['compound_id'], 'checked'))
-                elif v['compound_id']['data_type'] == 'tags':
-                    self.update_forms_values_callback_outputs.append(Output(v['compound_id'], 'injectedTags'))
-                elif v['compound_id']['data_type'] == 'datetime':
-                    self.update_forms_values_callback_outputs.append(Output(v['compound_id'], 'defaultValue'))
-                else:
-                    self.update_forms_values_callback_outputs.append(Output(v['compound_id'], 'value'))
-        self.update_forms_values_callback_outputs.append(Output(id + '-trigger-update-links-values', 'children'))
+        self.update_forms_values_callback_outputs = [
+            Output({'type': 'metadata-input', 'container_id': f"{self.id}", 'data_type': 'path', 'index': ALL}, 'value'),
+            Output({'type': 'metadata-input', 'container_id': f"{self.id}", 'data_type': 'boolean', 'index': ALL}, 'checked'),
+            Output({'type': 'metadata-input', 'container_id': f"{self.id}", 'data_type': 'string', 'index': ALL}, 'value'),
+            Output({'type': 'metadata-input', 'container_id': f"{self.id}", 'data_type': 'datetime', 'index': ALL}, 'defaultValue'),
+            Output({'type': 'metadata-input', 'container_id': f"{self.id}", 'data_type': 'tags', 'index': ALL}, 'injectedTags'),
+            Output({'type': 'metadata-input', 'container_id': f"{self.id}", 'data_type': 'name', 'index': ALL}, 'value'),
+            Output({'type': 'metadata-input', 'container_id': f"{self.id}", 'data_type': 'number', 'index': ALL}, 'value'),
+            Output(f'{self.id}-trigger-update-links-values', 'children')
+        ]
+        self.update_forms_values_callback_states = [
+            State({'type': 'metadata-input', 'container_id': f"{self.id}", 'data_type': 'path', 'index': ALL}, 'value'),
+            State({'type': 'metadata-input', 'container_id': f"{self.id}", 'data_type': 'boolean', 'index': ALL}, 'checked'),
+            State({'type': 'metadata-input', 'container_id': f"{self.id}", 'data_type': 'string', 'index': ALL}, 'value'),
+            State({'type': 'metadata-input', 'container_id': f"{self.id}", 'data_type': 'datetime', 'index': ALL}, 'value'),
+            State({'type': 'metadata-input', 'container_id': f"{self.id}", 'data_type': 'tags', 'index': ALL}, 'value'),
+            State({'type': 'metadata-input', 'container_id': f"{self.id}", 'data_type': 'name', 'index': ALL}, 'value'),
+            State({'type': 'metadata-input', 'container_id': f"{self.id}", 'data_type': 'number', 'index': ALL}, 'value'),
+        ]
 
-        # Create Outputs for the callback that updates Links values and options
-        # An extra paceholder is needed for when there is no link fields
-        link_output_options = [Output(v['compound_id'], 'options') for v in self.data.values() if v['compound_id']['data_type'] == 'link']
-        link_output_values = [Output(v['compound_id'], 'value') for v in self.data.values() if v['compound_id']['data_type'] == 'link']
-        link_output_placeholder = [Output(id + '-output-placeholder-links-values', 'children')]
-        self.update_forms_links_callback_outputs = link_output_options + link_output_values + link_output_placeholder
+        @self.parent_app.callback(
+            Output(f'{self.id}-output-update-finished-verification', 'children'),
+            [Input(f'{self.id}-external-trigger-update-internal-dict', 'children')],
+            [
+                State({'type': 'metadata-input', 'container_id': self.id, 'data_type': 'path', 'index': ALL}, 'value'),
+                State({'type': 'metadata-input', 'container_id': self.id, 'data_type': 'boolean', 'index': ALL}, 'checked'),
+                State({'type': 'metadata-input', 'container_id': self.id, 'data_type': 'string', 'index': ALL}, 'value'),
+                State({'type': 'metadata-input', 'container_id': self.id, 'data_type': 'datetime', 'index': ALL}, 'value'),
+                State({'type': 'metadata-input', 'container_id': self.id, 'data_type': 'tags', 'index': ALL}, 'value'),
+                State({'type': 'metadata-input', 'container_id': self.id, 'data_type': 'link', 'index': ALL}, 'value'),
+                State({'type': 'metadata-input', 'container_id': self.id, 'data_type': 'name', 'index': ALL}, 'value'),
+                State({'type': 'metadata-input', 'container_id': self.id, 'data_type': 'number', 'index': ALL}, 'value'),
+                State({'type': 'metadata-input', 'container_id': self.id, 'data_type': ALL, 'index': ALL}, 'id'),
+            ]
+        )
+        def update_internal_dict(trigger, path_values, boolean_values,
+                                 string_values, datetime_values, tags_values,
+                                 link_values, name_values, number_values, ids):
+
+            if trigger is None:
+                return []
+
+            boolean_counter = 0
+            path_counter = 0
+            datetime_counter = 0
+            string_counter = 0
+            tags_counter = 0
+            link_counter = 0
+            names_counter = 0
+            number_counter = 0
+
+            for e in ids:
+                for k, v in self.data.items():
+                    if e['index'] == k:
+                        if e['data_type'] == 'path':
+                            root_path = Path(self.parent_app.server.config['DATA_PATH']).parent
+                            path_v = path_values[path_counter] if path_values[path_counter] is not None else ''
+                            field_value = str(root_path / path_v)
+                            path_counter += 1
+                        elif e['data_type'] == 'boolean':
+                            field_value = boolean_values[boolean_counter]
+                            boolean_counter += 1
+                        elif e['data_type'] == 'datetime':
+                            field_value = datetime_values[datetime_counter]
+                            datetime_counter += 1
+                        elif e['data_type'] == 'string':
+                            field_value = string_values[string_counter]
+                            string_counter += 1
+                        elif e['data_type'] == 'name':
+                            field_value = name_values[names_counter]
+                            names_counter += 1
+                        elif e['data_type'] == 'number':
+                            field_value = number_values[number_counter]
+                            number_counter += 1
+                        elif e['data_type'] == 'tags':
+                            field_value = tags_values[tags_counter]
+                            tags_counter += 1
+                        elif e['data_type'] == 'link':
+                            field_value = link_values[link_counter]
+                            link_counter += 1
+
+                        self.data[k]['value'] = field_value
+
+            return str(np.random.rand())
 
         @self.parent_app.callback(
             self.update_forms_values_callback_outputs,
@@ -385,28 +474,55 @@ class SchemaFormContainer(html.Div):
                 Input({'type': 'external-trigger-update-forms-values', 'index': ALL}, 'children'),
                 Input({'type': 'internal-trigger-update-forms-values', 'parent': self.id, 'index': ALL}, 'children')
             ],
-            [State(v['compound_id'], 'value') for v in self.data.values() if (v['compound_id']['data_type'] != 'link' and v['compound_id']['data_type'] != 'boolean')] +
-            [State(v['compound_id'], 'checked') for v in self.data.values() if (v['compound_id']['data_type'] != 'link' and v['compound_id']['data_type'] == 'boolean')]
+            self.update_forms_values_callback_states
 
         )
         def update_forms_values(trigger, trigger_all, *states):
-            """Updates forms values (except links)"""
-
             ctx = dash.callback_context
             trigger_source = ctx.triggered[0]['prop_id'].split('.')[0]
+            context = json.loads(trigger_source)
+
+            if context['type'] == 'external-trigger-update-forms-values' and all((trg is None) or trg == [] for trg in trigger):
+                raise dash.exceptions.PreventUpdate
+
+            if context['type'] == 'internal-trigger-update-forms-values' and all((trg is None) or trg == [] or trg == '' for trg in trigger_all):
+                raise dash.exceptions.PreventUpdate
+
+            output_path = []
+            output_bool = []
+            output_string = []
+            output_date = []
+            output_tags = []
+            output_link = []
+            output_name = []
+            output_number = []
 
             curr_data = list()
             for v in self.data.values():
-                if v['compound_id']['data_type'] != 'link':
-                    if isinstance(v['value'], list):
-                        element = [{"index": i, "displayValue": e} for i, e in enumerate(v['value'])]
-                    else:
-                        element = v['value']
-                    curr_data.append(element)
+                if v['compound_id']['data_type'] == 'path':
+                    output_path.append(v['value'])
+                elif v['compound_id']['data_type'] == 'boolean':
+                    output_bool.append(v['value'])
+                elif v['compound_id']['data_type'] == 'string':
+                    output_string.append(v['value'])
+                elif v['compound_id']['data_type'] == 'datetime':
+                    output_date.append(v['value'])
+                elif v['compound_id']['data_type'] == 'tags':
+                    tags_values = v['value'] if v['value'] is not None else []
+                    output_tags.append([{"index": i, "displayValue": e} for i, e in enumerate(tags_values)])
+                elif v['compound_id']['data_type'] == 'link':
+                    pass
+                elif v['compound_id']['data_type'] == 'name':
+                    output_name.append(v['value'])
+                elif v['compound_id']['data_type'] == 'number':
+                    output_number.append(v['value'])
 
-            curr_data.append(1)
-            return curr_data
+            output = [
+                output_path, output_bool, output_string, output_date, output_tags,
+                output_name, output_number, 1
+            ]
 
+            return output
 
         @self.parent_app.callback(
             self.update_forms_links_callback_outputs,
@@ -414,50 +530,15 @@ class SchemaFormContainer(html.Div):
                 Input(self.id + '-trigger-update-links-values', 'children'),
                 Input({'type': 'external-trigger-update-links-values', 'index': ALL}, 'children')
             ],
-            [State(v['compound_id'], 'value') for v in self.data.values() if v['compound_id']['data_type'] == 'name']
+            [State({'type': 'metadata-input', 'container_id': f"{self.id}", 'data_type': 'name', 'index': ALL}, 'value')]
         )
-        def update_forms_links(trigger, external_trigger, *name_change):
-            """
-            Updates forms values for links (dropdown options) when names change.
-            If a field has a valid value for the 'target' property, this function
-            will sweep the data internal dictionary in search for field
-            ids ending with '-name' where the 'owner_class' value matches 'target'.
-            The resulting list will populate the dropdown menu of the field.
-
-            Example:
-            data = {
-                'Ecephys-ElectrodeGroup1-device': {
-                    'compound_id': {
-                        'type': 'metadata-input',
-                        'index': 'Ecephys-ElectrodeGroup1-device',
-                        'data_type': 'link'
-                    }
-                    'value': 'device 1',
-                    'owner_class': 'pynwb.ecephys.ElectrodeGroup',
-                    'target': 'pynwb.device.Device'
-                },
-                'Ecephys-Device-name': {
-                    'compound_id': {
-                        'type': 'metadata-input',
-                        'index': 'Ecephys-Device-name',
-                        'data_type': 'string'
-                    }
-                    'value': 'device 1',
-                    'owner_class': 'pynwb.device.Device',
-                    'target': None
-                }
-            }
-            """
+        def update_forms_links(trigger, trigger_all, name_change):
             ctx = dash.callback_context
             trigger_source = ctx.triggered[0]['prop_id'].split('.')[0]
 
             if 'index' in trigger_source:
                 trigger_source = json.loads(trigger_source)['index']
 
-            if trigger_source != self.id + '-trigger-update-links-values' and trigger_source != f'{self.id}-external-trigger-update-links-values':
-                return ['' for _ in self.update_forms_links_callback_outputs]
-
-            # Update changed names on backend mapping dictionary
             i = 0
             for k, v in self.data.items():
                 if v['compound_id']['data_type'] == 'name':
@@ -475,15 +556,21 @@ class SchemaFormContainer(html.Div):
                         for v in self.data.values() if
                         (v['owner_class'] == target_class and 'name' in v['compound_id']['index'])
                     ]
-                    list_values.append(options[0]['value'])
-                    list_options.append(options)
+                    if len(options) > 0:
+                        list_values.append(options[0]['value'])
+                        list_options.append(options)
+                    else:
+                        list_values.append([])
+                        list_options.append([])
 
             for sublist in list_options[:]:
                 for e in sublist[:]:
                     if e['value'] is None:
                         sublist.remove(e)
 
-            return list_options + list_values + [1]
+            output = [list_options, list_values, [1]]
+
+            return output
 
     def update_data(self, data, key=None):
         """Update data in the internal mapping dictionary of this Container"""
@@ -503,3 +590,86 @@ class SchemaFormContainer(html.Div):
             else:
                 component_id = key + '-' + k   # e.g. NWBFile-session_description
                 self.data[component_id]['value'] = v
+
+    def construct_children_forms(self):
+        # Construct children forms
+        if 'properties' in self.schema:
+            for form_key, form_value in self.schema['properties'].items():
+                iform = SchemaForm(
+                    schema=form_value,
+                    key=form_key,
+                    container=self
+                )
+                self.children_forms.append(iform)
+        self.children = self.children_forms + self.children_triggers
+
+    def data_to_nested(self):
+        """
+        Read internal class dict (containing ids, values, etc) and convert to nested
+        dict (data format)
+
+        Returns:
+            alert_children [list | None]: Alerts children if required fields empty or None if no required fields empty
+            output [dict]: Output dict w/ data
+        """
+
+        dicts_list = list()
+        output = dict()
+        empty_required_fields = list()
+        alert_children = [
+            html.H4("There are missing required fields:", className="alert-heading"),
+            html.Hr()
+        ]
+
+        for k, v in self.data.items():
+            field_value = v['value']
+            if v['required'] and (field_value is None or (isinstance(field_value, str) and field_value.isspace()) or field_value == ''):
+                empty_required_fields.append(k)
+                alert_children.append(html.A(
+                    k,
+                    href="#" + 'wrapper-' + v['compound_id']['index'] + '-' + v['compound_id']['type'],
+                    className="alert-link"
+                ))
+                alert_children.append(html.Hr())
+            if field_value not in ['', None]:
+                splited_keys = k.split('-')
+                master_key_name = splited_keys[0]
+                field_name = splited_keys[-1]
+
+                for element in reversed(splited_keys):
+                    if element == field_name:
+                        curr_dict = {field_name: v['value']}
+                    else:
+                        curr_dict = {element: curr_dict}
+                    if element == master_key_name:
+                        dicts_list.append(curr_dict)
+
+        for e in dicts_list:
+            master_key_name = list(e.keys())[0]
+            output = SchemaFormContainer._create_nested_dict(data=e, output=output, master_key_name=master_key_name)
+
+        if len(empty_required_fields) > 0:
+            return alert_children, output
+        else:
+            return None, output
+
+    @staticmethod
+    def _create_nested_dict(data, output, master_key_name):
+        for k, v in data.items():
+            if isinstance(v, dict):
+                if k == master_key_name and k not in output:
+                    output[k] = {}
+                    SchemaFormContainer._create_nested_dict(v, output[k], master_key_name)
+                elif k != master_key_name and k not in output:
+                    output[k] = {}
+                    SchemaFormContainer._create_nested_dict(v, output[k], master_key_name)
+                else:
+                    SchemaFormContainer._create_nested_dict(v, output[k], master_key_name)
+            else:
+                if isinstance(v, list):
+                    element = [e['displayValue'] for e in v]
+                else:
+                    element = v
+                output[k] = element
+
+        return output
