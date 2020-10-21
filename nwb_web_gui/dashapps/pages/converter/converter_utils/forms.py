@@ -311,8 +311,11 @@ class SchemaForm(dbc.Card):
                 # If field is an array of subforms, e.g. ImagingPlane.optical_channels
                 if isinstance(v['items'], list):
                     value = []
-                    template_name = v['items'][0]['$ref'].split('/')[-1]
-                    schema = self.definitions[template_name]
+                    if '$ref' in v['items'][0]:
+                        template_name = v['items'][0]['$ref'].split('/')[-1]
+                        schema = self.definitions[template_name]
+                    else:
+                        schema = v['items'][0]
                     for index in range(v['minItems']):
                         iform = SchemaForm(schema=schema, key=f'{k}-{index}', parent_form=self)
                         value.append(iform)
@@ -320,9 +323,11 @@ class SchemaForm(dbc.Card):
                 # If field is an array of strings, e.g. NWBFile.experimenter
                 elif isinstance(v['items'], dict):
                     value = v
+
             # If field is a simple input field, e.g. description
             elif 'type' in v and v['type'] in ['string', 'number', 'boolean']:
                 value = v
+
             # If field is something not yet implemented
             else:
                 warnings.warn(f'Field input not yet implemented for {k}')
@@ -551,8 +556,12 @@ class SchemaFormContainer(html.Div):
                         for v in self.data.values() if
                         (v['owner_class'] == target_class and 'name' in v['compound_id']['index'])
                     ]
-                    list_values.append(options[0]['value'])
-                    list_options.append(options)
+                    if len(options) > 0:
+                        list_values.append(options[0]['value'])
+                        list_options.append(options)
+                    else:
+                        list_values.append([])
+                        list_options.append([])
 
             for sublist in list_options[:]:
                 for e in sublist[:]:
