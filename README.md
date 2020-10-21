@@ -17,4 +17,4 @@ The app should be running on `localhost:5000`
 
 ## 3. Documentation
 
-[Documentation](https://github.com/catalystneuro/nwb-web-gui/blob/master/documentation.md)
+[Documentation](https://github.com/catalystneuro/nwb-web-gui/tree/master/documentation)
