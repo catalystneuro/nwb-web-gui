@@ -435,36 +435,42 @@ class SchemaFormContainer(html.Div):
             number_counter = 0
 
             for e in ids:
-                for k, v in self.data.items():
-                    if e['index'] == k:
-                        if e['data_type'] == 'path':
-                            root_path = Path(self.parent_app.server.config['DATA_PATH']).parent
-                            path_v = path_values[path_counter] if path_values[path_counter] is not None else ''
-                            field_value = str(root_path / path_v)
-                            path_counter += 1
-                        elif e['data_type'] == 'boolean':
-                            field_value = boolean_values[boolean_counter]
-                            boolean_counter += 1
-                        elif e['data_type'] == 'datetime':
-                            field_value = datetime_values[datetime_counter]
-                            datetime_counter += 1
-                        elif e['data_type'] == 'string':
-                            field_value = string_values[string_counter]
-                            string_counter += 1
-                        elif e['data_type'] == 'name':
-                            field_value = name_values[names_counter]
-                            names_counter += 1
-                        elif e['data_type'] == 'number':
-                            field_value = number_values[number_counter]
-                            number_counter += 1
-                        elif e['data_type'] == 'tags':
-                            field_value = tags_values[tags_counter]
-                            tags_counter += 1
-                        elif e['data_type'] == 'link':
-                            field_value = link_values[link_counter]
-                            link_counter += 1
+                k = e['index']
+                # v = self.data[k]
+                # for k, v in self.data.items():
+                    # if e['index'] == k:
+                if e['data_type'] == 'path':
+                    root_path = Path(self.parent_app.server.config['DATA_PATH']).parent
+                    path_v = path_values[path_counter] if path_values[path_counter] is not None else ''
+                    field_value = str(root_path / path_v)
+                    path_counter += 1
+                elif e['data_type'] == 'boolean':
+                    field_value = boolean_values[boolean_counter]
+                    boolean_counter += 1
+                elif e['data_type'] == 'datetime':
+                    field_value = datetime_values[datetime_counter]
+                    datetime_counter += 1
+                elif e['data_type'] == 'string':
+                    field_value = string_values[string_counter]
+                    string_counter += 1
+                elif e['data_type'] == 'name':
+                    field_value = name_values[names_counter]
+                    names_counter += 1
+                elif e['data_type'] == 'number':
+                    field_value = number_values[number_counter]
+                    print(f'number: {k}')
+                    print(field_value)
+                    if isinstance(field_value, list):
+                        field_value = field_value[0]
+                    number_counter += 1
+                elif e['data_type'] == 'tags':
+                    field_value = tags_values[tags_counter]
+                    tags_counter += 1
+                elif e['data_type'] == 'link':
+                    field_value = link_values[link_counter]
+                    link_counter += 1
 
-                        self.data[k]['value'] = field_value
+                self.data[k]['value'] = field_value
 
             return str(np.random.rand())
 
@@ -605,7 +611,7 @@ class SchemaFormContainer(html.Div):
 
     def data_to_nested(self):
         """
-        Read internal class dict (containing ids, values, etc) and convert to nested
+        Read internal dict (containing ids, values, etc) and convert to nested
         dict (data format)
 
         Returns:
@@ -659,9 +665,6 @@ class SchemaFormContainer(html.Div):
 
     @staticmethod
     def _create_nested_dict(data, output, master_key_name):
-        print('############')
-        print(data)
-        print('############')
         for k, v in data.items():
             if isinstance(v, dict):
                 if k == master_key_name and k not in output:
@@ -674,9 +677,6 @@ class SchemaFormContainer(html.Div):
                     SchemaFormContainer._create_nested_dict(v, output[k], master_key_name)
             else:
                 if isinstance(v, list):
-                    print('############')
-                    print(k)
-                    print('############')
                     element = [e['displayValue'] for e in v]
                 else:
                     element = v
