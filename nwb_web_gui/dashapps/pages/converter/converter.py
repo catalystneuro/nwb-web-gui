@@ -128,6 +128,17 @@ class ConverterForms(html.Div):
                     style={'text-align': 'left', 'margin-top': '1%', 'display': 'none'},
                     id='row_output_conversion'
                 ),
+                dbc.Row([
+                    dbc.Col(
+                        dbc.Alert(
+                            children=[],
+                            id="alert-required-conversion",
+                            dismissable=True,
+                            is_open=False,
+                            color='danger'
+                        )
+                    )
+                ]),
                 dbc.Textarea(
                     id='text-conversion-results',
                     className='string_input',
@@ -137,7 +148,7 @@ class ConverterForms(html.Div):
                 ),
                 html.Br(),
                 html.Div(id='export-output', style={'display': 'none'}),
-                html.Div(id='export-input', style={'display':'none'}),
+                html.Div(id='export-input', style={'display': 'none'}),
                 dbc.Button(id='get_metadata_done', style={'display': 'none'})
             ], style={'min-height': '110vh'})
         ]
@@ -192,12 +203,28 @@ class ConverterForms(html.Div):
 
         @self.parent_app.callback(
             Output('metadata-external-trigger-update-internal-dict', 'children'),
-            [Input('button_export_metadata', 'n_clicks')],
+            [
+                Input('button_export_metadata', 'n_clicks'),
+                Input('button_run_conversion', 'n_clicks')
+            ],
         )
-        def update_internal_metadata_to_export(click):
-            """Trigger metadata internal dict update and set export controller to true"""
-            if click:
-                self.export_controller = True
+        def update_internal_metadata(click_export, click_conversion):
+            """
+            Trigger metadata internal dict update and then:
+            1) set export_controller to true, when exporting to json/yaml
+            2) set convert_controller to true, when running conversion
+            """
+            ctx = dash.callback_context
+            if not ctx.triggered:
+                return dash.no_update
+            else:
+                button_id = ctx.triggered[0]['prop_id'].split('.')[0]
+                if button_id == 'button_export_metadata':
+                    self.export_controller = True
+                    self.convert_controller = False
+                elif button_id == 'button_run_conversion':
+                    self.export_controller = False
+                    self.convert_controller = True
                 return str(np.random.rand())
 
         @self.parent_app.callback(
@@ -324,7 +351,6 @@ class ConverterForms(html.Div):
 
         @self.parent_app.server.route('/downloads/<path:filename>')
         def download_file(filename):
-
             return flask.send_from_directory(
                 directory=self.downloads_path,
                 filename=filename,
@@ -332,11 +358,35 @@ class ConverterForms(html.Div):
             )
 
         @self.parent_app.callback(
-            Output("text-conversion-results", "value"),
-            [Input('button_run_conversion', 'n_clicks')]
+            [
+                Output('text-conversion-results', 'value'),
+                Output('alert-required-conversion', 'is_open'),
+                Output('alert-required-conversion', 'children'),
+            ],
+            [Input('metadata-output-update-finished-verification', 'children')],
+            [
+                State('output-nwbfile-name', 'value'),
+                State('alert-required-conversion', 'is_open')
+            ]
         )
-        def run_conversion(click):
-            """Run conversion """
+        def run_conversion(click, output_nwbfile, alert_is_open):
+            """Run conversion and update text area with results / errors"""
             if click:
-                return "This will call NWBConverter.run_conversion() and print results."
-            return ""
+                # Retrieve metadata from forms
+                alerts, metadata_dict = self.metadata_forms.data_to_nested()
+
+                # If required fields missing return alert, cancel conversion
+                if alerts is not None:
+                    return "Missing required fields", True, alerts
+
+                # Save file path
+                nwbfile_path = output_nwbfile
+
+                # Run conversion
+                self.converter.run_conversion(
+                    metadata_dict=metadata_dict,
+                    nwbfile_path=nwbfile_path
+                )
+
+                return "Running conversion... please wait", False, []
+            return "", alert_is_open, []

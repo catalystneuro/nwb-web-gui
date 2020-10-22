@@ -30,3 +30,6 @@ class ExampleNWBConverter(NWBConverter):
         with open(metadata_data_path, 'r') as inp:
             metadata = json.load(inp)
         return metadata
+
+    def run_conversion(self, metadata_dict):
+        raise NotImplementedError('TODO')

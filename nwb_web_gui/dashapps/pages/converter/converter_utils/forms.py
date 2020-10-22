@@ -646,7 +646,11 @@ class SchemaFormContainer(html.Div):
 
         for e in dicts_list:
             master_key_name = list(e.keys())[0]
-            output = SchemaFormContainer._create_nested_dict(data=e, output=output, master_key_name=master_key_name)
+            output = SchemaFormContainer._create_nested_dict(
+                data=e,
+                output=output,
+                master_key_name=master_key_name
+            )
 
         if len(empty_required_fields) > 0:
             return alert_children, output
@@ -655,6 +659,9 @@ class SchemaFormContainer(html.Div):
 
     @staticmethod
     def _create_nested_dict(data, output, master_key_name):
+        print('############')
+        print(data)
+        print('############')
         for k, v in data.items():
             if isinstance(v, dict):
                 if k == master_key_name and k not in output:
@@ -667,6 +674,9 @@ class SchemaFormContainer(html.Div):
                     SchemaFormContainer._create_nested_dict(v, output[k], master_key_name)
             else:
                 if isinstance(v, list):
+                    print('############')
+                    print(k)
+                    print('############')
                     element = [e['displayValue'] for e in v]
                 else:
                     element = v
