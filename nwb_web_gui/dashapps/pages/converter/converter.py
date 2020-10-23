@@ -7,7 +7,7 @@ import numpy as np
 import json
 import yaml
 import base64
-from .converter_utils.forms import SchemaFormContainer
+from json_schema_to_dash_forms.forms import SchemaFormContainer
 from pathlib import Path
 import flask
 
@@ -26,6 +26,7 @@ class ConverterForms(html.Div):
         self.parent_app = parent_app
         self.converter_class = converter_class
         self.export_controller = False
+        self.convert_controller = False
         self.get_metadata_controller = False
 
         self.downloads_path = Path(__file__).parent.parent.parent.parent.parent.absolute() / 'downloads'
@@ -173,6 +174,7 @@ class ConverterForms(html.Div):
             If export controller is not setted to true but the metadata internal dict was updated
             the function will return the current application state
             """
+
 
             # Prevent default
             if not self.export_controller or not trigger:
@@ -371,7 +373,8 @@ class ConverterForms(html.Div):
         )
         def run_conversion(click, output_nwbfile, alert_is_open):
             """Run conversion and update text area with results / errors"""
-            if click:
+
+            if click and self.convert_controller:
                 # Retrieve metadata from forms
                 alerts, metadata_dict = self.metadata_forms.data_to_nested()
 
@@ -387,6 +390,7 @@ class ConverterForms(html.Div):
                     metadata_dict=metadata_dict,
                     nwbfile_path=nwbfile_path
                 )
+                self.convert_controller = False
 
                 return "Running conversion... please wait", False, []
             return "", alert_is_open, []
