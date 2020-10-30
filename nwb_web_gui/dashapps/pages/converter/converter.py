@@ -31,6 +31,9 @@ class ConverterForms(html.Div):
 
         self.downloads_path = Path(__file__).parent.parent.parent.parent.parent.absolute() / 'downloads'
 
+        if not self.downloads_path.is_dir():
+            self.downloads_path.mkdir()
+
         self.source_json_schema = converter_class.get_input_schema()
 
         # Source data Form
