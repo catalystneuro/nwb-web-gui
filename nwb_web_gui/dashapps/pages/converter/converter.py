@@ -104,6 +104,15 @@ class ConverterForms(html.Div):
                     dbc.Col(
                         dbc.Alert(
                             children=[],
+                            id="alert_required_source",
+                            dismissable=True,
+                            is_open=False,
+                            color='danger'
+                        )
+                    ),
+                    dbc.Col(
+                        dbc.Alert(
+                            children=[],
                             id="alert_required",
                             dismissable=True,
                             is_open=False,
@@ -240,10 +249,13 @@ class ConverterForms(html.Div):
                 Output('button_refresh', 'style'),
                 Output('row_output_conversion', 'style'),
                 Output('text-conversion-results', 'style'),
-                Output('get_metadata_done', 'n_clicks')
+                Output('get_metadata_done', 'n_clicks'),
+                Output('alert_required_source', 'is_open'),
+                Output('alert_required_source', 'children')
             ],
             [Input('sourcedata-output-update-finished-verification', 'children')],
             [
+                State('alert_required_source', 'is_open'),
                 State('button_load_metadata', 'style'),
                 State('button_export_metadata', 'style'),
                 State('button_refresh', 'style'),
@@ -251,7 +263,7 @@ class ConverterForms(html.Div):
                 State('text-conversion-results', 'style')
             ]
         )
-        def get_metadata(trigger, *styles):
+        def get_metadata(trigger, alert_is_open, *styles):
             """
             Render Metadata forms based on Source Data Form
             This function is triggered when sourcedata internal dict is updated
@@ -268,10 +280,13 @@ class ConverterForms(html.Div):
                     self.metadata_forms.children = self.metadata_forms.children_triggers
                     self.metadata_forms.data = dict()
                     self.metadata_forms.schema = dict()
-                return [self.metadata_forms, styles[0], styles[1], styles[2], styles[3], styles[4], None]
+                return [self.metadata_forms, styles[0], styles[1], styles[2], styles[3], styles[4], None, alert_is_open, []]
 
             # Get forms data
             alerts, source_data = self.source_forms.data_to_nested()
+
+            if alerts is not None:
+                return [self.metadata_forms, styles[0], styles[1], styles[2], styles[3], styles[4], None, True, alerts]
 
             self.get_metadata_controller = False
 
@@ -290,7 +305,7 @@ class ConverterForms(html.Div):
             self.metadata_forms.construct_children_forms()
             self.metadata_forms.update_data(data=self.metadata_json_data)
 
-            return [self.metadata_forms, {'display': 'block'}, {'display': 'block'}, {'display': 'block'}, {'display': 'block'}, {'display': 'block'}, 1]
+            return [self.metadata_forms, {'display': 'block'}, {'display': 'block'}, {'display': 'block'}, {'display': 'block'}, {'display': 'block'}, 1, alert_is_open, []]
 
         @self.parent_app.callback(
             Output('sourcedata-external-trigger-update-internal-dict', 'children'),
