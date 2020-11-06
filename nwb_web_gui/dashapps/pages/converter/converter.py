@@ -395,5 +395,5 @@ class ConverterForms(html.Div):
                 )
                 self.convert_controller = False
 
-                return "Running conversion... please wait", False, []
+                return "Conversion finished!", False, []
             return "", alert_is_open, []

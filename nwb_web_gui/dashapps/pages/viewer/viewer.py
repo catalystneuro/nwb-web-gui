@@ -79,7 +79,7 @@ class Viewer(html.Div):
                 if nwb_path.is_file() and str(nwb_path).endswith('.nwb'):
                     self.nwb_path = nwb_path
                     voila_address = self.run_explorer()
-                    time.sleep(3)
+                    time.sleep(5)
                     iframe = html.Iframe(style={"min-width": "100vw", 'max-width': '100vw', "min-height": "100vh"}, src=voila_address)
                     style.update({"background-color": "#287836"})
                     return True, style, 'NWB file loaded, widgets started', iframe, 1
