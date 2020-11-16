@@ -51,7 +51,8 @@ class Viewer(html.Div):
                 Output("toast_loadedfile_viewer", "is_open"),
                 Output("toast_loadedfile_viewer", "style"),
                 Output("toast_loadedfile_viewer", "children"),
-                Output('voila_div', 'children')
+                Output('voila_div', 'children'),
+                Output("button_file_browser_viewer", 'n_clicks')
             ],
             [Input('submit-filebrowser-viewer', component_property='n_clicks')],
             [State('chosen-filebrowser-viewer', 'value')]
@@ -81,11 +82,11 @@ class Viewer(html.Div):
                     time.sleep(5)
                     iframe = html.Iframe(style={"min-width": "100vw", 'max-width': '100vw', "min-height": "100vh"}, src=voila_address)
                     style.update({"background-color": "#287836"})
-                    return True, style, 'NWB file loaded, widgets started', iframe
+                    return True, style, 'NWB file loaded, widgets started', iframe, 1
                 else:
                     style.update({"background-color": "#955"})
-                    return True, style, 'Must be a NWB file', ''
-            return False, '', '', ''
+                    return True, style, 'Must be a NWB file', '', None
+            return False, '', '', '', None
 
     def kill_processes(self):
         """"""

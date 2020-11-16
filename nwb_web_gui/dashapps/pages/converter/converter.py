@@ -7,7 +7,7 @@ import numpy as np
 import json
 import yaml
 import base64
-from .converter_utils.forms import SchemaFormContainer
+from json_schema_to_dash_forms.forms import SchemaFormContainer
 from pathlib import Path
 import flask
 
@@ -26,9 +26,13 @@ class ConverterForms(html.Div):
         self.parent_app = parent_app
         self.converter_class = converter_class
         self.export_controller = False
+        self.convert_controller = False
         self.get_metadata_controller = False
 
         self.downloads_path = Path(__file__).parent.parent.parent.parent.parent.absolute() / 'downloads'
+
+        if not self.downloads_path.is_dir():
+            self.downloads_path.mkdir()
 
         self.source_json_schema = converter_class.get_input_schema()
 
@@ -52,7 +56,7 @@ class ConverterForms(html.Div):
                     html.Br(),
                     dbc.Col(self.source_forms, width={'size': 12}),
                     dbc.Col(
-                        dbc.Button('Get Metadata Form', id='get_metadata_btn'),
+                        dbc.Button('Get Metadata Form', id='get_metadata_btn', color='dark'),
                         style={'justify-content': 'left', 'text-align': 'left', 'margin-top': '1%'},
                         width={'size': 4}
                     )
@@ -100,6 +104,15 @@ class ConverterForms(html.Div):
                     dbc.Col(
                         dbc.Alert(
                             children=[],
+                            id="alert_required_source",
+                            dismissable=True,
+                            is_open=False,
+                            color='danger'
+                        )
+                    ),
+                    dbc.Col(
+                        dbc.Alert(
+                            children=[],
                             id="alert_required",
                             dismissable=True,
                             is_open=False,
@@ -128,6 +141,17 @@ class ConverterForms(html.Div):
                     style={'text-align': 'left', 'margin-top': '1%', 'display': 'none'},
                     id='row_output_conversion'
                 ),
+                dbc.Row([
+                    dbc.Col(
+                        dbc.Alert(
+                            children=[],
+                            id="alert-required-conversion",
+                            dismissable=True,
+                            is_open=False,
+                            color='danger'
+                        )
+                    )
+                ]),
                 dbc.Textarea(
                     id='text-conversion-results',
                     className='string_input',
@@ -137,7 +161,7 @@ class ConverterForms(html.Div):
                 ),
                 html.Br(),
                 html.Div(id='export-output', style={'display': 'none'}),
-                html.Div(id='export-input', style={'display':'none'}),
+                html.Div(id='export-input', style={'display': 'none'}),
                 dbc.Button(id='get_metadata_done', style={'display': 'none'})
             ], style={'min-height': '110vh'})
         ]
@@ -162,6 +186,7 @@ class ConverterForms(html.Div):
             If export controller is not setted to true but the metadata internal dict was updated
             the function will return the current application state
             """
+
 
             # Prevent default
             if not self.export_controller or not trigger:
@@ -192,12 +217,28 @@ class ConverterForms(html.Div):
 
         @self.parent_app.callback(
             Output('metadata-external-trigger-update-internal-dict', 'children'),
-            [Input('button_export_metadata', 'n_clicks')],
+            [
+                Input('button_export_metadata', 'n_clicks'),
+                Input('button_run_conversion', 'n_clicks')
+            ],
         )
-        def update_internal_metadata_to_export(click):
-            """Trigger metadata internal dict update and set export controller to true"""
-            if click:
-                self.export_controller = True
+        def update_internal_metadata(click_export, click_conversion):
+            """
+            Trigger metadata internal dict update and then:
+            1) set export_controller to true, when exporting to json/yaml
+            2) set convert_controller to true, when running conversion
+            """
+            ctx = dash.callback_context
+            if not ctx.triggered:
+                return dash.no_update
+            else:
+                button_id = ctx.triggered[0]['prop_id'].split('.')[0]
+                if button_id == 'button_export_metadata':
+                    self.export_controller = True
+                    self.convert_controller = False
+                elif button_id == 'button_run_conversion':
+                    self.export_controller = False
+                    self.convert_controller = True
                 return str(np.random.rand())
 
         @self.parent_app.callback(
@@ -208,10 +249,13 @@ class ConverterForms(html.Div):
                 Output('button_refresh', 'style'),
                 Output('row_output_conversion', 'style'),
                 Output('text-conversion-results', 'style'),
-                Output('get_metadata_done', 'n_clicks')
+                Output('get_metadata_done', 'n_clicks'),
+                Output('alert_required_source', 'is_open'),
+                Output('alert_required_source', 'children')
             ],
             [Input('sourcedata-output-update-finished-verification', 'children')],
             [
+                State('alert_required_source', 'is_open'),
                 State('button_load_metadata', 'style'),
                 State('button_export_metadata', 'style'),
                 State('button_refresh', 'style'),
@@ -219,7 +263,7 @@ class ConverterForms(html.Div):
                 State('text-conversion-results', 'style')
             ]
         )
-        def get_metadata(trigger, *styles):
+        def get_metadata(trigger, alert_is_open, *styles):
             """
             Render Metadata forms based on Source Data Form
             This function is triggered when sourcedata internal dict is updated
@@ -236,10 +280,13 @@ class ConverterForms(html.Div):
                     self.metadata_forms.children = self.metadata_forms.children_triggers
                     self.metadata_forms.data = dict()
                     self.metadata_forms.schema = dict()
-                return [self.metadata_forms, styles[0], styles[1], styles[2], styles[3], styles[4], None]
+                return [self.metadata_forms, styles[0], styles[1], styles[2], styles[3], styles[4], None, alert_is_open, []]
 
             # Get forms data
             alerts, source_data = self.source_forms.data_to_nested()
+
+            if alerts is not None:
+                return [self.metadata_forms, styles[0], styles[1], styles[2], styles[3], styles[4], None, True, alerts]
 
             self.get_metadata_controller = False
 
@@ -258,7 +305,7 @@ class ConverterForms(html.Div):
             self.metadata_forms.construct_children_forms()
             self.metadata_forms.update_data(data=self.metadata_json_data)
 
-            return [self.metadata_forms, {'display': 'block'}, {'display': 'block'}, {'display': 'block'}, {'display': 'block'}, {'display': 'block'}, 1]
+            return [self.metadata_forms, {'display': 'block'}, {'display': 'block'}, {'display': 'block'}, {'display': 'block'}, {'display': 'block'}, 1, alert_is_open, []]
 
         @self.parent_app.callback(
             Output('sourcedata-external-trigger-update-internal-dict', 'children'),
@@ -324,7 +371,6 @@ class ConverterForms(html.Div):
 
         @self.parent_app.server.route('/downloads/<path:filename>')
         def download_file(filename):
-
             return flask.send_from_directory(
                 directory=self.downloads_path,
                 filename=filename,
@@ -332,11 +378,37 @@ class ConverterForms(html.Div):
             )
 
         @self.parent_app.callback(
-            Output("text-conversion-results", "value"),
-            [Input('button_run_conversion', 'n_clicks')]
+            [
+                Output('text-conversion-results', 'value'),
+                Output('alert-required-conversion', 'is_open'),
+                Output('alert-required-conversion', 'children'),
+            ],
+            [Input('metadata-output-update-finished-verification', 'children')],
+            [
+                State('output-nwbfile-name', 'value'),
+                State('alert-required-conversion', 'is_open')
+            ]
         )
-        def run_conversion(click):
-            """Run conversion """
-            if click:
-                return "This will call NWBConverter.run_conversion() and print results."
-            return ""
+        def run_conversion(click, output_nwbfile, alert_is_open):
+            """Run conversion and update text area with results / errors"""
+
+            if click and self.convert_controller:
+                # Retrieve metadata from forms
+                alerts, metadata_dict = self.metadata_forms.data_to_nested()
+
+                # If required fields missing return alert, cancel conversion
+                if alerts is not None:
+                    return "Missing required fields", True, alerts
+
+                # Save file path
+                nwbfile_path = output_nwbfile
+
+                # Run conversion
+                self.converter.run_conversion(
+                    metadata_dict=metadata_dict,
+                    nwbfile_path=nwbfile_path
+                )
+                self.convert_controller = False
+
+                return "Conversion finished!", False, []
+            return "", alert_is_open, []
