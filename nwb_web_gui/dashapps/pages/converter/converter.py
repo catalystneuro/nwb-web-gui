@@ -1,81 +1,87 @@
 import dash
 import dash_html_components as html
 import dash_core_components as dcc
-from dash.dependencies import Input, Output, State, ALL, MATCH
+from dash.dependencies import Input, Output, State, ALL
 import dash_bootstrap_components as dbc
+import numpy as np
 import json
 import yaml
 import base64
-from .converter_utils.utils import get_forms_from_schema
-from .converter_utils.forms import SourceForm, MetadataForm
-from nwb_web_gui.dashapps.utils.make_components import make_modal
+from json_schema_to_dash_forms.forms import SchemaFormContainer
 from pathlib import Path
-
 import flask
-import time
 
 
 class ConverterForms(html.Div):
-    def __init__(self, parent_app):
+    def __init__(self, parent_app, converter_class):
+        """
+        Forms to interface user input with NWB converters.
+
+        INPUT:
+        ------
+        parent_app : running Dash app
+        converter : NWB converter class
+        """
         super().__init__([])
         self.parent_app = parent_app
-        self.current_modal_source = ''
-        modal = make_modal(parent_app)
+        self.converter_class = converter_class
+        self.export_controller = False
+        self.convert_controller = False
+        self.get_metadata_controller = False
 
-        examples_path = Path(__file__).parent.absolute() / 'example_schemas'
         self.downloads_path = Path(__file__).parent.parent.parent.parent.parent.absolute() / 'downloads'
 
-        source_schema_path = examples_path / 'source_schema.json'
-        with open(source_schema_path, 'r') as inp:
-            self.source_json_schema = json.load(inp)
+        if not self.downloads_path.is_dir():
+            self.downloads_path.mkdir()
 
-        metadata_schema_path = examples_path / 'metadata_schema.json'
-        with open(metadata_schema_path, 'r') as inp:
-            self.metadata_json_schema = json.load(inp)
+        self.source_json_schema = converter_class.get_input_schema()
 
         # Source data Form
-        source_forms = get_forms_from_schema(self.source_json_schema, source=True)
-
-        # Metadata Form
-        self.parent_app.data_to_field = dict()
-        self.metadata_forms = MetadataForm(
-            schema=self.metadata_json_schema,
-            key="Metadata",
+        self.source_forms = SchemaFormContainer(
+            id='sourcedata',
+            schema=self.source_json_schema,
             parent_app=self.parent_app
         )
 
-        # Fill form
-        metadata_data_path = examples_path / 'metadata_example_0.json'
-        with open(metadata_data_path, 'r') as inp:
-            self.metadata_json_data = json.load(inp)
-        self.metadata_forms.update_form_dict_values(data=self.metadata_json_data)
+        self.metadata_forms = SchemaFormContainer(
+            id='metadata',
+            schema=dict(),
+            parent_app=self.parent_app
+        )
+        self.style = {'background-color': '#f0f0f0', 'min-height': '100vh'}
 
         self.children = [
             dbc.Container([
-                dbc.Col(html.H4('Input Files'), width={'size': 12}, style={'text-align': 'left'}),
-                dbc.Col(source_forms, width={'size': 12}),
-                dbc.Col(
-                    dbc.Button('Get Metadata Form', id='get_metadata_btn'),
-                    style={'justify-content': 'left', 'text-align': 'left', 'margin-top': '1%'},
-                    width={'size': 4}
-                ),
+                dbc.Row([
+                    html.Br(),
+                    dbc.Col(self.source_forms, width={'size': 12}),
+                    dbc.Col(
+                        dbc.Button('Get Metadata Form', id='get_metadata_btn', color='dark'),
+                        style={'justify-content': 'left', 'text-align': 'left', 'margin-top': '1%'},
+                        width={'size': 4}
+                    )
+                ]),
                 dbc.Row([
                     dbc.Col(
-                        dcc.Upload(dbc.Button('Load Metadata'), id='button_load_metadata'),
+                        dcc.Upload(dbc.Button('Load Metadata', color='dark'), id='button_load_metadata', style={'display': 'none'}),
                         width={'size': 2},
                         style={'justify-content': 'left', 'text-align': 'left', 'margin-top': '1%'},
                     ),
                     dbc.Col(
                         html.Div([
-                            dbc.Button('Export Metadata', id='button_export_metadata'),
+                            dbc.Button('Export Metadata', id='button_export_metadata', color='dark', style={'display': 'none'}),
                             dbc.Popover(
                                 [
                                     dbc.PopoverBody([
                                         html.Div([
-                                            dbc.Button("Download as JSON", id='button_export_json', color="link",
-                                                       href='/../../downloads/exported_metadata.json'),
-                                            dbc.Button("Download as YAML", id='button_export_yaml', color="link",
-                                                       href='/../../../downloads/exported_metadata.yaml')
+                                            html.A(
+                                                dbc.Button("Download as JSON", id='button_export_json', color="link"),
+                                                href='/downloads/exported_metadata.json'
+                                            ),
+                                            html.A(
+                                                dbc.Button("Download as YAML", id='button_export_yaml', color="link"),
+                                                href='/downloads/exported_metadata.yaml'
+                                            )
                                         ])
                                     ])
                                 ],
@@ -89,231 +95,320 @@ class ConverterForms(html.Div):
                         style={'justify-content': 'left', 'text-align': 'left', 'margin-top': '1%'},
                     ),
                     dbc.Col(
-                        dbc.Button('Refresh', id='button_refresh'),
+                        dbc.Button('Refresh', id='button_refresh', color='dark', style={'display': 'none'}),
                         width={'size': 2},
                         style={'justify-content': 'left', 'text-align': 'left', 'margin-top': '1%'},
                     )
                 ]),
                 dbc.Row([
-                    dbc.Col(self.metadata_forms, width={'size': 12})
-                ], style={'margin-top': '1%'}),
-                dbc.Row(modal),
-                html.Div(id='hidden', style={'display': 'none'}),
+                    dbc.Col(
+                        dbc.Alert(
+                            children=[],
+                            id="alert_required_source",
+                            dismissable=True,
+                            is_open=False,
+                            color='danger'
+                        )
+                    ),
+                    dbc.Col(
+                        dbc.Alert(
+                            children=[],
+                            id="alert_required",
+                            dismissable=True,
+                            is_open=False,
+                            color='danger'
+                        )
+                    )
+                ]),
+                dbc.Row(
+                    dbc.Col(id='metadata-col', width={'size': 12}),
+                    style={'margin-top': '1%', 'margin-bottom': '10px'}
+                ),
                 dbc.Row(
                     dbc.Col(
-                        dbc.Button('Run Conversion', id='run_conversion_button'), width={'size': 11}
-                    ), style={'text-align': 'right', 'margin-top': '1%'}
+                        dbc.InputGroup(
+                            [
+                                dbc.InputGroupAddon("Output file: ", addon_type="prepend"),
+                                dbc.Input(id="output-nwbfile-name", placeholder="filename.nwb"),
+                                dbc.InputGroupAddon(
+                                    dbc.Button('Run Conversion', id='button_run_conversion'),
+                                    addon_type="append",
+                                ),
+                            ]
+                        ),
+                        width={'size': 11}
+                    ),
+                    style={'text-align': 'left', 'margin-top': '1%', 'display': 'none'},
+                    id='row_output_conversion'
                 ),
+                dbc.Row([
+                    dbc.Col(
+                        dbc.Alert(
+                            children=[],
+                            id="alert-required-conversion",
+                            dismissable=True,
+                            is_open=False,
+                            color='danger'
+                        )
+                    )
+                ]),
+                dbc.Textarea(
+                    id='text-conversion-results',
+                    className='string_input',
+                    bs_size="lg",
+                    readOnly=True,
+                    style={'font-size': '16px', 'display': 'none'}
+                ),
+                html.Br(),
+                html.Div(id='export-output', style={'display': 'none'}),
+                html.Div(id='export-input', style={'display': 'none'}),
+                dbc.Button(id='get_metadata_done', style={'display': 'none'})
             ], style={'min-height': '110vh'})
         ]
 
-        # Create Outputs for the callback that updates Forms values
-        self.update_forms_callback_outputs = [Output(v['compound_id'], 'value') for v in self.parent_app.data_to_field.values() if v['compound_id']['data_type'] != 'link']
-        self.update_forms_callback_outputs.append(Output('button_refresh', 'n_clicks'))
-
         @self.parent_app.callback(
-            Output('modal_explorer', 'is_open'),
-            [Input({'name': 'source_explorer', 'index': ALL}, 'n_clicks'), Input('close_explorer_modal', 'n_clicks')],
-            [State("modal_explorer", "is_open")]
-        )
-        def open_explorer(click_open, click_close, is_open):
-
-            ctx = dash.callback_context
-            source = ctx.triggered[0]['prop_id'].split('.')[0]
-
-            if 'index' in source:
-                dict_source = json.loads(source)
-
-                self.current_modal_source = dict_source['index']
-
-            if source != '' and (any(click_open) or click_close):
-                return not is_open
-            else:
-                return is_open
-
-        @self.parent_app.callback(
-            Output({'name': 'source_string_input', 'index': MATCH}, 'value'),
-            [Input('submit_file_browser_modal', 'n_clicks')],
             [
-                State('chosen_file_modal', 'value'),
-                State({'name': 'source_string_input', 'index': MATCH}, 'value'),
-                State({'name': 'source_string_input', 'index': MATCH}, 'id'),
+                Output("popover_export_metadata", "is_open"),
+                Output('alert_required', 'is_open'),
+                Output('alert_required', 'children'),
+            ],
+            [Input('metadata-output-update-finished-verification', 'children')],
+            [
+                State("popover_export_metadata", "is_open"),
+                State('alert_required', 'is_open')
             ]
         )
-        def change_path_values(click, input_value, values, ids):
-            ctx = dash.callback_context
-            source = ctx.triggered[0]['prop_id'].split('.')[0]
+        def export_metadata(trigger, fileoption_is_open, req_is_open):
+            """
+            Export Metadata Form data to JSON and YAML file
+            This function is triggered when metadata internal dict is updated
+            and export controller is setted to true.
+            If export controller is not setted to true but the metadata internal dict was updated
+            the function will return the current application state
+            """
 
-            if self.current_modal_source.replace('explorer', 'input') == ids['index'] and input_value != '':
-                return input_value
-            else:
-                return values
+
+            # Prevent default
+            if not self.export_controller or not trigger:
+                return fileoption_is_open, req_is_open, []
+
+            if self.export_controller and fileoption_is_open:
+                self.export_controller = False
+                return not fileoption_is_open, req_is_open, []
+
+            alerts, output = self.metadata_forms.data_to_nested()
+
+            # If required fields missing return alert
+            if alerts is not None:
+                return fileoption_is_open, not req_is_open, alerts
+
+            # Make temporary files on server side
+            # JSON
+            exported_file_path = self.downloads_path / 'exported_metadata.json'
+            with open(exported_file_path, 'w') as outfile:
+                json.dump(output, outfile, indent=4)
+
+            # YAML
+            exported_file_path = self.downloads_path / 'exported_metadata.yaml'
+            with open(exported_file_path, 'w') as outfile:
+                yaml.dump(output, outfile, default_flow_style=False)
+
+            return not fileoption_is_open, req_is_open, []
 
         @self.parent_app.callback(
-            self.update_forms_callback_outputs,
-            [Input('button_load_metadata', 'contents')],
+            Output('metadata-external-trigger-update-internal-dict', 'children'),
+            [
+                Input('button_export_metadata', 'n_clicks'),
+                Input('button_run_conversion', 'n_clicks')
+            ],
+        )
+        def update_internal_metadata(click_export, click_conversion):
+            """
+            Trigger metadata internal dict update and then:
+            1) set export_controller to true, when exporting to json/yaml
+            2) set convert_controller to true, when running conversion
+            """
+            ctx = dash.callback_context
+            if not ctx.triggered:
+                return dash.no_update
+            else:
+                button_id = ctx.triggered[0]['prop_id'].split('.')[0]
+                if button_id == 'button_export_metadata':
+                    self.export_controller = True
+                    self.convert_controller = False
+                elif button_id == 'button_run_conversion':
+                    self.export_controller = False
+                    self.convert_controller = True
+                return str(np.random.rand())
+
+        @self.parent_app.callback(
+            [
+                Output('metadata-col', 'children'),
+                Output('button_load_metadata', 'style'),
+                Output('button_export_metadata', 'style'),
+                Output('button_refresh', 'style'),
+                Output('row_output_conversion', 'style'),
+                Output('text-conversion-results', 'style'),
+                Output('get_metadata_done', 'n_clicks'),
+                Output('alert_required_source', 'is_open'),
+                Output('alert_required_source', 'children')
+            ],
+            [Input('sourcedata-output-update-finished-verification', 'children')],
+            [
+                State('alert_required_source', 'is_open'),
+                State('button_load_metadata', 'style'),
+                State('button_export_metadata', 'style'),
+                State('button_refresh', 'style'),
+                State('row_output_conversion', 'style'),
+                State('text-conversion-results', 'style')
+            ]
+        )
+        def get_metadata(trigger, alert_is_open, *styles):
+            """
+            Render Metadata forms based on Source Data Form
+            This function is triggered when sourcedata internal dict is updated
+            and get metadata controller is setted to true.
+            If get metadata controller is not setted to true but the sourcedata
+            internal dict was updated the function will return the current
+            application state
+            """
+
+            if not trigger or not self.get_metadata_controller:
+                # If metadata forms defined reset to default state
+                if self.metadata_forms.children_forms:
+                    self.metadata_forms.children_forms = []
+                    self.metadata_forms.children = self.metadata_forms.children_triggers
+                    self.metadata_forms.data = dict()
+                    self.metadata_forms.schema = dict()
+                return [self.metadata_forms, styles[0], styles[1], styles[2], styles[3], styles[4], None, alert_is_open, []]
+
+            # Get forms data
+            alerts, source_data = self.source_forms.data_to_nested()
+
+            if alerts is not None:
+                return [self.metadata_forms, styles[0], styles[1], styles[2], styles[3], styles[4], None, True, alerts]
+
+            self.get_metadata_controller = False
+
+            # Get metadata schema from converter
+            self.converter = self.converter_class(input_data=source_data)
+            self.metadata_json_schema = self.converter.get_metadata_schema()
+
+            # Get metadata data from converter
+            self.metadata_json_data = self.converter.get_metadata()
+
+            if self.metadata_forms.children_forms:
+                # Clean form children if exists to render new one
+                self.metadata_forms.children_forms = []
+
+            self.metadata_forms.schema = self.metadata_json_schema
+            self.metadata_forms.construct_children_forms()
+            self.metadata_forms.update_data(data=self.metadata_json_data)
+
+            return [self.metadata_forms, {'display': 'block'}, {'display': 'block'}, {'display': 'block'}, {'display': 'block'}, {'display': 'block'}, 1, alert_is_open, []]
+
+        @self.parent_app.callback(
+            Output('sourcedata-external-trigger-update-internal-dict', 'children'),
+            [Input('get_metadata_btn', 'n_clicks')]
+        )
+        def update_internal_sourcedata(click):
+            """Update sourcedata internal dictionary to Get Metadata Forms from it"""
+            if click:
+                self.get_metadata_controller = True
+                return str(np.random.rand())
+
+        @self.parent_app.callback(
+            Output({'type': 'external-trigger-update-links-values', 'index': 'metadata-external-trigger-update-links-values'}, 'children'),
+            [Input('button_refresh', 'n_clicks')]
+        )
+        def refresh_forms_links(click):
+            if click:
+                return str(np.random.rand())
+
+        @self.parent_app.callback(
+            Output({'type': 'external-trigger-update-forms-values', 'index': 'metadata-external-trigger-update-forms-values'}, 'children'),
+            [
+                Input('button_load_metadata', 'contents'),
+                Input('get_metadata_done', 'n_clicks')
+            ],
             [State('button_load_metadata', 'filename')]
         )
-        def update_forms_values(contents, filename):
+        def update_forms_values_metadata(contents, click, filename):
             """
             Updates forms values (except links) when:
             - Forms are created (receives metadata dict from Converter)
-            - User upload metadata json / yaml file
+            - User uploads metadata json / yaml file
             """
             ctx = dash.callback_context
             trigger_source = ctx.triggered[0]['prop_id'].split('.')[0]
 
-            if trigger_source == 'button_load_metadata':
-                content_type, content_string = contents.split(',')
-                filename_extension = filename.split('.')[-1]
-
-                if filename_extension == 'json':
-                    bs4decode = base64.b64decode(content_string)
-                    json_string = bs4decode.decode('utf8').replace("'", '"')
-                    self.metadata_json_data = json.loads(json_string)
-                    self.metadata_forms.update_form_dict_values(data=self.metadata_json_data)
-                elif filename_extension in ['yaml', 'yml']:
-                    bs4decode = base64.b64decode(content_string)
-                    yaml_data = yaml.load(bs4decode, Loader=yaml.BaseLoader)
-                    self.metadata_json_data = yaml_data
-                    self.metadata_forms.update_form_dict_values(data=self.metadata_json_data)
-                output = [v['value'] for v in self.parent_app.data_to_field.values() if v['compound_id']['data_type'] != 'link']
-                output.append(1)
-                return output
-            else:
-                output = [v['value'] for v in self.parent_app.data_to_field.values() if v['compound_id']['data_type'] != 'link']
-                output.append(1)
+            if trigger_source != 'button_load_metadata' and click is None:
+                output = []
                 return output
 
-        @self.parent_app.callback(
-            [Output(v['compound_id'], 'options') for v in self.parent_app.data_to_field.values() if v['compound_id']['data_type'] == 'link'],
-            [Input('button_refresh', 'n_clicks')],
-            [State(v['compound_id'], 'value') for v in self.parent_app.data_to_field.values() if v['compound_id']['data_type'] == 'name']
-        )
-        def update_forms_links(click_update, *name_change):
-            """
-            Updates forms values for links (dropdown options) when names change.
-            If a field has a valid value for the 'target' property, this function
-            will sweep the data_to_field internal dictionary in search for field
-            ids ending with '-name' where the 'owner_class' value matches 'target'.
-            The resulting list will populate the dropdown menu of the field.
+            if trigger_source != 'button_load_metadata' and click is not None:
+                output = str(np.random.rand())
+                return output
 
-            Example:
-            data_to_field = {
-                'Ecephys-ElectrodeGroup1-device': {
-                    'compound_id': {
-                        'type': 'metadata-input',
-                        'index': 'Ecephys-ElectrodeGroup1-device',
-                        'data_type': 'link'
-                    }
-                    'value': 'device 1',
-                    'owner_class': 'pynwb.ecephys.ElectrodeGroup',
-                    'target': 'pynwb.device.Device'
-                },
-                'Ecephys-Device-name': {
-                    'compound_id': {
-                        'type': 'metadata-input',
-                        'index': 'Ecephys-Device-name',
-                        'data_type': 'string'
-                    }
-                    'value': 'device 1',
-                    'owner_class': 'pynwb.device.Device',
-                    'target': None
-                }
-            }
-            """
-            ctx = dash.callback_context
-            trigger_source = ctx.triggered[0]['prop_id'].split('.')[0]
+            content_type, content_string = contents.split(',')
+            filename_extension = filename.split('.')[-1]
 
-            if trigger_source == 'button_refresh':
-                # Update changed names on backend mapping dictionary
-                i = 0
-                for k, v in self.parent_app.data_to_field.items():
-                    if v['compound_id']['data_type'] == 'name':
-                        self.parent_app.data_to_field[k]['value'] = name_change[i]
-                        i += 1
+            # Update SchemaFormContainer internal data dictionary
+            if filename_extension == 'json':
+                bs4decode = base64.b64decode(content_string)
+                json_string = bs4decode.decode('utf8').replace("'", '"')
+                self.metadata_json_data = json.loads(json_string)
+                self.metadata_forms.update_data(data=self.metadata_json_data)
+            elif filename_extension in ['yaml', 'yml']:
+                bs4decode = base64.b64decode(content_string)
+                yaml_data = yaml.load(bs4decode, Loader=yaml.BaseLoader)
+                self.metadata_json_data = yaml_data
+                self.metadata_forms.update_data(data=self.metadata_json_data)
+            # Trigger update of React components
+            output = str(np.random.rand())
 
-                # Get specific options for each link dropdown
-                list_options = []
-                for k, v in self.parent_app.data_to_field.items():
-                    if v['target'] is not None:
-                        target_class = v['target']
-                        options = [
-                            {'label': v['value'], 'value': v['value']}
-                            for v in self.parent_app.data_to_field.values() if
-                            (v['owner_class'] == target_class and 'name' in v['compound_id']['index'])
-                        ]
-                        list_options.append(options)
+            return output
 
-                for sublist in list_options[:]:
-                    for e in sublist[:]:
-                        if e['value'] is None:
-                            sublist.remove(e)
-
-                return list_options
-
-            return [[] for v in self.parent_app.data_to_field.values() if v['compound_id']['data_type'] == 'link']
-
-        @self.parent_app.callback(
-            Output("popover_export_metadata", "is_open"),
-            [Input('button_export_metadata', 'n_clicks')],
-            [State("popover_export_metadata", "is_open")] +
-            [State(v['compound_id'], 'value') for v in self.parent_app.data_to_field.values()]
-        )
-        def export_metadata(click, is_open, *form_values):
-            """
-            Exports data to JSON or YAML files.
-            """
-
-            ctx = dash.callback_context
-            trigger_source = ctx.triggered[0]['prop_id'].split('.')[0]
-
-            output = dict()
-            if click:
-                # If popover was opened, just close it
-                if is_open:
-                    return not is_open
-                # If popover was closed, make files and open options
-                else:
-                    for i, (k, v) in enumerate(self.parent_app.data_to_field.items()):
-                        # Read data current from each field
-                        field_value = form_values[i]
-
-                        # Ignore empty fields
-                        if field_value not in ['', None]:
-                            v['value'] = field_value
-
-                            # Organize item inside the output dictionary
-                            splited_keys = k.split('-')
-                            field_name = splited_keys[-1]
-                            if len(splited_keys) > 2:
-                                # here create compound nested dict
-                                pass
-                            else:
-                                # create simple nested dict
-                                if splited_keys[0] in output:
-                                    output[splited_keys[0]][field_name] = v['value']
-                                else:
-                                    output[splited_keys[0]] = {field_name: v['value']}
-
-                    # Make temporary files on server side
-                    # JSON
-                    exported_file_path = self.downloads_path / 'exported_metadata.json'
-                    with open(exported_file_path, 'w') as outfile:
-                        json.dump(output, outfile, indent=4)
-
-                    # YAML
-                    exported_file_path = self.downloads_path / 'exported_metadata.yaml'
-                    with open(exported_file_path, 'w') as outfile:
-                        yaml.dump(output, outfile, default_flow_style=False)
-
-                    return not is_open
-            return is_open
-
-        @self.parent_app.server.route('/../downloads/<path:filename>')
+        @self.parent_app.server.route('/downloads/<path:filename>')
         def download_file(filename):
             return flask.send_from_directory(
-                self.parent_app.files_path,
-                filename,
+                directory=self.downloads_path,
+                filename=filename,
                 as_attachment=True
             )
+
+        @self.parent_app.callback(
+            [
+                Output('text-conversion-results', 'value'),
+                Output('alert-required-conversion', 'is_open'),
+                Output('alert-required-conversion', 'children'),
+            ],
+            [Input('metadata-output-update-finished-verification', 'children')],
+            [
+                State('output-nwbfile-name', 'value'),
+                State('alert-required-conversion', 'is_open')
+            ]
+        )
+        def run_conversion(click, output_nwbfile, alert_is_open):
+            """Run conversion and update text area with results / errors"""
+
+            if click and self.convert_controller:
+                # Retrieve metadata from forms
+                alerts, metadata_dict = self.metadata_forms.data_to_nested()
+
+                # If required fields missing return alert, cancel conversion
+                if alerts is not None:
+                    return "Missing required fields", True, alerts
+
+                # Save file path
+                nwbfile_path = output_nwbfile
+
+                # Run conversion
+                self.converter.run_conversion(
+                    metadata_dict=metadata_dict,
+                    nwbfile_path=nwbfile_path
+                )
+                self.convert_controller = False
+
+                return "Conversion finished!", False, []
+            return "", alert_is_open, []
