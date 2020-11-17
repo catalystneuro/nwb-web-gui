@@ -11,6 +11,7 @@ RUN apt-get update && \
         g++ \
         libtiff5-dev
 
+RUN mkdir files
 COPY requirements.txt .
 RUN pip install numpy && pip install --no-cache-dir -r requirements.txt
 COPY requirements.txt .
@@ -18,5 +19,6 @@ RUN cp ../../include/x86_64-linux-gnu/tiff.h ../../local/include
 COPY . .
 
 EXPOSE 5000
+EXPOSE 8866
 
 CMD gunicorn -w 1 -b 0.0.0.0:5000 wsgi:app
