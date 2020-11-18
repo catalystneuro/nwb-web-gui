@@ -11,6 +11,9 @@ from json_schema_to_dash_forms.forms import SchemaFormContainer
 from pathlib import Path
 import flask
 
+import threading
+import sys, io
+
 
 class ConverterForms(html.Div):
     def __init__(self, parent_app, converter_class):
@@ -28,6 +31,8 @@ class ConverterForms(html.Div):
         self.export_controller = False
         self.convert_controller = False
         self.get_metadata_controller = False
+        self.conversion_messages = ''
+        self.conversion_msg_controller = True
 
         self.downloads_path = Path(__file__).parent.parent.parent.parent.parent.absolute() / 'downloads'
 
@@ -159,10 +164,12 @@ class ConverterForms(html.Div):
                     readOnly=True,
                     style={'font-size': '16px', 'display': 'none'}
                 ),
+                dbc.Button(id='pause_loop', style={'display': 'none'}),
+                dcc.Interval(id='interval-text-results', max_intervals=0, interval=500),
                 html.Br(),
                 html.Div(id='export-output', style={'display': 'none'}),
                 html.Div(id='export-input', style={'display': 'none'}),
-                dbc.Button(id='get_metadata_done', style={'display': 'none'})
+                dbc.Button(id='get_metadata_done', style={'display': 'none'}),
             ], style={'min-height': '110vh'})
         ]
 
@@ -379,36 +386,80 @@ class ConverterForms(html.Div):
 
         @self.parent_app.callback(
             [
-                Output('text-conversion-results', 'value'),
+                Output('interval-text-results', 'max_intervals'),
                 Output('alert-required-conversion', 'is_open'),
                 Output('alert-required-conversion', 'children'),
             ],
-            [Input('metadata-output-update-finished-verification', 'children')],
+            [
+                Input('metadata-output-update-finished-verification', 'children'),
+                Input('pause_loop', 'n_clicks')
+            ],
             [
                 State('output-nwbfile-name', 'value'),
                 State('alert-required-conversion', 'is_open')
             ]
         )
-        def run_conversion(click, output_nwbfile, alert_is_open):
-            """Run conversion and update text area with results / errors"""
+        def trigger_conversion(trigger, pause, output_nwbfile, alert_is_open):
+            ctx = dash.callback_context
+            trigger_source = ctx.triggered[0]['prop_id'].split('.')[0]
 
-            if click and self.convert_controller:
-                # Retrieve metadata from forms
+            if trigger_source == 'metadata-output-update-finished-verification' and self.convert_controller:
+                # run conversion
                 alerts, metadata_dict = self.metadata_forms.data_to_nested()
-
-                # If required fields missing return alert, cancel conversion
                 if alerts is not None:
-                    return "Missing required fields", True, alerts
+                    return 0, True, alerts
 
-                # Save file path
                 nwbfile_path = output_nwbfile
 
-                # Run conversion
-                self.converter.run_conversion(
-                    metadata_dict=metadata_dict,
-                    nwbfile_path=nwbfile_path
-                )
-                self.convert_controller = False
+                #t = threading.Thread(target=self.conversion_example, daemon=True)
+                #t.start()
+                t = threading.Thread(target=self.conversion, daemon=True, args=(metadata_dict, nwbfile_path))
+                t.start()
 
-                return "Conversion finished!", False, []
-            return "", alert_is_open, []
+                self.conversion_msg_controller = True
+                return -1, False, [] # run loop
+
+            elif trigger_source == 'pause_loop' and pause is not None:
+                # Pause interval component that reads conversion messages
+                return 0, False, []
+
+            return dash.no_update
+
+        @self.parent_app.callback(
+            [
+                Output('text-conversion-results', 'value'),
+                Output('pause_loop', 'n_clicks')
+            ],
+            [
+                Input('interval-text-results', 'n_intervals')
+            ]
+        )
+        def update_conversion_messages(n_intervals):
+            if self.conversion_msg_controller:
+                return self.conversion_messages, None
+            return self.conversion_messages, 1
+
+    def conversion(self, metadata_dict, nwbfile_path):
+        self.converter.run_conversion(
+            metadata_dict=metadata_dict,
+            nwbfile_path=nwbfile_path
+        )
+        self.convert_controller = False
+        self.conversion_msg_controller = False
+
+    '''
+    def conversion_example(self):
+        import time
+        self.conversion_messages = 'conversion started'
+        time.sleep(1)
+        self.conversion_messages = ' 1 seg'
+        time.sleep(1)
+        self.conversion_messages = ' 2 seg'
+        time.sleep(1)
+        self.conversion_messages = ' 3 seg'
+        time.sleep(3)
+        self.conversion_messages = 'returning'
+        self.conversion_msg_controller = False
+
+        return 0
+    '''
