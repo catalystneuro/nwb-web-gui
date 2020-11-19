@@ -10,9 +10,9 @@ import base64
 from json_schema_to_dash_forms.forms import SchemaFormContainer
 from pathlib import Path
 import flask
-
+from io import StringIO
+from contextlib import redirect_stdout
 import threading
-import sys, io
 
 
 class ConverterForms(html.Div):
@@ -33,6 +33,7 @@ class ConverterForms(html.Div):
         self.get_metadata_controller = False
         self.conversion_messages = ''
         self.conversion_msg_controller = True
+        self.msg_buffer = StringIO()
 
         self.downloads_path = Path(__file__).parent.parent.parent.parent.parent.absolute() / 'downloads'
 
@@ -312,7 +313,11 @@ class ConverterForms(html.Div):
             self.metadata_forms.construct_children_forms()
             self.metadata_forms.update_data(data=self.metadata_json_data)
 
-            return [self.metadata_forms, {'display': 'block'}, {'display': 'block'}, {'display': 'block'}, {'display': 'block'}, {'display': 'block'}, 1, alert_is_open, []]
+            return [
+                self.metadata_forms, {'display': 'block'}, {'display': 'block'}, 
+                {'display': 'block'}, {'display': 'block'}, {'font-size': '16px', 'display': 'block', 'height': '100%', "min-height": "200px", "max-height": "600px"}, 
+                1, alert_is_open, []
+                ]
 
         @self.parent_app.callback(
             Output('sourcedata-external-trigger-update-internal-dict', 'children'),
@@ -413,14 +418,16 @@ class ConverterForms(html.Div):
 
                 #t = threading.Thread(target=self.conversion_example, daemon=True)
                 #t.start()
-                t = threading.Thread(target=self.conversion, daemon=True, args=(metadata_dict, nwbfile_path))
-                t.start()
+                self.t = threading.Thread(target=self.conversion, daemon=True, args=(metadata_dict, nwbfile_path))
+                self.t.start()
 
                 self.conversion_msg_controller = True
                 return -1, False, [] # run loop
 
             elif trigger_source == 'pause_loop' and pause is not None:
-                # Pause interval component that reads conversion messages
+                # Pause interval component that reads conversion messages and terminate conversion thread
+                if self.t.is_alive():
+                    self.t.terminate()
                 return 0, False, []
 
             return dash.no_update
@@ -435,31 +442,17 @@ class ConverterForms(html.Div):
             ]
         )
         def update_conversion_messages(n_intervals):
+            self.conversion_messages = self.msg_buffer.getvalue()
             if self.conversion_msg_controller:
                 return self.conversion_messages, None
             return self.conversion_messages, 1
 
     def conversion(self, metadata_dict, nwbfile_path):
-        self.converter.run_conversion(
-            metadata_dict=metadata_dict,
-            nwbfile_path=nwbfile_path
-        )
+        with redirect_stdout(self.msg_buffer):
+            self.converter.run_conversion(
+                metadata_dict=metadata_dict,
+                nwbfile_path=nwbfile_path
+            )
+
         self.convert_controller = False
         self.conversion_msg_controller = False
-
-    '''
-    def conversion_example(self):
-        import time
-        self.conversion_messages = 'conversion started'
-        time.sleep(1)
-        self.conversion_messages = ' 1 seg'
-        time.sleep(1)
-        self.conversion_messages = ' 2 seg'
-        time.sleep(1)
-        self.conversion_messages = ' 3 seg'
-        time.sleep(3)
-        self.conversion_messages = 'returning'
-        self.conversion_msg_controller = False
-
-        return 0
-    '''
