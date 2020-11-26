@@ -33,10 +33,10 @@ def init_app():
         # Import Dash application
         from .dashapps.pages.converter.init_coverter import init_converter
         from .dashapps.pages.viewer.init_viewer import init_viewer
-        from .dashapps.pages.dashboard.init_dashboard import init_dashboard
+        # from .dashapps.pages.dashboard.init_dashboard import init_dashboard
 
         init_converter(server=app, converter_class=converter_class)
         init_viewer(app)
-        init_dashboard(app)
+        # init_dashboard(app)
 
         return app
