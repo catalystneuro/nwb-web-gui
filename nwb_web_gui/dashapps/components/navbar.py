@@ -13,7 +13,6 @@ grey: #8f8f8f
 blue: #114b7c
 '''
 
-
 NAV_LOGO = "assets/logo_nwb.png"
 
 
@@ -76,4 +75,5 @@ def render_navbar():
         color="dark",
         dark=True
     )
+
     return navbar

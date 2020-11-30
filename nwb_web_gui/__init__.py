@@ -1,5 +1,6 @@
 from flask import Flask
 import os
+from distutils.util import strtobool
 
 
 def init_app():
@@ -14,9 +15,9 @@ def init_app():
     app.config['NWB_DASHBOARD_CLASS'] = os.environ.get('NWB_DASHBOARD_CLASS')
     app.config['DATA_PATH'] = os.environ.get('DATA_PATH')
     app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
-    app.config['RENDER_CONVERTER'] = bool(os.environ.get('RENDER_CONVERTER'))
-    app.config['RENDER_VIEWER'] = bool(os.environ.get('RENDER_VIEWER'))
-    app.config['RENDER_DASHBOARD'] = bool(os.environ.get('RENDER_DASHBOARD'))
+    app.config['RENDER_CONVERTER'] = bool(strtobool(os.environ.get('RENDER_CONVERTER', 'True')))
+    app.config['RENDER_VIEWER'] = bool(strtobool(os.environ.get('RENDER_VIEWER', 'False')))
+    app.config['RENDER_DASHBOARD'] = bool(strtobool(os.environ.get('RENDER_DASHBOARD', 'False')))
 
     with app.app_context():
         # Import parts of our core Flask app
