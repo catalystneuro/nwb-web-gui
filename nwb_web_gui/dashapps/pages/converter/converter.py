@@ -194,8 +194,6 @@ class ConverterForms(html.Div):
             If export controller is not setted to true but the metadata internal dict was updated
             the function will return the current application state
             """
-
-
             # Prevent default
             if not self.export_controller or not trigger:
                 return fileoption_is_open, req_is_open, []
@@ -280,7 +278,6 @@ class ConverterForms(html.Div):
             internal dict was updated the function will return the current
             application state
             """
-
             if not trigger or not self.get_metadata_controller:
                 # If metadata forms defined reset to default state
                 if self.metadata_forms.children_forms:
@@ -314,10 +311,10 @@ class ConverterForms(html.Div):
             self.metadata_forms.update_data(data=self.metadata_json_data)
 
             return [
-                self.metadata_forms, {'display': 'block'}, {'display': 'block'}, 
-                {'display': 'block'}, {'display': 'block'}, {'font-size': '16px', 'display': 'block', 'height': '100%', "min-height": "200px", "max-height": "600px"}, 
+                self.metadata_forms, {'display': 'block'}, {'display': 'block'},
+                {'display': 'block'}, {'display': 'block'}, {'font-size': '16px', 'display': 'block', 'height': '100%', "min-height": "200px", "max-height": "600px"},
                 1, alert_is_open, []
-                ]
+            ]
 
         @self.parent_app.callback(
             Output('sourcedata-external-trigger-update-internal-dict', 'children'),
