@@ -14,6 +14,9 @@ def init_app():
     app.config['NWB_DASHBOARD_CLASS'] = os.environ.get('NWB_DASHBOARD_CLASS')
     app.config['DATA_PATH'] = os.environ.get('DATA_PATH')
     app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
+    app.config['RENDER_CONVERTER'] = bool(os.environ.get('RENDER_CONVERTER'))
+    app.config['RENDER_VIEWER'] = bool(os.environ.get('RENDER_VIEWER'))
+    app.config['RENDER_DASHBOARD'] = bool(os.environ.get('RENDER_DASHBOARD'))
 
     with app.app_context():
         # Import parts of our core Flask app
@@ -31,12 +34,14 @@ def init_app():
             )
 
         # Import Dash application
-        from .dashapps.pages.converter.init_coverter import init_converter
-        # from .dashapps.pages.viewer.init_viewer import init_viewer
-        # from .dashapps.pages.dashboard.init_dashboard import init_dashboard
-
-        init_converter(server=app, converter_class=converter_class)
-        # init_viewer(app)
-        # init_dashboard(app)
+        if app.config['RENDER_CONVERTER']:
+            from .dashapps.pages.converter.init_coverter import init_converter
+            init_converter(server=app, converter_class=converter_class)
+        if app.config['RENDER_VIEWER']:
+            from .dashapps.pages.viewer.init_viewer import init_viewer
+            init_viewer(app)
+        if app.config['RENDER_DASHBOARD']:
+            from .dashapps.pages.dashboard.init_dashboard import init_dashboard
+            init_dashboard(app)
 
         return app
