@@ -110,6 +110,7 @@ class Viewer(html.Div):
             "voila",
             """ "{}" """.format(str(self.aux_notebook)),
             "--no-browser",
+            "--debug",
             "--enable_nbextensions=True",
             "--port=8866",
             "--strip_sources=" + str(True),
