@@ -3,6 +3,7 @@ import dash_core_components as dcc
 import dash_html_components as html
 import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output
+from flask import current_app as app
 
 
 '''
@@ -12,12 +13,41 @@ grey: #8f8f8f
 blue: #114b7c
 '''
 
-
 NAV_LOGO = "assets/logo_nwb.png"
 
 
 def render_navbar():
     """Make Navbar"""
+    apps_dict = {
+        'converter': {
+            'render': app.config['RENDER_CONVERTER'],
+            'id': 'nav_nwb_converter',
+            'children': 'NWB Converter',
+            'href': '/converter'
+        },
+        'viewer': {
+            'render': app.config['RENDER_VIEWER'],
+            'id': 'nav_nwb_viewer',
+            'children': 'NWB Viewer',
+            'href': '/viewer'
+        },
+        'dashboard': {
+            'render': app.config['RENDER_DASHBOARD'],
+            'id': 'nav_nwb_dashboard',
+            'children': 'Dashboard',
+            'href': '/dashboard'
+        }
+    }
+
+    navchildren = []
+    for k, v in apps_dict.items():
+        if v['render']:
+            item = dbc.NavItem(html.A(
+                            id=v['id'], children=v['children'], href=v['href'],
+                            style={"font-size": "120%", "font-weight": "normal"}, className='nav-link'
+                    ))
+            navchildren.append(item)
+
     navbar = dbc.Navbar(
         [
             html.A(
@@ -34,20 +64,9 @@ def render_navbar():
             ),
             dbc.Nav(
                 [
-                    dbc.Container([
-                        dbc.NavItem(html.A(
-                            id="nav_nwb_converter", children="NWB Converter", href="/converter",
-                            style={"font-size": "120%", "font-weight": "normal"}, className='nav-link'
-                        )),
-                        dbc.NavItem(html.A(
-                            id="nav_nwb_viewer", children="NWB Viewer", href="/viewer",
-                            style={"font-size": "120%", "font-weight": "normal"}, className='nav-link'
-                        )),
-                        dbc.NavItem(html.A(
-                            id="nav_nwb_dashboard", children="Dashboard", href="/dashboard",
-                            style={"font-size": "120%", "font-weight": "normal"}, className='nav-link'
-                        )),
-                    ])
+                    dbc.Container(
+                        navchildren
+                    )
                 ],
                 horizontal='end',
                 className="ml-auto flex-nowrap mt-3 mt-md-0"
@@ -56,4 +75,5 @@ def render_navbar():
         color="dark",
         dark=True
     )
+
     return navbar

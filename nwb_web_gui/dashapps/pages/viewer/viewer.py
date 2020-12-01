@@ -1,4 +1,4 @@
-from nwb_web_gui.dashapps.utils.make_components import make_file_picker, FileBrowserComponent
+from json_schema_to_dash_forms.utils import make_filebrowser_modal, FileBrowserComponent
 from flask import current_app as app
 import dash_core_components as dcc
 import dash_html_components as html
@@ -110,6 +110,7 @@ class Viewer(html.Div):
             "voila",
             """ "{}" """.format(str(self.aux_notebook)),
             "--no-browser",
+            "--debug",
             "--enable_nbextensions=True",
             "--port=8866",
             "--strip_sources=" + str(True),

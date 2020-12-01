@@ -1,3 +1,9 @@
+numpy==1.19.1
+-e git+https://github.com/catalystneuro/allen-oephys-to-nwb.git@e29c8dc8e5834d49312552b7fc05cde8bec96c58#egg=allen_to_nwb
+-e git+https://github.com/catalystneuro/json-schema-to-dash-forms.git@67f589f6113cdc5e28809b8ca88727ec77b20ef0#egg=json_schema_to_dash_forms
+hdmf @ git+https://github.com/hdmf-dev/hdmf.git@64c1c97ee73d66305006c34b57b9537fb9479635
+-e git+https://github.com/catalystneuro/nwb-conversion-tools.git@cbfbdd88c554fc3c4df6d8c6e6fd204b90c503bb#egg=nwb_conversion_tools
+-e git+https://github.com/Tauffer-Consulting/nwb-web-gui.git@2b4a798012684a9984cb7ce40ac67dcdfdd35d23#egg=nwb_web_gui
 argon2-cffi==20.1.0
 asciitree==0.3.3
 async-generator==1.10
@@ -16,7 +22,6 @@ fasteners==0.15
 Flask==1.1.2
 Flask-Cors==3.0.8
 h5py==2.10.0
-hdmf==1.6.4
 idna==2.10
 imageio==2.9.0
 importlib-metadata==1.7.0
@@ -49,7 +54,6 @@ ndx-icephys-meta==0.1.0
 networkx==2.4
 notebook==6.1.0
 numcodecs==0.6.4
-numpy==1.19.1
 nwbwidgets==0.4.0
 packaging==20.4
 pandas==1.1.0
@@ -99,3 +103,4 @@ zarr==2.4.0
 zipp==3.1.0
 dash-cool-components==0.1.2
 dash-bootstrap-components
+gunicorn==20.0.4

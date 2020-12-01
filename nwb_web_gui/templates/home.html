@@ -13,6 +13,7 @@
         <h1>NWB Web GUI</h1>
     </div>
     <div class="row justify-content-center">
+        {% if config['RENDER_CONVERTER'] %}
         <div class='col-md-6 col-lg-2'>
             <div class="card">
                 <div class="card-header">
@@ -22,12 +23,12 @@
                 </div>
                 <img src="{{ url_for('static', filename='logo_nwb_square.png') }}" class="card-img-top" alt="...">
                 <div class="card-body">
-
                     <p class="card-text">User friendly metadata editing before converting your data to NWB.</p>
-
                 </div>
             </div>
         </div>
+        {% endif %}
+        {% if config['RENDER_VIEWER'] %}
         <div class='col-md-6 col-lg-2'>
             <div class="card">
                 <div class="card-header">
@@ -41,6 +42,8 @@
                 </div>
             </div>
         </div>
+        {% endif %}
+        {% if config['RENDER_DASHBOARD'] %}
         <div class='col-md-6 col-lg-2'>
             <div class="card">
                 <div class="card-header">
@@ -54,6 +57,7 @@
                 </div>
             </div>
         </div>
+        {% endif %}
         <div class='col-md-6 col-lg-2'>
             <div class="card">
                 <div class="card-header">

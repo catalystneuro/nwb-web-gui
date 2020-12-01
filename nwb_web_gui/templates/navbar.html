@@ -15,15 +15,21 @@
     </button>
     <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav ml-auto mt-2 mt-lg-0">
+            {% if config['RENDER_CONVERTER'] %}
             <li class="nav-item">
                 <a class="nav-link" href="/converter" style='color: #d7d7d7;'>NWB Converter</a>
             </li>
+            {% endif %}
+            {% if config['RENDER_VIEWER'] %}
             <li class="nav-item">
                 <a class="nav-link" href="/viewer" style='color: #d7d7d7;'>Viewer</a>
             </li>
+            {% endif %}
+            {% if config['RENDER_DASHBOARD'] %}
             <li class="nav-item">
                 <a class="nav-link" href="/dashboard" style='color: #d7d7d7;'>Dashboard</a>
             </li>
+            {% endif %}
         </ul>
     </div>
 </nav>

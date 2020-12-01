@@ -10,6 +10,9 @@ import base64
 from json_schema_to_dash_forms.forms import SchemaFormContainer
 from pathlib import Path
 import flask
+from io import StringIO
+from contextlib import redirect_stdout
+import threading
 
 
 class ConverterForms(html.Div):
@@ -28,13 +31,16 @@ class ConverterForms(html.Div):
         self.export_controller = False
         self.convert_controller = False
         self.get_metadata_controller = False
+        self.conversion_messages = ''
+        self.conversion_msg_controller = True
+        self.msg_buffer = StringIO()
 
         self.downloads_path = Path(__file__).parent.parent.parent.parent.parent.absolute() / 'downloads'
 
         if not self.downloads_path.is_dir():
             self.downloads_path.mkdir()
 
-        self.source_json_schema = converter_class.get_input_schema()
+        self.source_json_schema = converter_class.get_source_schema()
 
         # Source data Form
         self.source_forms = SchemaFormContainer(
@@ -159,10 +165,12 @@ class ConverterForms(html.Div):
                     readOnly=True,
                     style={'font-size': '16px', 'display': 'none'}
                 ),
+                dbc.Button(id='pause_loop', style={'display': 'none'}),
+                dcc.Interval(id='interval-text-results', max_intervals=0, interval=500),
                 html.Br(),
                 html.Div(id='export-output', style={'display': 'none'}),
                 html.Div(id='export-input', style={'display': 'none'}),
-                dbc.Button(id='get_metadata_done', style={'display': 'none'})
+                dbc.Button(id='get_metadata_done', style={'display': 'none'}),
             ], style={'min-height': '110vh'})
         ]
 
@@ -186,8 +194,6 @@ class ConverterForms(html.Div):
             If export controller is not setted to true but the metadata internal dict was updated
             the function will return the current application state
             """
-
-
             # Prevent default
             if not self.export_controller or not trigger:
                 return fileoption_is_open, req_is_open, []
@@ -272,7 +278,6 @@ class ConverterForms(html.Div):
             internal dict was updated the function will return the current
             application state
             """
-
             if not trigger or not self.get_metadata_controller:
                 # If metadata forms defined reset to default state
                 if self.metadata_forms.children_forms:
@@ -291,7 +296,7 @@ class ConverterForms(html.Div):
             self.get_metadata_controller = False
 
             # Get metadata schema from converter
-            self.converter = self.converter_class(input_data=source_data)
+            self.converter = self.converter_class(source_data=source_data)
             self.metadata_json_schema = self.converter.get_metadata_schema()
 
             # Get metadata data from converter
@@ -305,7 +310,11 @@ class ConverterForms(html.Div):
             self.metadata_forms.construct_children_forms()
             self.metadata_forms.update_data(data=self.metadata_json_data)
 
-            return [self.metadata_forms, {'display': 'block'}, {'display': 'block'}, {'display': 'block'}, {'display': 'block'}, {'display': 'block'}, 1, alert_is_open, []]
+            return [
+                self.metadata_forms, {'display': 'block'}, {'display': 'block'},
+                {'display': 'block'}, {'display': 'block'}, {'font-size': '16px', 'display': 'block', 'height': '100%', "min-height": "200px", "max-height": "600px"},
+                1, alert_is_open, []
+            ]
 
         @self.parent_app.callback(
             Output('sourcedata-external-trigger-update-internal-dict', 'children'),
@@ -379,36 +388,70 @@ class ConverterForms(html.Div):
 
         @self.parent_app.callback(
             [
-                Output('text-conversion-results', 'value'),
+                Output('interval-text-results', 'max_intervals'),
                 Output('alert-required-conversion', 'is_open'),
                 Output('alert-required-conversion', 'children'),
             ],
-            [Input('metadata-output-update-finished-verification', 'children')],
+            [
+                Input('metadata-output-update-finished-verification', 'children'),
+                Input('pause_loop', 'n_clicks')
+            ],
             [
                 State('output-nwbfile-name', 'value'),
                 State('alert-required-conversion', 'is_open')
             ]
         )
-        def run_conversion(click, output_nwbfile, alert_is_open):
-            """Run conversion and update text area with results / errors"""
+        def trigger_conversion(trigger, pause, output_nwbfile, alert_is_open):
+            ctx = dash.callback_context
+            trigger_source = ctx.triggered[0]['prop_id'].split('.')[0]
 
-            if click and self.convert_controller:
-                # Retrieve metadata from forms
-                alerts, metadata_dict = self.metadata_forms.data_to_nested()
-
-                # If required fields missing return alert, cancel conversion
+            if trigger_source == 'metadata-output-update-finished-verification' and self.convert_controller:
+                # run conversion
+                alerts, metadata = self.metadata_forms.data_to_nested()
                 if alerts is not None:
-                    return "Missing required fields", True, alerts
+                    return 0, True, alerts
 
-                # Save file path
                 nwbfile_path = output_nwbfile
 
-                # Run conversion
-                self.converter.run_conversion(
-                    metadata_dict=metadata_dict,
-                    nwbfile_path=nwbfile_path
-                )
-                self.convert_controller = False
+                #t = threading.Thread(target=self.conversion_example, daemon=True)
+                #t.start()
+                self.t = threading.Thread(target=self.conversion, daemon=True, args=(metadata, nwbfile_path))
+                self.t.start()
 
-                return "Conversion finished!", False, []
-            return "", alert_is_open, []
+                self.conversion_msg_controller = True
+                return -1, False, [] # run loop
+
+            elif trigger_source == 'pause_loop' and pause is not None:
+                # Pause interval component that reads conversion messages and terminate conversion thread
+                if self.t.is_alive():
+                    self.t.terminate()
+                return 0, False, []
+
+            return dash.no_update
+
+        @self.parent_app.callback(
+            [
+                Output('text-conversion-results', 'value'),
+                Output('pause_loop', 'n_clicks')
+            ],
+            [
+                Input('interval-text-results', 'n_intervals')
+            ]
+        )
+        def update_conversion_messages(n_intervals):
+            self.conversion_messages = self.msg_buffer.getvalue()
+            if self.conversion_msg_controller:
+                return self.conversion_messages, None
+            return self.conversion_messages, 1
+
+    def conversion(self, metadata, nwbfile_path):
+        with redirect_stdout(self.msg_buffer):
+            self.converter.run_conversion(
+                metadata=metadata,
+                nwbfile_path=nwbfile_path,
+                save_to_file=True,
+                conversion_options=None
+            )
+
+        self.convert_controller = False
+        self.conversion_msg_controller = False
