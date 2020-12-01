@@ -407,7 +407,7 @@ class ConverterForms(html.Div):
 
             if trigger_source == 'metadata-output-update-finished-verification' and self.convert_controller:
                 # run conversion
-                alerts, metadata_dict = self.metadata_forms.data_to_nested()
+                alerts, metadata = self.metadata_forms.data_to_nested()
                 if alerts is not None:
                     return 0, True, alerts
 
@@ -415,7 +415,7 @@ class ConverterForms(html.Div):
 
                 #t = threading.Thread(target=self.conversion_example, daemon=True)
                 #t.start()
-                self.t = threading.Thread(target=self.conversion, daemon=True, args=(metadata_dict, nwbfile_path))
+                self.t = threading.Thread(target=self.conversion, daemon=True, args=(metadata, nwbfile_path))
                 self.t.start()
 
                 self.conversion_msg_controller = True
@@ -444,11 +444,13 @@ class ConverterForms(html.Div):
                 return self.conversion_messages, None
             return self.conversion_messages, 1
 
-    def conversion(self, metadata_dict, nwbfile_path):
+    def conversion(self, metadata, nwbfile_path):
         with redirect_stdout(self.msg_buffer):
             self.converter.run_conversion(
-                metadata_dict=metadata_dict,
-                nwbfile_path=nwbfile_path
+                metadata=metadata,
+                nwbfile_path=nwbfile_path,
+                save_to_file=True,
+                conversion_options=None
             )
 
         self.convert_controller = False
