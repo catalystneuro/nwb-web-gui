@@ -10,7 +10,7 @@ class ExampleNWBConverter(NWBConverter):
         super().__init__(**input_args)
 
     @classmethod
-    def get_input_schema(cls):
+    def get_source_schema(cls):
         examples_path = Path(__file__).parent.parent.absolute() / 'example_schemas'
         source_schema_path = examples_path / 'schema_source.json'
         with open(source_schema_path, 'r') as inp:

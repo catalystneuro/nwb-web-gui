@@ -1,6 +1,7 @@
 from flask import Flask
 import os
 from distutils.util import strtobool
+import importlib
 
 
 def init_app():
@@ -28,7 +29,6 @@ def init_app():
             from .dashapps.pages.converter.converter_utils.converter_example import ExampleNWBConverter
             converter_class = ExampleNWBConverter
         else:
-            import importlib
             converter_class = getattr(
                 importlib.import_module(app.config['NWB_CONVERTER_MODULE']),
                 app.config['NWB_CONVERTER_CLASS']
@@ -43,6 +43,10 @@ def init_app():
             init_viewer(app)
         if app.config['RENDER_DASHBOARD']:
             from .dashapps.pages.dashboard.init_dashboard import init_dashboard
-            init_dashboard(app)
+            dashboard_class = getattr(
+                importlib.import_module(app.config['NWB_DASHBOARD_MODULE']),
+                app.config['NWB_DASHBOARD_CLASS']
+            )
+            init_dashboard(app, dashboard_class=dashboard_class)
 
         return app
