@@ -21,6 +21,7 @@ def init_converter(server, converter_class):
         navbar,
         ConverterForms(parent_app=dash_app, converter_class=converter_class)
     ])
-    dash_app.enable_dev_tools(debug=True)
+    # dash_app.enable_dev_tools(debug=True)
+    dash_app.enable_dev_tools(debug=False)
 
     return dash_app.server
