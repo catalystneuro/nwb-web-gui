@@ -6,7 +6,8 @@ import importlib
 
 def init_app():
     """Construct core Flask application with embedded Dash app."""
-    app = Flask(__name__, instance_relative_config=False)
+    app = Flask(__name__, instance_relative_config=False, template_folder='templates')
+    #app.config.from_object('nwb_web_gui.config.ConfigDev')
     app.config.from_object('config.ConfigDev')
 
     # Variables from ENV vars
@@ -21,8 +22,6 @@ def init_app():
     app.config['RENDER_DASHBOARD'] = bool(strtobool(os.environ.get('RENDER_DASHBOARD', 'False')))
 
     with app.app_context():
-        # Import parts of our core Flask app
-        from . import routes
 
         # Import NWB converter
         if app.config['NWB_CONVERTER_CLASS'] == 'example':
@@ -37,9 +36,11 @@ def init_app():
         # Import Dash application
         if app.config['RENDER_CONVERTER']:
             from .dashapps.pages.converter.init_coverter import init_converter
-            init_converter(server=app, converter_class=converter_class)
+            global converter
+            converter = init_converter(server=app, converter_class=converter_class)
         if app.config['RENDER_VIEWER']:
             from .dashapps.pages.viewer.init_viewer import init_viewer
+            global viewer
             init_viewer(app)
         if app.config['RENDER_DASHBOARD']:
             from .dashapps.pages.dashboard.init_dashboard import init_dashboard
@@ -47,6 +48,10 @@ def init_app():
                 importlib.import_module(app.config['NWB_DASHBOARD_MODULE']),
                 app.config['NWB_DASHBOARD_CLASS']
             )
-            init_dashboard(app, dashboard_class=dashboard_class)
+            global dashboard
+            dashboard = init_dashboard(app, dashboard_class=dashboard_class)
+
+        # Import parts of our core Flask app
+        from . import routes
 
         return app
