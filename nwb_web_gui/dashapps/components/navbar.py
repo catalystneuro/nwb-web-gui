@@ -36,6 +36,12 @@ def render_navbar():
             'id': 'nav_nwb_dashboard',
             'children': 'Dashboard',
             'href': '/dashboard'
+        },
+        "close_gui": {
+            "render": True,
+            'id': "close_gui",
+            "children": "Close GUI",
+            "href": '/shutdown'
         }
     }
 

@@ -58,6 +58,9 @@ class Viewer(html.Div):
         )
         def submit_nwb(click, input_value):
 
+            if not click:
+                return dash.no_update
+
             if not any(d['key'] == input_value for d in self.filebrowser.paths_tree):
                 # If not selected from explorer
                 nwb_path = Path(input_value)

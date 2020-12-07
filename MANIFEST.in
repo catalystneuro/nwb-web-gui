@@ -1,0 +1,3 @@
+graft nwb_web_gui/nwb_web_gui/assets
+graft nwb_web_gui/nwb_web_gui/templates
+graft nwb_web_gui/nwb_web_gui/dashapps/pages/converter/assets
