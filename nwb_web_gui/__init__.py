@@ -2,13 +2,14 @@ from flask import Flask
 import os
 from distutils.util import strtobool
 import importlib
+from .config import config
 
 
 def init_app():
     """Construct core Flask application with embedded Dash app."""
     app = Flask(__name__, instance_relative_config=False, template_folder='templates')
-    #app.config.from_object('nwb_web_gui.config.ConfigDev')
-    app.config.from_object('config.ConfigDev')
+
+    app.config.from_object(config.get(os.environ.get('FLASK_CONFIG') or 'default'))
 
     # Variables from ENV vars
     app.config['NWB_CONVERTER_MODULE'] = os.environ.get('NWB_CONVERTER_MODULE')

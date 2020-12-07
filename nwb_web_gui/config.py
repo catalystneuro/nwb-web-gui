@@ -48,3 +48,10 @@ class ConfigDev(Config):
 
     if 'SECRETS' in parser.sections():
         os.environ['SECRET_KEY'] = parser['SECRETS']['SECRET_KEY']
+
+
+config = {
+    'dev': ConfigDev,
+    'prod': ConfigProduction,
+    'default': ConfigDev,
+}

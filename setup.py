@@ -6,13 +6,12 @@ from os import path
 
 here = path.abspath(path.dirname(__file__))
 
-
 with open(path.join(here, 'README.md')) as f:
     long_description = f.read()
 
 setup(
     name='nwb-web-gui',
-    version='0.1.0',
+    version='0.1.2',
     description='Web graphical user interface for NWB conversion and exploring',
     long_description=long_description,
     long_description_content_type='text/markdown',
@@ -21,7 +20,10 @@ setup(
     url='https://github.com/catalystneuro/nwb-web-gui',
     keywords='nwb',
     packages=find_packages(),
-    package_data={'': ['']},
+    package_data={
+        'assets': ['*'],
+        'static': ['*']
+    },
     include_package_data=True,
     install_requires=[
         'pynwb', 'numpy', 'nwbwidgets', 'dash', 'dash_daq', 'dash_bootstrap_components',

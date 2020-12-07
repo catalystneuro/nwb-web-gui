@@ -10,7 +10,7 @@ from pathlib import Path
 def init_viewer(server):
     FONT_AWESOME = "https://use.fontawesome.com/releases/v5.7.2/css/all.css"
     external_stylesheets = [dbc.themes.BOOTSTRAP, FONT_AWESOME]
-    assets = Path(get_root_path(__name__)).parent.parent.parent / 'assets'
+    assets = Path(get_root_path(__name__)).parent.parent.parent / 'static'
 
     dash_app = dash.Dash(
         __name__,
