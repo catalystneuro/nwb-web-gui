@@ -445,13 +445,16 @@ class ConverterForms(html.Div):
             return self.conversion_messages, 1
 
     def conversion(self, metadata, nwbfile_path):
-        with redirect_stdout(self.msg_buffer):
-            self.converter.run_conversion(
-                metadata=metadata,
-                nwbfile_path=nwbfile_path,
-                save_to_file=True,
-                conversion_options=None
-            )
+        try:
+            with redirect_stdout(self.msg_buffer):
+                self.converter.run_conversion(
+                    metadata=metadata,
+                    nwbfile_path=nwbfile_path,
+                    save_to_file=True,
+                    conversion_options=None
+                )
+        except Exception as e:
+            self.msg_buffer.write(str(e))
 
         self.convert_controller = False
         self.conversion_msg_controller = False
