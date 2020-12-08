@@ -29,5 +29,8 @@ setup(
         'pynwb', 'numpy', 'nwbwidgets', 'dash', 'dash_daq', 'dash_bootstrap_components',
         'dash-cool-components', 'psutil', 'voila', 'pandas', 'jupyter', 'matplotlib', 'h5py',
         'jupyter-client'
-    ]
+    ],
+    entry_points={
+        'console_scripts': ['nwb-web-gui=nwb_web_gui.cmd_line:cmd_line_shortcut']
+    }
 )
