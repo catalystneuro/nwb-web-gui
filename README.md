@@ -1,8 +1,16 @@
 # NWB Web GUI
 
+[![PyPI version](https://badge.fury.io/py/nwb-web-gui.svg)](https://badge.fury.io/py/nwb-web-gui)
+
 Web graphical user interface for NWB conversion and visualization.
 
 ## 1. Installation
+From PyPi
+```
+pip install nwb-web-gui
+```
+
+From setup
 ```
 pip install -e .
 ```
