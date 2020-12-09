@@ -1,11 +1,8 @@
 {
-	"source_data": {
-		"raw_data": "path_to/raw.rhd",
-		"processed_data": "path_to/processed_data/"
+	"EcephysDataInterface": {
+		"raw_data": "path_to/raw.rhd"
 	},
-	"conversion_options": {
-		"add_raw": true,
-		"add_processed": true,
-		"add_behavior": true
+	"OphysDataInterface": {
+		"processed_data": "path_to/processed_data/"
 	}
 }

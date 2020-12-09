@@ -8,11 +8,9 @@
     },
     "Subject": {
         "description": "description of this subject",
-        "genotype": "",
         "sex": "M",
-        "species": "",
         "subject_id": "ID123",
-        "weight": "",
+        "weight": "120g",
         "date_of_birth": "1900-01-01T00:00:00"
     }
 }

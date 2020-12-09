@@ -4,6 +4,7 @@ from threading import Timer
 import webbrowser
 import os
 
+
 def parse_arguments():
     """
     Command line shortcut to open GUI editor.
@@ -93,17 +94,6 @@ def cmd_line_shortcut():
     os.environ['NWB_CONVERTER_MODULE'] = converter
     if converter == 'example':
         os.environ['NWB_CONVERTER_CLASS'] = converter
-    """
-    os.environ['NWB_CONVERTER_MODULE'] = 'jaeger_lab_to_nwb'
-    if run_args.experiment == 'bpod':
-        os.environ['NWB_CONVERTER_CLASS'] = 'JaegerBpodConverter'
-    elif run_args.experiment == 'fret':
-        os.environ['NWB_CONVERTER_CLASS'] = 'JaegerFRETConverter'
-    elif run_args.experiment == 'labview':
-        os.environ['NWB_CONVERTER_CLASS'] = 'JaegerLabviewConverter'
-    elif run_args.experiment == 'treadmill':
-        os.environ['NWB_CONVERTER_CLASS'] = 'JaegerTreadmillConverter'
-    """
 
     print(f'NWB GUI running on localhost:{run_args.port}')
     print(f'Data path: {data_path}')

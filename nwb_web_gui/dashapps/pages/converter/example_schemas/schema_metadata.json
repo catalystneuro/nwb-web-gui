@@ -142,7 +142,7 @@
       "properties": {
         "Device1": {"$ref": "#/definitions/Device"},
         "Device2": {"$ref": "#/definitions/Device"},
-        "ElectricalSeries1": {"$ref": "#/definitions/ElectricalSeries"},
+        "ElectricalSeries": {"$ref": "#/definitions/ElectricalSeries"},
         "ElectrodeGroup1": {
           "tag": "pynwb.ecephys.ElectrodeGroup",
           "type": "object",
@@ -175,9 +175,9 @@
       "title": "Ophys",
       "required": [],
       "properties": {
-        "Device1": {"$ref": "#/definitions/Device"},
-        "TwoPhotonSeries1": {"$ref": "#/definitions/TwoPhotonSeries"},
-        "DFOverF1": {
+        "Device": {"$ref": "#/definitions/Device"},
+        "TwoPhotonSeries": {"$ref": "#/definitions/TwoPhotonSeries"},
+        "DFOverF": {
           "tag": "pynwb.ophys.DFOverF",
           "title": "DFOverF",
           "type": "object",
@@ -198,7 +198,7 @@
             }
           }
         },
-        "Fluorescence1": {
+        "Fluorescence": {
           "tag": "pynwb.ophys.Fluorescence",
           "title": "Fluorescence",
           "type": "object",
@@ -219,7 +219,7 @@
             }
           }
         },
-        "ImagingPlane1": {
+        "ImagingPlane": {
           "tag": "pynwb.ophys.ImagingPlane",
           "title": "ImagingPlane",
           "type": "object",
@@ -265,7 +265,7 @@
             }
           }
         },
-        "ImageSegmentation1": {
+        "ImageSegmentation": {
           "tag": "pynwb.ophys.ImageSegmentation",
           "title": "ImageSegmentation",
           "type": "object",
@@ -293,7 +293,7 @@
     	"type": "object",
     	"required": [],
     	"properties": {
-    		"Position1": {
+    		"Position": {
           "tag": "pynwb.behavior.Position",
           "title": "Position",
     			"type": "object",
@@ -312,7 +312,7 @@
             }
     			}
     		},
-        "BehavioralEvents1": {
+        "BehavioralEvents": {
           "tag": "pynwb.behavior.BehavioralEvents",
           "title": "BehavioralEvents",
           "type": "object",

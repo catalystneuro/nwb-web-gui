@@ -14,35 +14,33 @@ Subject:
   date_of_birth: 1900-01-01T00:00:00
 Ecephys:
   Device1:
-    name: Ecephys device name
+    name: ecephys_device_name
     description: ecephys device description
   Device2:
-    name: Ecephys device 2
+    name: ecephys_device_2
     description: ecephys device 2 description
-  ElectricalSeries1:
-    name: ElectricalSeries name
+  ElectricalSeries:
+    name: ElectricalSeries_name
     description: Electrical Series description
     electrodes: Electrical Series electrodes
 Ophys:
-  Device1:
-    name: Ophys device1 name
-    description: Ophys device1 description
-  TwoPhotonSeries1:
-    name: Ophys two photon series 1 name
-  DFOverF1:
+  Device:
+    name: ophys_device_name
+    description: Ophys device description
+  TwoPhotonSeries:
+    name: two_photon_series_name
+  DFOverF:
     name: DFOverF1 name
     roi_response_series:
-      0:
-        name: DFOverF1 roi name 0
-        description: DFOverF1 roi description
-  Fluorescence1:
-    name: Fluorescence1 name
+      - name: dfoverf_roi_name
+        description: roi description
+  Fluorescence:
+    name: Fluorescence name
     roi_response_series:
-      0:
-        name: Fluorescence1 roi name
-  ImagingPlane1:
-    name: Ophys ImagingPlane name
-    description: Ophys ImagingPlane description
+      - name: fluorescence_roi_name
+        description: roi description
+  ImagingPlane:
+    name: ImagingPlane_name
+    description: ImagingPlane description
     optical_channels:
-      0:
-        name: ImagingPlane optical_channels 0 name
+      - name: ImagingPlane optical_channels 0 name
