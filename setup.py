@@ -28,7 +28,7 @@ setup(
     install_requires=[
         'pynwb', 'numpy', 'nwbwidgets', 'dash', 'dash_daq', 'dash_bootstrap_components',
         'dash-cool-components', 'psutil', 'voila', 'pandas', 'jupyter', 'matplotlib', 'h5py',
-        'jupyter-client'
+        'jupyter-client', 'json_schema_to_dash_forms'
     ],
     entry_points={
         'console_scripts': ['nwbgui=nwb_web_gui.cmd_line:cmd_line_shortcut']
