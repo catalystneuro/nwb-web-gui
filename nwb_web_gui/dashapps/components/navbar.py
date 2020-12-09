@@ -20,19 +20,19 @@ def render_navbar():
     """Make Navbar"""
     apps_dict = {
         'converter': {
-            'render': app.config['RENDER_CONVERTER'],
+            'render': app.config['NWB_GUI_RENDER_CONVERTER'],
             'id': 'nav_nwb_converter',
             'children': 'NWB Converter',
             'href': '/converter'
         },
         'viewer': {
-            'render': app.config['RENDER_VIEWER'],
+            'render': app.config['NWB_GUI_RENDER_VIEWER'],
             'id': 'nav_nwb_viewer',
             'children': 'NWB Viewer',
             'href': '/viewer'
         },
         'dashboard': {
-            'render': app.config['RENDER_DASHBOARD'],
+            'render': app.config['NWB_GUI_RENDER_DASHBOARD'],
             'id': 'nav_nwb_dashboard',
             'children': 'Dashboard',
             'href': '/dashboard'

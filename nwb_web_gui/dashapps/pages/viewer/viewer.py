@@ -66,7 +66,7 @@ class Viewer(html.Div):
                 nwb_path = Path(input_value)
             else:
                 # If selected from explorer get absolute path from config
-                nwb_path = Path(app.config['DATA_PATH']).parent / Path(input_value)
+                nwb_path = Path(app.config['NWB_GUI_ROOT_PATH']).parent / Path(input_value)
 
             style = {
                 "position": "fixed", "top": 180, "left": 10, "width": 350,
