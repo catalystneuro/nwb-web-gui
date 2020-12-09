@@ -33,7 +33,7 @@ NWB Web GUI by default runs on `localhost:5000`.
 
 ## 3. Running on docker container (referencing a local folder)
 
-- Change on config.ini file the DATA_PATH to /usr/src/nwb_web_gui/files  
+- Change on config.ini file the NWB_GUI_ROOT_PATH to /usr/src/nwb_web_gui/files  
 - build docker with:
 ```
 $ docker build -t latest .
@@ -54,16 +54,16 @@ import os
 # Set ENV variables for app
 # Set root path from where to run the GUI
 data_path = '/source_path'
-os.environ['DATA_PATH'] = data_path
+os.environ['NWB_GUI_ROOT_PATH'] = data_path
 
 # Set which NWB GUI pages should be displayed
-os.environ['RENDER_CONVERTER'] = 'True'
-os.environ['RENDER_VIEWER'] = 'True'
-os.environ['RENDER_DASHBOARD'] = 'False'
+os.environ['NWB_GUI_RENDER_CONVERTER'] = 'True'
+os.environ['NWB_GUI_RENDER_VIEWER'] = 'True'
+os.environ['NWB_GUI_RENDER_DASHBOARD'] = 'False'
 
 # Choose NWB converter to be used
-os.environ['NWB_CONVERTER_MODULE'] = 'my_lab_to_nwb'
-os.environ['NWB_CONVERTER_CLASS'] = 'MylabNWBConverter'
+os.environ['NWB_GUI_NWB_CONVERTER_MODULE'] = 'my_lab_to_nwb'
+os.environ['NWB_GUI_NWB_CONVERTER_CLASS'] = 'MylabNWBConverter'
 
 # Choose port where the GUI will run. Default is 5000
 port = 5000

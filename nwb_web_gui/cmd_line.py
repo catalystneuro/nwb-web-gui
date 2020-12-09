@@ -84,16 +84,16 @@ def cmd_line_shortcut():
     render_dashboard = run_args.render_dashboard
     converter = run_args.converter
 
-    os.environ['DATA_PATH'] = data_path
     os.environ['FLASK_ENV'] = 'production'
-    os.environ['RENDER_CONVERTER'] = render_converter
-    os.environ['RENDER_VIEWER'] = render_viewer
-    os.environ['RENDER_DASHBOARD'] = render_dashboard
+    os.environ['NWB_GUI_ROOT_PATH'] = data_path
+    os.environ['NWB_GUI_RENDER_CONVERTER'] = render_converter
+    os.environ['NWB_GUI_RENDER_VIEWER'] = render_viewer
+    os.environ['NWB_GUI_RENDER_DASHBOARD'] = render_dashboard
 
     # Choose converter
-    os.environ['NWB_CONVERTER_MODULE'] = converter
+    os.environ['NWB_GUI_CONVERTER_MODULE'] = converter
     if converter == 'example':
-        os.environ['NWB_CONVERTER_CLASS'] = converter
+        os.environ['NWB_GUI_CONVERTER_CLASS'] = converter
 
     print(f'NWB GUI running on localhost:{run_args.port}')
     print(f'Data path: {data_path}')
