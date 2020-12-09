@@ -36,8 +36,8 @@ class ConfigDev(Config):
         os.environ['NWB_GUI_ROOT_PATH'] = parser['PATH']['NWB_GUI_ROOT_PATH']
 
     if 'CONVERTER' in parser.sections():
-        os.environ['NWB_GUI_CONVERTER_MODULE'] = parser['NWB_CONVERTER']['NWB_GUI_CONVERTER_MODULE']
-        os.environ['NWB_GUI_CONVERTER_CLASS'] = parser['NWB_CONVERTER']['NWB_GUI_CONVERTER_CLASS']
+        os.environ['NWB_GUI_CONVERTER_MODULE'] = parser['CONVERTER']['NWB_GUI_CONVERTER_MODULE']
+        os.environ['NWB_GUI_CONVERTER_CLASS'] = parser['CONVERTER']['NWB_GUI_CONVERTER_CLASS']
 
     if 'DASHBOARD' in parser.sections():
         os.environ['NWB_GUI_DASHBOARD_MODULE'] = parser['DASHBOARD']['NWB_GUI_DASHBOARD_MODULE']

@@ -36,6 +36,7 @@ class ConverterForms(html.Div):
         self.msg_buffer = StringIO()
 
         self.downloads_path = Path(__file__).parent.parent.parent.parent.parent.absolute() / 'downloads'
+        self.root_path = Path(self.parent_app.server.config['NWB_GUI_ROOT_PATH'])
 
         if not self.downloads_path.is_dir():
             self.downloads_path.mkdir()
@@ -46,13 +47,15 @@ class ConverterForms(html.Div):
         self.source_forms = SchemaFormContainer(
             id='sourcedata',
             schema=self.source_json_schema,
-            parent_app=self.parent_app
+            parent_app=self.parent_app,
+            root_path=self.root_path
         )
 
         self.metadata_forms = SchemaFormContainer(
             id='metadata',
             schema=dict(),
-            parent_app=self.parent_app
+            parent_app=self.parent_app,
+            root_path=self.root_path
         )
         self.style = {'background-color': '#f0f0f0', 'min-height': '100vh'}
 
