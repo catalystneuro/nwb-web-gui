@@ -13,6 +13,7 @@ import flask
 from io import StringIO
 from contextlib import redirect_stdout
 import threading
+import time
 
 
 class ConverterForms(html.Div):
@@ -42,11 +43,20 @@ class ConverterForms(html.Div):
             self.downloads_path.mkdir()
 
         self.source_json_schema = converter_class.get_source_schema()
+        self.conversion_json_schema = converter_class.get_conversion_options_schema()
 
         # Source data Form
         self.source_forms = SchemaFormContainer(
             id='sourcedata',
             schema=self.source_json_schema,
+            parent_app=self.parent_app,
+            root_path=self.root_path
+        )
+        
+        # Conversion Option Form
+        self.conversion_options_forms = SchemaFormContainer(
+            id='conversiondata',
+            schema=self.conversion_json_schema,
             parent_app=self.parent_app,
             root_path=self.root_path
         )
@@ -64,6 +74,7 @@ class ConverterForms(html.Div):
                 dbc.Row([
                     html.Br(),
                     dbc.Col(self.source_forms, width={'size': 12}),
+                    dbc.Col(self.conversion_options_forms, width={'size': 12}),
                     dbc.Col(
                         dbc.Button('Get Metadata Form', id='get_metadata_btn', color='dark'),
                         style={'justify-content': 'left', 'text-align': 'left', 'margin-top': '1%'},
@@ -225,7 +236,10 @@ class ConverterForms(html.Div):
             return not fileoption_is_open, req_is_open, []
 
         @self.parent_app.callback(
-            Output('metadata-external-trigger-update-internal-dict', 'children'),
+            [
+                Output('metadata-external-trigger-update-internal-dict', 'children'),
+                Output('conversiondata-external-trigger-update-internal-dict', 'children')
+            ],
             [
                 Input('button_export_metadata', 'n_clicks'),
                 Input('button_run_conversion', 'n_clicks')
@@ -248,7 +262,7 @@ class ConverterForms(html.Div):
                 elif button_id == 'button_run_conversion':
                     self.export_controller = False
                     self.convert_controller = True
-                return str(np.random.rand())
+                return str(np.random.rand()), str(np.random.rand())
 
         @self.parent_app.callback(
             [
@@ -411,14 +425,17 @@ class ConverterForms(html.Div):
             if trigger_source == 'metadata-output-update-finished-verification' and self.convert_controller:
                 # run conversion
                 alerts, metadata = self.metadata_forms.data_to_nested()
+
+                _, conversion_options_data = self.conversion_options_forms.data_to_nested() # use this metadata to conversion
+                
                 if alerts is not None:
                     return 0, True, alerts
 
                 nwbfile_path = output_nwbfile
 
-                #t = threading.Thread(target=self.conversion_example, daemon=True)
-                #t.start()
-                self.t = threading.Thread(target=self.conversion, daemon=True, args=(metadata, nwbfile_path))
+                self.msg_buffer.truncate(0)
+
+                self.t = threading.Thread(target=self.conversion, daemon=True, args=(metadata, nwbfile_path, conversion_options_data))
                 self.t.start()
 
                 self.conversion_msg_controller = True
@@ -443,21 +460,24 @@ class ConverterForms(html.Div):
         )
         def update_conversion_messages(n_intervals):
             self.conversion_messages = self.msg_buffer.getvalue()
+
             if self.conversion_msg_controller:
                 return self.conversion_messages, None
             return self.conversion_messages, 1
 
-    def conversion(self, metadata, nwbfile_path):
+    def conversion(self, metadata, nwbfile_path, conversion_options):
         try:
             with redirect_stdout(self.msg_buffer):
                 self.converter.run_conversion(
                     metadata=metadata,
                     nwbfile_path=nwbfile_path,
                     save_to_file=True,
-                    conversion_options=None
+                    conversion_options=conversion_options
                 )
         except Exception as e:
             self.msg_buffer.write(str(e))
-
-        self.convert_controller = False
-        self.conversion_msg_controller = False
+        finally:
+            time.sleep(0.1)
+            self.convert_controller = False
+            self.conversion_msg_controller = False
+            
