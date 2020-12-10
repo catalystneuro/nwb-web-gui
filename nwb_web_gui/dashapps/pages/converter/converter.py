@@ -74,7 +74,6 @@ class ConverterForms(html.Div):
                 dbc.Row([
                     html.Br(),
                     dbc.Col(self.source_forms, width={'size': 12}),
-                    dbc.Col(self.conversion_options_forms, width={'size': 12}),
                     dbc.Col(
                         dbc.Button('Get Metadata Form', id='get_metadata_btn', color='dark'),
                         style={'justify-content': 'left', 'text-align': 'left', 'margin-top': '1%'},
@@ -143,6 +142,9 @@ class ConverterForms(html.Div):
                 dbc.Row(
                     dbc.Col(id='metadata-col', width={'size': 12}),
                     style={'margin-top': '1%', 'margin-bottom': '10px'}
+                ),
+                dbc.Row(
+                    dbc.Col(self.conversion_options_forms, id='conversion-col', width={'size': 12}, style={'display': 'none'}),
                 ),
                 dbc.Row(
                     dbc.Col(
@@ -274,7 +276,8 @@ class ConverterForms(html.Div):
                 Output('text-conversion-results', 'style'),
                 Output('get_metadata_done', 'n_clicks'),
                 Output('alert_required_source', 'is_open'),
-                Output('alert_required_source', 'children')
+                Output('alert_required_source', 'children'),
+                Output('conversion-col', 'style')
             ],
             [Input('sourcedata-output-update-finished-verification', 'children')],
             [
@@ -283,7 +286,8 @@ class ConverterForms(html.Div):
                 State('button_export_metadata', 'style'),
                 State('button_refresh', 'style'),
                 State('row_output_conversion', 'style'),
-                State('text-conversion-results', 'style')
+                State('text-conversion-results', 'style'),
+                State('conversion-col', 'style')
             ]
         )
         def get_metadata(trigger, alert_is_open, *styles):
@@ -302,13 +306,13 @@ class ConverterForms(html.Div):
                     self.metadata_forms.children = self.metadata_forms.children_triggers
                     self.metadata_forms.data = dict()
                     self.metadata_forms.schema = dict()
-                return [self.metadata_forms, styles[0], styles[1], styles[2], styles[3], styles[4], None, alert_is_open, []]
+                return [self.metadata_forms, styles[0], styles[1], styles[2], styles[3], styles[4], None, alert_is_open, [], styles[5]]
 
             # Get forms data
             alerts, source_data = self.source_forms.data_to_nested()
 
             if alerts is not None:
-                return [self.metadata_forms, styles[0], styles[1], styles[2], styles[3], styles[4], None, True, alerts]
+                return [self.metadata_forms, styles[0], styles[1], styles[2], styles[3], styles[4], None, True, alerts, styles[5]]
 
             self.get_metadata_controller = False
 
@@ -330,7 +334,7 @@ class ConverterForms(html.Div):
             return [
                 self.metadata_forms, {'display': 'block'}, {'display': 'block'},
                 {'display': 'block'}, {'display': 'block'}, {'font-size': '16px', 'display': 'block', 'height': '100%', "min-height": "200px", "max-height": "600px"},
-                1, alert_is_open, []
+                1, alert_is_open, [], {'display': 'block'}
             ]
 
         @self.parent_app.callback(
