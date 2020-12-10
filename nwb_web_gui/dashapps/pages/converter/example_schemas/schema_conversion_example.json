@@ -1,7 +1,7 @@
 {
     "required": [],
     "properties": {
-        "AllenEcephysInterface": {
+        "EcephysDataInterface": {
             "required": [],
             "properties": {
                 "stub_test": {
@@ -24,7 +24,7 @@
             "type": "object",
             "additionalProperties": false
         },
-        "AllenOphysInterface": {
+        "OphysDataInterface": {
             "required": [],
             "properties": {
                 "stub_test": {
