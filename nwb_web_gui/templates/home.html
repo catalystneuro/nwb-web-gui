@@ -13,7 +13,7 @@
         <h1>NWB Web GUI</h1>
     </div>
     <div class="row justify-content-center">
-        {% if config['RENDER_CONVERTER'] %}
+        {% if config['NWB_GUI_RENDER_CONVERTER'] %}
         <div class='col-md-6 col-lg-2'>
             <div class="card">
                 <div class="card-header">
@@ -28,7 +28,7 @@
             </div>
         </div>
         {% endif %}
-        {% if config['RENDER_VIEWER'] %}
+        {% if config['NWB_GUI_RENDER_VIEWER'] %}
         <div class='col-md-6 col-lg-2'>
             <div class="card">
                 <div class="card-header">
@@ -43,7 +43,7 @@
             </div>
         </div>
         {% endif %}
-        {% if config['RENDER_DASHBOARD'] %}
+        {% if config['NWB_GUI_RENDER_DASHBOARD'] %}
         <div class='col-md-6 col-lg-2'>
             <div class="card">
                 <div class="card-header">
