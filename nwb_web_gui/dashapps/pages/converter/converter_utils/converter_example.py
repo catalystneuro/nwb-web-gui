@@ -10,6 +10,15 @@ class ExampleNWBConverter(NWBConverter):
         super().__init__(**input_args)
 
     @classmethod
+    def get_conversion_options_schema(cls):
+        examples_path = Path(__file__).parent.parent.absolute() / 'example_schemas'
+        conversion_options_schema = examples_path / 'schema_conversion_example.json'
+        with open(conversion_options_schema, 'r') as inp:
+            conversion_schema = json.load(inp)
+
+        return conversion_schema
+
+    @classmethod
     def get_source_schema(cls):
         examples_path = Path(__file__).parent.parent.absolute() / 'example_schemas'
         source_schema_path = examples_path / 'schema_source.json'
@@ -32,5 +41,5 @@ class ExampleNWBConverter(NWBConverter):
             metadata = json.load(inp)
         return metadata
 
-    def run_conversion(self, metadata_dict):
+    def run_conversion(self, metadata, nwbfile_path, save_to_file, conversion_options):
         raise NotImplementedError('TODO')

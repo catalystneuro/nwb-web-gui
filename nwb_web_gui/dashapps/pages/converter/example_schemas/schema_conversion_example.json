@@ -1,0 +1,58 @@
+{
+    "required": [],
+    "properties": {
+        "EcephysDataInterface": {
+            "required": [],
+            "properties": {
+                "stub_test": {
+                    "type": "boolean",
+                    "default": false
+                },
+                "add_ecephys_raw": {
+                    "type": "boolean",
+                    "default": false
+                },
+                "add_ecephys_processed": {
+                    "type": "boolean",
+                    "default": false
+                },
+                "add_ecephys_spiking": {
+                    "type": "boolean",
+                    "default": false
+                }
+            },
+            "type": "object",
+            "additionalProperties": false
+        },
+        "OphysDataInterface": {
+            "required": [],
+            "properties": {
+                "stub_test": {
+                    "type": "boolean",
+                    "default": false
+                },
+                "add_ophys_processed": {
+                    "type": "boolean",
+                    "default": false
+                },
+                "add_ophys_raw": {
+                    "type": "boolean",
+                    "default": false
+                },
+                "link_ophys_raw": {
+                    "type": "boolean",
+                    "default": false
+                }
+            },
+            "type": "object",
+            "additionalProperties": false
+        }
+    },
+    "type": "object",
+    "additionalProperties": false,
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "conversion_options.schema.json",
+    "title": "Conversion options schema",
+    "description": "Schema for the conversion options",
+    "version": "0.1.0"
+}
