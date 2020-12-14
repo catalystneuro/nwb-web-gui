@@ -9,9 +9,12 @@ here = path.abspath(path.dirname(__file__))
 with open(path.join(here, 'README.md')) as f:
     long_description = f.read()
 
+with open('requirements.txt', 'r') as f:
+    install_requires = [w for w in f.read().strip().split('\n') if not w.startswith('-e')]
+
 setup(
     name='nwb-web-gui',
-    version='0.1.2',
+    version='0.1.3',
     description='Web graphical user interface for NWB conversion and exploring',
     long_description=long_description,
     long_description_content_type='text/markdown',
@@ -25,11 +28,7 @@ setup(
         'static': ['*']
     },
     include_package_data=True,
-    install_requires=[
-        'pynwb', 'numpy', 'nwbwidgets', 'dash', 'dash_daq', 'dash_bootstrap_components',
-        'dash-cool-components', 'psutil', 'voila', 'pandas', 'jupyter', 'matplotlib', 'h5py',
-        'jupyter-client', 'json_schema_to_dash_forms'
-    ],
+    install_requires=install_requires,
     entry_points={
         'console_scripts': ['nwbgui=nwb_web_gui.cmd_line:cmd_line_shortcut']
     }
