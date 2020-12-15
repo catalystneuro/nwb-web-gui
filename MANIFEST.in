@@ -1,6 +1,0 @@
-graft nwb_web_gui/nwb_web_gui/assets
-graft nwb_web_gui/nwb_web_gui/templates
-include nwb_web_gui/nwb_web_gui/static
-include nwb_web_gui/static/*
-graft nwb_web_gui/static/*
-graft nwb_web_gui/static

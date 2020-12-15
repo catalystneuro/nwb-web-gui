@@ -14,7 +14,7 @@ with open('requirements.txt', 'r') as f:
 
 setup(
     name='nwb-web-gui',
-    version='0.1.3',
+    version='0.1.4',
     description='Web graphical user interface for NWB conversion and exploring',
     long_description=long_description,
     long_description_content_type='text/markdown',
@@ -24,8 +24,7 @@ setup(
     keywords='nwb',
     packages=find_packages(),
     package_data={
-        'assets': ['*'],
-        'static': ['*']
+        'nwb_web_gui': ['static/*', 'assets/*', 'templates/*']
     },
     include_package_data=True,
     install_requires=install_requires,

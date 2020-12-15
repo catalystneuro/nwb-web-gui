@@ -151,7 +151,7 @@ class ConverterForms(html.Div):
                         dbc.InputGroup(
                             [
                                 dbc.InputGroupAddon("Output file: ", addon_type="prepend"),
-                                dbc.Input(id="output-nwbfile-name", placeholder="filename.nwb"),
+                                dbc.Input(id="output-nwbfile-name", value=str(self.root_path)+'/'),
                                 dbc.InputGroupAddon(
                                     dbc.Button('Run Conversion', id='button_run_conversion'),
                                     addon_type="append",
