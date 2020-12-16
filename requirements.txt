@@ -1,4 +1,5 @@
 pynwb
+nwb-conversion-tools
 nwbwidgets
 dash
 dash_daq
