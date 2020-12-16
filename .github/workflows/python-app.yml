@@ -5,7 +5,7 @@ name: Python application
 
 on:
   push:
-    branches: 
+    branches:
       - '**'   # matches every branch
   pull_request:
     branches:
@@ -27,9 +27,12 @@ jobs:
         python -m pip install --upgrade pip
         pip install pytest
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+    - name: Install nwb-web-gui
+      run: |
+        pip install .
     - name: Test with pytest
       run: |
         pytest
-    - name: Command line shortcut
-      run: |
-        nwbgui
+    # - name: Command line shortcut
+    #   run: |
+    #     nwbgui

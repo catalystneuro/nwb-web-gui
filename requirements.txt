@@ -1,18 +1,13 @@
-wheel
 pynwb
-numpy==1.19.1
+nwb-conversion-tools
 nwbwidgets
-dash 
-dash_daq 
+dash
+dash_daq
 dash_bootstrap_components
-dash-cool-components 
-psutil 
-voila 
-pandas 
-jupyter 
-matplotlib 
-h5py==2.10.0
-jupyter-client 
-json-schema-to-dash-forms==0.1.6
--e git+https://github.com/catalystneuro/nwb-conversion-tools.git@452d456d15f0d2107077f28ad73c7b62512af454#egg=nwb_conversion_tools
--e git+https://github.com/catalystneuro/allen-oephys-to-nwb.git@ac6c60109bfd7613a8753bbb61ba63c9ea575b52#egg=allen_oephys_to_nwb
+dash-cool-components
+psutil
+voila
+pandas
+jupyter
+jupyter-client
+json_schema_to_dash_forms
