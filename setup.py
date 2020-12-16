@@ -24,7 +24,11 @@ setup(
     keywords='nwb',
     packages=find_packages(),
     package_data={
-        'nwb_web_gui': ['static/*', 'assets/*', 'templates/*']
+        'nwb_web_gui': [
+            'static/*',
+            'templates/*',
+            'dashapps/pages/converter/example_schemas/*'
+        ]
     },
     include_package_data=True,
     install_requires=install_requires,
