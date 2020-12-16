@@ -151,7 +151,7 @@ class ConverterForms(html.Div):
                         dbc.InputGroup(
                             [
                                 dbc.InputGroupAddon("Output file: ", addon_type="prepend"),
-                                dbc.Input(id="output-nwbfile-name", placeholder="filename.nwb"),
+                                dbc.Input(id="output-nwbfile-name", value=str(self.root_path)+'/'),
                                 dbc.InputGroupAddon(
                                     dbc.Button('Run Conversion', id='button_run_conversion'),
                                     addon_type="append",
@@ -329,7 +329,24 @@ class ConverterForms(html.Div):
 
             self.metadata_forms.schema = self.metadata_json_schema
             self.metadata_forms.construct_children_forms()
-            self.metadata_forms.update_data(data=self.metadata_json_data)
+
+            try:
+                self.metadata_forms.update_data(data=self.metadata_json_data)
+            except Exception as e:
+                alert_field = ' '.join([w for w in str(e).strip().split('-')[1:] if not w.isdigit()])
+                exception_alert = [
+                    html.H4('Field not found on schema', className='alert-heading'),
+                    html.Hr(),
+                    html.A(
+                        alert_field,
+                        href="#" + f'wrapper-{alert_field}',
+                        className="alert-link"
+                    )
+                ]
+                return [self.metadata_forms, {'display': 'block'}, {'display': 'block'}, 
+                {'display': 'block'}, {'display': 'block'}, {'font-size': '16px', 'display': 'block', 'height': '100%', "min-height": "200px", "max-height": "600px"},
+                1, True, exception_alert, {'display': 'block'}]
+                
 
             return [
                 self.metadata_forms, {'display': 'block'}, {'display': 'block'},
