@@ -37,7 +37,7 @@ jobs:
         pytest
     - name: Command line shortcut
       run: |
-        nwbgui
+        nwbgui --ci True
       
   macos-tests:
     runs-on: macos-latest
@@ -51,7 +51,11 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install pytest
+        pip install pytest-flask
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
     - name: Install nwb-web-gui
       run: |
         pip install .
+    - name: Command line shortcut
+      run: |
+        nwbgui --ci True

@@ -1,4 +1,4 @@
-from flask import render_template, request
+from flask import render_template, request, redirect
 from flask import current_app as app
 
 
@@ -20,3 +20,10 @@ def shutdown_server():
 def shutdown():
     shutdown_server()
     return 'Server down...'
+
+
+@app.route('/cirun/')
+def ci_run():
+    from time import sleep
+    sleep(3)
+    return redirect('/shutdown/')
