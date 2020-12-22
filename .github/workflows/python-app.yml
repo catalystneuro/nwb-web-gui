@@ -35,9 +35,9 @@ jobs:
     - name: Test with pytest
       run: |
         pytest
-    - name: Command line shortcut
-      run: |
-        nwbgui --ci True
+    #- name: Command line shortcut
+      #run: |
+        #nwbgui --ci True
       
   macos-tests:
     runs-on: macos-latest
@@ -56,6 +56,6 @@ jobs:
     - name: Install nwb-web-gui
       run: |
         pip install .
-    - name: Command line shortcut
-      run: |
-        nwbgui --ci True
+    #- name: Command line shortcut
+      #run: |
+        #nwbgui --ci True
