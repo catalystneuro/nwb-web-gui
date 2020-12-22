@@ -118,11 +118,6 @@ def cmd_line_shortcut():
             webbrowser.open_new(f'http://localhost:{run_args.port}/')
 
         Timer(1, open_browser).start()
-    else:
-        def open_browser():
-            webbrowser.open_new(f'http://localhost:{run_args.port}/cirun')
-
-        Timer(1, open_browser).start()
 
     # Run app
     app.run(
