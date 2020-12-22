@@ -80,7 +80,7 @@ class Viewer(html.Div):
                     self.nwb_path = nwb_path
                     voila_address = self.run_explorer()
                     time.sleep(5)
-                    iframe = dbc.Container(html.Iframe(style={"min-width": "100%", 'max-width': '100%', "min-height": "100vh"}, src=voila_address))
+                    iframe = dbc.Container(html.Iframe(style={"min-width": "100%", 'max-width': '100%', "height": "80vh"}, src=voila_address))
                     style.update({"background-color": "#287836"})
                     return True, style, 'NWB file loaded, widgets started', iframe, 1
                 else:

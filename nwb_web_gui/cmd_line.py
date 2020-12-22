@@ -9,7 +9,7 @@ def parse_arguments():
     """
     Command line shortcut to open GUI editor.
     Usage:
-    $ nwb-web-gui [--converter] [--data_path] [--port] [--dev] [--render_dashboard] [--render_viewer] [--render_converter]
+    $ nwb-web-gui [--converter] [--data_path] [--port] [--dev] [--render_dashboard] [--render_viewer] [--render_converter] [--ci]
 
     converter : str
         Optional.
@@ -25,6 +25,8 @@ def parse_arguments():
         Optional. Render viewer page
     render_converter : bool
         Optional. Render converter page
+    ci : bool
+        Optional. Use for Continuous Integration testing only.
     """
     import argparse
 
@@ -67,6 +69,11 @@ def parse_arguments():
         default='True',
         help="Render coverter page"
     )
+    parser.add_argument(
+        "--ci",
+        default='False',
+        help="Continuous Integration testing"
+    )
 
     # Parse arguments
     args = parser.parse_args()
@@ -83,6 +90,7 @@ def cmd_line_shortcut():
     render_viewer = run_args.render_viewer
     render_dashboard = run_args.render_dashboard
     converter = run_args.converter
+    ci = run_args.ci
 
     os.environ['FLASK_ENV'] = 'production'
     os.environ['NWB_GUI_ROOT_PATH'] = data_path
@@ -104,11 +112,17 @@ def cmd_line_shortcut():
     # Initialize app
     app = init_app()
 
-    # Open browser after 1 sec
-    def open_browser():
-        webbrowser.open_new(f'http://localhost:{run_args.port}/')
+    if not ci:
+        # Open browser after 1 sec
+        def open_browser():
+            webbrowser.open_new(f'http://localhost:{run_args.port}/')
 
-    Timer(1, open_browser).start()
+        Timer(1, open_browser).start()
+    else:
+        def open_browser():
+            webbrowser.open_new(f'http://localhost:{run_args.port}/cirun')
+
+        Timer(1, open_browser).start()
 
     # Run app
     app.run(
