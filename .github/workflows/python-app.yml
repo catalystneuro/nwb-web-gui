@@ -37,7 +37,7 @@ jobs:
         pytest
     #- name: Command line shortcut
       #run: |
-        #nwbgui --ci True
+        #nwbgui
       
   macos-tests:
     runs-on: macos-latest
@@ -58,4 +58,4 @@ jobs:
         pip install .
     #- name: Command line shortcut
       #run: |
-        #nwbgui --ci True
+        #nwbgui 
