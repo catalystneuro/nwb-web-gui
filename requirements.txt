@@ -3,11 +3,11 @@ nwb-conversion-tools
 nwbwidgets
 dash
 dash_daq
-dash_bootstrap_components
+dash-bootstrap-components
 dash-cool-components
 psutil
 voila
 pandas
 jupyter
 jupyter-client
-json_schema_to_dash_forms
+json-schema-to-dash-forms
