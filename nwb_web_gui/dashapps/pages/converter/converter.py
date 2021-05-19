@@ -52,7 +52,7 @@ class ConverterForms(html.Div):
             parent_app=self.parent_app,
             root_path=self.root_path
         )
-        
+
         # Conversion Option Form
         self.conversion_options_forms = SchemaFormContainer(
             id='conversiondata',
@@ -70,10 +70,23 @@ class ConverterForms(html.Div):
         self.style = {'background-color': '#f0f0f0', 'min-height': '100vh'}
 
         self.children = [
+            html.Br(),
             dbc.Container([
                 dbc.Row([
                     html.Br(),
-                    dbc.Col(self.source_forms, width={'size': 12}),
+                    dbc.Col(
+                        dbc.Card([
+                            dbc.Col(
+                                html.H4('Source Data'),
+                                style={'text-align': 'center', 'justify-content': 'center', "margin-top": "5px"},
+                                width={'size': 12}
+                            ),
+                            dbc.CardBody(
+                                self.source_forms
+                            )
+                        ], style={'background-color': '##eceef7', "box-shadow": "2px 2px 2px 2px rgba(0,0,0,0.1)"}),
+                        width={'size': 12}
+                    ),
                     dbc.Col(
                         dbc.Button('Get Metadata Form', id='get_metadata_btn', color='dark'),
                         style={'justify-content': 'left', 'text-align': 'left', 'margin-top': '1%'},
@@ -144,7 +157,20 @@ class ConverterForms(html.Div):
                     style={'margin-top': '1%', 'margin-bottom': '10px'}
                 ),
                 dbc.Row(
-                    dbc.Col(self.conversion_options_forms, id='conversion-col', width={'size': 12}, style={'display': 'none'}),
+                    dbc.Col([
+                        dbc.Card([
+                            dbc.Col(
+                                html.H4('Conversion Options'),
+                                style={'text-align': 'center', 'justify-content': 'center', "margin-top": "5px"},
+                                width={'size': 12}
+                            ),
+                            dbc.CardBody(self.conversion_options_forms)
+                        ], style={'background-color': '##eceef7', "box-shadow": "2px 2px 2px 2px rgba(0,0,0,0.1)"}),
+                    ],
+                    id='conversion-col',
+                    width={'size': 12}, 
+                    style={'display': 'none'}
+                    )
                 ),
                 dbc.Row(
                     dbc.Col(
@@ -330,6 +356,15 @@ class ConverterForms(html.Div):
             self.metadata_forms.schema = self.metadata_json_schema
             self.metadata_forms.construct_children_forms()
 
+            output_form = dbc.Card([
+                dbc.Col(
+                    html.H4('Metadata Forms'),
+                    style={'text-align': 'center', 'justify-content': 'center', "margin-top": "5px"},
+                    width={'size': 12}
+                ),
+                dbc.CardBody(self.metadata_forms)
+            ], style={'background-color': '##eceef7', "box-shadow": "2px 2px 2px 2px rgba(0,0,0,0.1)"})
+
             try:
                 self.metadata_forms.update_data(data=self.metadata_json_data)
             except Exception as e:
@@ -343,12 +378,12 @@ class ConverterForms(html.Div):
                         className="alert-link"
                     )
                 ]
-                return [self.metadata_forms, {'display': 'block'}, {'display': 'block'}, 
+                return [output_form, {'display': 'block'}, {'display': 'block'}, 
                 {'display': 'block'}, {'display': 'block'}, {'font-size': '16px', 'display': 'block', 'height': '100%', "min-height": "200px", "max-height": "600px"},
                 1, True, exception_alert, {'display': 'block'}]
 
             return [
-                self.metadata_forms, {'display': 'block'}, {'display': 'block'},
+                output_form, {'display': 'block'}, {'display': 'block'},
                 {'display': 'block'}, {'display': 'block'}, {'font-size': '16px', 'display': 'block', 'height': '100%', "min-height": "200px", "max-height": "600px"},
                 1, alert_is_open, [], {'display': 'block'}
             ]
