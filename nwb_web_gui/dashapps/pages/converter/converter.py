@@ -346,7 +346,6 @@ class ConverterForms(html.Div):
                 return [self.metadata_forms, {'display': 'block'}, {'display': 'block'}, 
                 {'display': 'block'}, {'display': 'block'}, {'font-size': '16px', 'display': 'block', 'height': '100%', "min-height": "200px", "max-height": "600px"},
                 1, True, exception_alert, {'display': 'block'}]
-                
 
             return [
                 self.metadata_forms, {'display': 'block'}, {'display': 'block'},
@@ -420,8 +419,8 @@ class ConverterForms(html.Div):
         def download_file(filename):
             return flask.send_from_directory(
                 directory=self.downloads_path,
-                filename=filename,
-                as_attachment=True
+                path=filename,
+                as_attachment=True,
             )
 
         @self.parent_app.callback(
