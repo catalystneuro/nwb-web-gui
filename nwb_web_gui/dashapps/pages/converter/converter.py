@@ -14,6 +14,7 @@ from io import StringIO
 from contextlib import redirect_stdout
 import threading
 import time
+from nwb_conversion_tools.utils.json_schema import dict_deep_update
 
 
 class ConverterForms(html.Div):
@@ -250,16 +251,18 @@ class ConverterForms(html.Div):
             if alerts is not None:
                 return fileoption_is_open, not req_is_open, alerts
 
+            updated_data = dict_deep_update(self.start_metadata_data, output)
+
             # Make temporary files on server side
             # JSON
             exported_file_path = self.downloads_path / 'exported_metadata.json'
             with open(exported_file_path, 'w') as outfile:
-                json.dump(output, outfile, indent=4)
+                json.dump(updated_data, outfile, indent=4)
 
             # YAML
             exported_file_path = self.downloads_path / 'exported_metadata.yaml'
             with open(exported_file_path, 'w') as outfile:
-                yaml.dump(output, outfile, default_flow_style=False)
+                yaml.dump(updated_data, outfile, default_flow_style=False)
 
             return not fileoption_is_open, req_is_open, []
 
@@ -348,6 +351,7 @@ class ConverterForms(html.Div):
 
             # Get metadata data from converter
             self.metadata_json_data = self.converter.get_metadata()
+            self.start_metadata_data = self.metadata_json_data
 
             if self.metadata_forms.children_forms:
                 # Clean form children if exists to render new one
@@ -358,7 +362,7 @@ class ConverterForms(html.Div):
 
             output_form = dbc.Card([
                 dbc.Col(
-                    html.H4('Metadata Forms'),
+                    html.H4('Metadata'),
                     style={'text-align': 'center', 'justify-content': 'center', "margin-top": "5px"},
                     width={'size': 12}
                 ),
@@ -479,10 +483,12 @@ class ConverterForms(html.Div):
 
             if trigger_source == 'metadata-output-update-finished-verification' and self.convert_controller:
                 # run conversion
-                alerts, metadata = self.metadata_forms.data_to_nested()
+                alerts, metadata_form_data = self.metadata_forms.data_to_nested()
 
                 _, conversion_options_data = self.conversion_options_forms.data_to_nested() # use this metadata to conversion
-                
+
+                metadata = dict_deep_update(self.start_metadata_data, metadata_form_data)
+
                 if alerts is not None:
                     return 0, True, alerts
 
@@ -535,4 +541,3 @@ class ConverterForms(html.Div):
             time.sleep(0.1)
             self.convert_controller = False
             self.conversion_msg_controller = False
-            
