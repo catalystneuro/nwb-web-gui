@@ -369,8 +369,11 @@ class ConverterForms(html.Div):
                 dbc.CardBody(self.metadata_forms)
             ], style={'background-color': '##eceef7', "box-shadow": "2px 2px 2px 2px rgba(0,0,0,0.1)"})
 
+            self.conversion_options_data = self.converter.get_conversion_options()
+
             try:
                 self.metadata_forms.update_data(data=self.metadata_json_data)
+                self.conversion_options_forms.update_data(data=self.conversion_options_data)
             except Exception as e:
                 alert_field = ' '.join([w for w in str(e).strip().split('-')[1:] if not w.isdigit()])
                 exception_alert = [
