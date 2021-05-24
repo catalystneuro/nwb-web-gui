@@ -79,7 +79,7 @@ class ConverterForms(html.Div):
                         dbc.Card([
                             dbc.Col(
                                 html.H4('Source Data'),
-                                style={'text-align': 'center', 'justify-content': 'center', "margin-top": "5px"},
+                                style={'text-align': 'center', 'justify-content': 'center', "margin-top": "15px"},
                                 width={'size': 12}
                             ),
                             dbc.CardBody(
@@ -162,15 +162,15 @@ class ConverterForms(html.Div):
                         dbc.Card([
                             dbc.Col(
                                 html.H4('Conversion Options'),
-                                style={'text-align': 'center', 'justify-content': 'center', "margin-top": "5px"},
+                                style={'text-align': 'center', 'justify-content': 'center', "margin-top": "15px"},
                                 width={'size': 12}
                             ),
                             dbc.CardBody(self.conversion_options_forms)
                         ], style={'background-color': '##eceef7', "box-shadow": "2px 2px 2px 2px rgba(0,0,0,0.1)"}),
                     ],
-                    id='conversion-col',
-                    width={'size': 12}, 
-                    style={'display': 'none'}
+                        id='conversion-col',
+                        width={'size': 12},
+                        style={'display': 'none'}
                     )
                 ),
                 dbc.Row(
@@ -187,7 +187,7 @@ class ConverterForms(html.Div):
                         ),
                         width={'size': 11}
                     ),
-                    style={'text-align': 'left', 'margin-top': '1%', 'display': 'none'},
+                    style={'text-align': 'left', 'margin-top': '15px', 'display': 'none'},
                     id='row_output_conversion'
                 ),
                 dbc.Row([
@@ -363,7 +363,7 @@ class ConverterForms(html.Div):
             output_form = dbc.Card([
                 dbc.Col(
                     html.H4('Metadata'),
-                    style={'text-align': 'center', 'justify-content': 'center', "margin-top": "5px"},
+                    style={'text-align': 'center', 'justify-content': 'center', "margin-top": "15px"},
                     width={'size': 12}
                 ),
                 dbc.CardBody(self.metadata_forms)
@@ -386,13 +386,13 @@ class ConverterForms(html.Div):
                     )
                 ]
                 return [output_form, {'display': 'block'}, {'display': 'block'}, 
-                {'display': 'block'}, {'display': 'block'}, {'font-size': '16px', 'display': 'block', 'height': '100%', "min-height": "200px", "max-height": "600px"},
-                1, True, exception_alert, {'display': 'block'}]
+                {'display': 'block'}, {'display': 'block', 'text-align': 'left', 'margin-top': '15px'}, {'font-size': '16px', 'display': 'block', 'height': '100%', "min-height": "200px", "max-height": "600px"},
+                1, True, exception_alert, {'display': 'block', "margin-top": "15px"}]
 
             return [
                 output_form, {'display': 'block'}, {'display': 'block'},
-                {'display': 'block'}, {'display': 'block'}, {'font-size': '16px', 'display': 'block', 'height': '100%', "min-height": "200px", "max-height": "600px"},
-                1, alert_is_open, [], {'display': 'block'}
+                {'display': 'block'}, {'display': 'block', 'text-align': 'left', 'margin-top': '15px'}, {'font-size': '16px', 'display': 'block', 'height': '100%', "min-height": "200px", "max-height": "600px"},
+                1, alert_is_open, [], {'display': 'block', "margin-top": "15px"}
             ]
 
         @self.parent_app.callback(
@@ -410,8 +410,11 @@ class ConverterForms(html.Div):
             [Input('button_refresh', 'n_clicks')]
         )
         def refresh_forms_links(click):
+
             if click:
                 return str(np.random.rand())
+
+            raise dash.exceptions.PreventUpdate
 
         @self.parent_app.callback(
             Output({'type': 'external-trigger-update-forms-values', 'index': 'metadata-external-trigger-update-forms-values'}, 'children'),
