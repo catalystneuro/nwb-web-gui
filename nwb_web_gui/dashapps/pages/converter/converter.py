@@ -376,6 +376,8 @@ class ConverterForms(html.Div):
                 self.conversion_options_forms.update_data(data=self.conversion_options_data)
             except Exception as e:
                 alert_field = ' '.join([w for w in str(e).strip().split('-')[1:] if not w.isdigit()])
+                if alert_field == '':
+                    alert_field = "One or more form fields failed to auto-fill. Please check if your Converter's metadata complies to its schema."
                 exception_alert = [
                     html.H4('Field not found on schema', className='alert-heading'),
                     html.Hr(),
