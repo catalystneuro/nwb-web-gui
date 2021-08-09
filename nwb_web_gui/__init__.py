@@ -5,7 +5,7 @@ import importlib
 from .config import config
 
 
-def init_app():
+def init_app(converter_class=None):
     """Construct core Flask application with embedded Dash app."""
     app = Flask(__name__, instance_relative_config=False, template_folder='templates')
 
@@ -25,14 +25,15 @@ def init_app():
     with app.app_context():
 
         # Import NWB converter
-        if app.config['NWB_GUI_CONVERTER_CLASS'] == 'example':
-            from .dashapps.pages.converter.converter_utils.converter_example import ExampleNWBConverter
-            converter_class = ExampleNWBConverter
-        else:
-            converter_class = getattr(
-                importlib.import_module(app.config['NWB_GUI_CONVERTER_MODULE']),
-                app.config['NWB_GUI_CONVERTER_CLASS']
-            )
+        if converter_class is None:
+            if app.config['NWB_GUI_CONVERTER_CLASS'] == 'example':
+                from .dashapps.pages.converter.converter_utils.converter_example import ExampleNWBConverter
+                converter_class = ExampleNWBConverter
+            else:
+                converter_class = getattr(
+                    importlib.import_module(app.config['NWB_GUI_CONVERTER_MODULE']),
+                    app.config['NWB_GUI_CONVERTER_CLASS']
+                )
 
         # Import Dash application
         if app.config['NWB_GUI_RENDER_CONVERTER']:
